@@ -1057,9 +1057,19 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="user-center-nav">
-              <button type="button" className={userView === 'discover' ? 'active' : ''} onClick={() => setUserView('discover')}>Keşfet</button>
-              <button type="button" className={userView === 'chat' ? 'active' : ''} onClick={() => setUserView('chat')}>
+            <div className="user-center-nav rounded-2xl border border-slate-200 bg-white/90 p-1.5 shadow-sm backdrop-blur-md">
+              <button
+                type="button"
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'discover' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-transparent text-slate-600 hover:bg-slate-100'}`}
+                onClick={() => setUserView('discover')}
+              >
+                Keşfet
+              </button>
+              <button
+                type="button"
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'chat' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-transparent text-slate-600 hover:bg-slate-100'}`}
+                onClick={() => setUserView('chat')}
+              >
                 Mesajlar
                 {totalUnreadCount > 0 && <span className="nav-dot" />}
               </button>
@@ -1072,9 +1082,22 @@ export default function App() {
           )}
           {loggedIn && isAdmin && <button onClick={handleSignOut}>Çıkış</button>}
           {loggedIn && !isAdmin && (
-            <div className="user-right-icons">
-              <button type="button" className="icon-circle" title="Profil">{memberProfile?.status_emoji || '🙂'}</button>
-              <button type="button" className="icon-circle danger" title="Çıkış" onClick={handleSignOut}>↪</button>
+            <div className="user-right-icons flex items-center gap-2">
+              <button
+                type="button"
+                className="icon-circle flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-base shadow-sm"
+                title="Profil"
+              >
+                {memberProfile?.status_emoji || '🙂'}
+              </button>
+              <button
+                type="button"
+                className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                title="Çıkış"
+                onClick={handleSignOut}
+              >
+                Çıkış
+              </button>
             </div>
           )}
         </div>
@@ -1507,40 +1530,42 @@ export default function App() {
           <div className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-1/3 h-52 w-52 rounded-full bg-indigo-500/20 blur-3xl" />
 
-          <section className="relative rounded-[1.8rem] border border-white/15 bg-white/10 p-5 backdrop-blur-xl md:p-6">
+          <section className="relative overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-white/95 p-5 text-slate-900 shadow-2xl shadow-slate-900/10 md:p-6">
+            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-indigo-200/70 blur-3xl" />
+            <div className="pointer-events-none absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-cyan-200/60 blur-3xl" />
             <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-              <div className="space-y-3">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100">
+              <div className="relative space-y-3">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-700">
                   <span className="h-2 w-2 rounded-full bg-emerald-300" />
                   Discover Hub
                 </span>
                 <h2 className="text-3xl font-semibold leading-tight md:text-4xl">Çağa uyumlu eşleşmeler seni bekliyor ✨</h2>
-                <p className="max-w-2xl text-sm text-slate-200/90 md:text-base">
+                <p className="max-w-2xl text-sm text-slate-600 md:text-base">
                   Gelişmiş filtreler ve etkileşim butonlarıyla profilleri hızlıca keşfet, beğen ve tek dokunuşla sohbete başla.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5">Toplam profil: {discoverProfiles.length}</span>
-                  <span className="rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1.5">
+                  <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-700">Toplam profil: {discoverProfiles.length}</span>
+                  <span className="rounded-full border border-emerald-300/70 bg-emerald-50 px-3 py-1.5 text-emerald-700">
                     Çevrimiçi: {discoverProfiles.filter((p) => onlineProfiles[p.id]).length}
                   </span>
-                  <span className="rounded-full border border-indigo-300/40 bg-indigo-400/10 px-3 py-1.5">Spotlight: {spotlightProfiles.length}</span>
+                  <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
                 </div>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 xl:w-[460px]">
-                <label className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5">
-                  <span className="text-sm text-slate-300">⌕</span>
+              <div className="relative grid gap-2 sm:grid-cols-2 xl:w-[480px]">
+                <label className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                  <span className="text-sm text-slate-400">⌕</span>
                   <input
                     placeholder="İsim, şehir veya hobi ara"
                     value={profileSearch}
                     onChange={(e) => setProfileSearch(e.target.value)}
-                    className="w-full bg-transparent text-sm text-white placeholder:text-slate-300/70 outline-none"
+                    className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
                   />
                 </label>
                 <select
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
-                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-300"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none shadow-sm focus:border-cyan-400"
                 >
                   <option value="all" className="text-slate-900">Tümü</option>
                   <option value="Kadın" className="text-slate-900">Kadın</option>
@@ -1550,12 +1575,12 @@ export default function App() {
                   placeholder="Şehir filtresi (örn. İstanbul)"
                   value={cityFilter}
                   onChange={(e) => setCityFilter(e.target.value)}
-                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-slate-300/70 outline-none focus:border-fuchsia-300"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none shadow-sm focus:border-fuchsia-400"
                 />
                 <select
                   value={discoverSort}
                   onChange={(e) => setDiscoverSort(e.target.value)}
-                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-300"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none shadow-sm focus:border-indigo-400"
                 >
                   <option value="match" className="text-slate-900">Uyuma göre sırala</option>
                   <option value="newest" className="text-slate-900">En yeni profiller</option>
