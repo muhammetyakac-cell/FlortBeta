@@ -19,6 +19,26 @@ const QUICK_REPLIES = ['Merhaba! 🌸', 'Naber, günün nasıl geçti?', 'Fotoğ
 const THREAD_TAGS = ['sicak_lead', 'soguk', 'takip_edilecek'];
 const BULK_TEMPLATES = ['Merhaba! 👋', 'Naber, günün nasıl?', 'Müsaitsen yaz ✨'];
 
+function hashToInt(text) {
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash * 31 + text.charCodeAt(i)) % 2147483647;
+  }
+  return Math.abs(hash);
+}
+
+function buildHourlyOnlineMap(profiles, hourKey) {
+  const map = {};
+  (profiles || []).forEach((profile) => {
+    const score = hashToInt(`${hourKey}-${profile.id}`) % 100;
+    map[profile.id] = score < 48;
+  });
+  if ((profiles || []).length && !Object.values(map).some(Boolean)) {
+    map[profiles[0].id] = true;
+  }
+  return map;
+}
+
 export default function App() {
   const [status, setStatus] = useState('');
 
@@ -81,6 +101,7 @@ export default function App() {
   const [registeredMembers, setRegisteredMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
+  const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
   const chatBoxRef = useRef(null);
   const adminChatBoxRef = useRef(null);
   const profileListRef = useRef(null);
@@ -141,6 +162,21 @@ export default function App() {
     return Math.round((common / Math.max(a.size, b.size)) * 100);
   }, [selectedProfile, memberProfile]);
 
+  useEffect(() => {
+    if (!loggedIn || isAdmin) return;
+    const tick = () => {
+      const nowHour = new Date().toISOString().slice(0, 13);
+      setHourKey((prev) => (prev === nowHour ? prev : nowHour));
+    };
+    const interval = window.setInterval(tick, 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [loggedIn, isAdmin]);
+
+  const effectiveOnlineProfiles = useMemo(
+    () => (isAdmin ? onlineProfiles : buildHourlyOnlineMap(virtualProfiles, hourKey)),
+    [isAdmin, onlineProfiles, virtualProfiles, hourKey]
+  );
+
   const discoverProfiles = useMemo(() => {
     const filtered = sortedProfiles.filter((profile) => {
       const cityOk = cityFilter ? (profile.city || '').toLowerCase().includes(cityFilter.toLowerCase()) : true;
@@ -161,10 +197,10 @@ export default function App() {
     return filtered.sort((p1, p2) => {
       if (discoverSort === 'newest') return new Date(p2.created_at || 0) - new Date(p1.created_at || 0);
       if (discoverSort === 'age_asc') return Number(p1.age || 0) - Number(p2.age || 0);
-      if (discoverSort === 'online') return Number(!!onlineProfiles[p2.id]) - Number(!!onlineProfiles[p1.id]);
+      if (discoverSort === 'online') return Number(!!effectiveOnlineProfiles[p2.id]) - Number(!!effectiveOnlineProfiles[p1.id]);
       return score(p2) - score(p1);
     });
-  }, [sortedProfiles, cityFilter, genderFilter, profileSearch, memberProfile.hobbies, discoverSort, onlineProfiles]);
+  }, [sortedProfiles, cityFilter, genderFilter, profileSearch, memberProfile.hobbies, discoverSort, effectiveOnlineProfiles]);
 
   const totalUnreadCount = useMemo(
     () => Object.values(unreadByProfile).reduce((sum, count) => sum + Number(count || 0), 0),
@@ -172,8 +208,8 @@ export default function App() {
   );
 
   const activeProfileCount = useMemo(
-    () => virtualProfiles.filter((profile) => onlineProfiles[profile.id]).length,
-    [virtualProfiles, onlineProfiles]
+    () => virtualProfiles.filter((profile) => effectiveOnlineProfiles[profile.id]).length,
+    [virtualProfiles, effectiveOnlineProfiles]
   );
 
   const spotlightProfiles = useMemo(() => discoverProfiles.slice(0, 5), [discoverProfiles]);
@@ -1082,17 +1118,17 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="user-center-nav rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
+            <div className="user-center-nav rounded-2xl border border-slate-300 bg-slate-100 p-1.5 shadow-sm">
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'discover' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${userView === 'discover' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-900 hover:bg-slate-200'}`}
                 onClick={() => setUserView('discover')}
               >
                 Keşfet
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'chat' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${userView === 'chat' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-900 hover:bg-slate-200'}`}
                 onClick={() => setUserView('chat')}
               >
                 Mesajlar
@@ -1100,7 +1136,7 @@ export default function App() {
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'profile' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${userView === 'profile' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-900 hover:bg-slate-200'}`}
                 onClick={() => setUserView('profile')}
               >
                 Profilim
@@ -1566,7 +1602,7 @@ export default function App() {
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-700">Toplam profil: {discoverProfiles.length}</span>
                   <span className="rounded-full border border-emerald-300/70 bg-emerald-50 px-3 py-1.5 text-emerald-700">
-                    Çevrimiçi: {discoverProfiles.filter((p) => onlineProfiles[p.id]).length}
+                    Çevrimiçi: {discoverProfiles.filter((p) => effectiveOnlineProfiles[p.id]).length}
                   </span>
                   <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
                 </div>
@@ -1618,7 +1654,7 @@ export default function App() {
                 .map((h) => h.trim())
                 .filter(Boolean)
                 .slice(0, 3);
-              const isOnline = !!onlineProfiles[profile.id];
+              const isOnline = !!effectiveOnlineProfiles[profile.id];
               const liked = !!likedProfiles[profile.id];
               const hearted = !!heartedProfiles[profile.id];
               const waved = !!wavedProfiles[profile.id];
@@ -1726,8 +1762,10 @@ export default function App() {
 
             <div className="mt-4 grid gap-3">
               <input
+                id="member-photo-upload"
                 type="file"
                 accept="image/*"
+                className="hidden"
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
@@ -1735,6 +1773,12 @@ export default function App() {
                   if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
                 }}
               />
+              <label
+                htmlFor="member-photo-upload"
+                className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-200"
+              >
+                Resim Yükle
+              </label>
               <input
                 placeholder="Yaş"
                 type="number"
