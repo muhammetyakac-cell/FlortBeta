@@ -1098,6 +1098,20 @@ export default function App() {
                 Mesajlar
                 {totalUnreadCount > 0 && <span className="nav-dot" />}
               </button>
+              <button
+                type="button"
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'profile' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
+                onClick={() => setUserView('profile')}
+              >
+                Profilim
+              </button>
+              <button
+                type="button"
+                className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                onClick={handleSignOut}
+              >
+                Çıkış
+              </button>
             </div>
           )}
           {!loggedIn && (
@@ -1106,32 +1120,6 @@ export default function App() {
             </button>
           )}
           {loggedIn && isAdmin && <button onClick={handleSignOut}>Çıkış</button>}
-          {loggedIn && !isAdmin && (
-            <div className="user-right-icons flex items-center gap-2">
-              <button
-                type="button"
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                onClick={() => setUserView('discover')}
-              >
-                Keşfet
-              </button>
-              <button
-                type="button"
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
-                onClick={() => setUserView('chat')}
-              >
-                Mesajlar
-              </button>
-              <button
-                type="button"
-                className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
-                title="Çıkış"
-                onClick={handleSignOut}
-              >
-                Çıkış
-              </button>
-            </div>
-          )}
         </div>
       </header>
 
@@ -1720,6 +1708,60 @@ export default function App() {
             </section>
           )}
         </main>
+      ) : userView === 'profile' ? (
+        <main className="mx-auto grid max-w-4xl gap-5 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-lg md:grid-cols-[320px_1fr] md:p-7">
+          <aside className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <h3 className="text-xl font-semibold text-slate-900">Profilim</h3>
+            <p className="mt-2 text-sm text-slate-600">Profilini güncelle, fotoğrafını değiştir ve diğer kullanıcılara nasıl görüneceğini ayarla.</p>
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              <p><strong>Kullanıcı:</strong> {memberSession?.username}</p>
+              <p><strong>Durum:</strong> {memberProfile.status_emoji}</p>
+              <p><strong>Şehir:</strong> {memberProfile.city || '-'}</p>
+            </div>
+          </aside>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+            <h4 className="text-lg font-semibold text-slate-900">Profil düzenleme</h4>
+            {memberProfile.photo_url && <img src={memberProfile.photo_url} alt="profil" className="profile-photo mt-4" />}
+
+            <div className="mt-4 grid gap-3">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const url = await uploadImage(file, 'members');
+                  if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
+                }}
+              />
+              <input
+                placeholder="Yaş"
+                type="number"
+                value={memberProfile.age}
+                onChange={(e) => setMemberProfile((s) => ({ ...s, age: e.target.value }))}
+              />
+              <input
+                placeholder="Şehir"
+                value={memberProfile.city}
+                onChange={(e) => setMemberProfile((s) => ({ ...s, city: e.target.value }))}
+              />
+              <textarea
+                placeholder="Hobiler"
+                value={memberProfile.hobbies}
+                onChange={(e) => setMemberProfile((s) => ({ ...s, hobbies: e.target.value }))}
+              />
+              <select value={memberProfile.status_emoji} onChange={(e) => setMemberProfile((s) => ({ ...s, status_emoji: e.target.value }))}>
+                <option value="🙂">🙂 Normal</option>
+                <option value="☕">☕ Kahve içiyor</option>
+                <option value="💃">💃 Dans ediyor</option>
+                <option value="🎧">🎧 Müzik dinliyor</option>
+                <option value="🌙">🌙 Dinleniyor</option>
+              </select>
+              <button onClick={saveOwnProfile}>Profili Kaydet</button>
+            </div>
+          </section>
+        </main>
       ) : (
         <main className="dashboard user-grid user-dashboard user-chat-layout compact-shell">
           <aside className="card">
@@ -1783,42 +1825,13 @@ export default function App() {
             </div>
           </section>
           <section className="card">
-            <h3>Kendi Profilin {memberProfile.status_emoji}</h3>
+            <h3>Kendi Profilin</h3>
             {memberProfile.photo_url && <img src={memberProfile.photo_url} alt="profil" className="profile-photo" />}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const url = await uploadImage(file, 'members');
-                if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
-              }}
-            />
-            <input
-              placeholder="Yaş"
-              type="number"
-              value={memberProfile.age}
-              onChange={(e) => setMemberProfile((s) => ({ ...s, age: e.target.value }))}
-            />
-            <input
-              placeholder="Şehir"
-              value={memberProfile.city}
-              onChange={(e) => setMemberProfile((s) => ({ ...s, city: e.target.value }))}
-            />
-            <textarea
-              placeholder="Hobiler"
-              value={memberProfile.hobbies}
-              onChange={(e) => setMemberProfile((s) => ({ ...s, hobbies: e.target.value }))}
-            />
-            <select value={memberProfile.status_emoji} onChange={(e) => setMemberProfile((s) => ({ ...s, status_emoji: e.target.value }))}>
-              <option value="🙂">🙂 Normal</option>
-              <option value="☕">☕ Kahve içiyor</option>
-              <option value="💃">💃 Dans ediyor</option>
-              <option value="🎧">🎧 Müzik dinliyor</option>
-              <option value="🌙">🌙 Dinleniyor</option>
-            </select>
-            <button onClick={saveOwnProfile}>Profili Kaydet</button>
+            <p><strong>Durum:</strong> {memberProfile.status_emoji}</p>
+            <p><strong>Yaş:</strong> {memberProfile.age || '-'}</p>
+            <p><strong>Şehir:</strong> {memberProfile.city || '-'}</p>
+            <p><strong>Hobiler:</strong> {memberProfile.hobbies || '-'}</p>
+            <button type="button" onClick={() => setUserView('profile')}>Profilimi Düzenle</button>
           </section>
         </main>
       )}
