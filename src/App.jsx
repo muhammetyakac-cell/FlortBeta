@@ -1502,75 +1502,166 @@ export default function App() {
           )}
         </main>
       ) : userView === 'discover' ? (
-        <main className="discover-screen">
-          <section className="discover-hero-panel">
-            <h2>Yeni İnsanlar Keşfet ✨</h2>
-            <p>Şehir, cinsiyet ve ilgi alanlarına göre filtrele. Sana en uygun profilleri hemen bul ve sohbete başla.</p>
-            <div className="discover-inline-filters">
-              <label className="discover-search">
-                <span>⌕</span>
+        <main className="relative isolate space-y-6 overflow-hidden rounded-[2.2rem] border border-slate-200/70 bg-slate-950 p-4 text-white shadow-[0_30px_100px_-40px_rgba(15,23,42,0.85)] md:p-6">
+          <div className="pointer-events-none absolute -left-24 top-0 h-64 w-64 rounded-full bg-fuchsia-500/25 blur-3xl" />
+          <div className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-1/3 h-52 w-52 rounded-full bg-indigo-500/20 blur-3xl" />
+
+          <section className="relative rounded-[1.8rem] border border-white/15 bg-white/10 p-5 backdrop-blur-xl md:p-6">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+              <div className="space-y-3">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  Discover Hub
+                </span>
+                <h2 className="text-3xl font-semibold leading-tight md:text-4xl">Çağa uyumlu eşleşmeler seni bekliyor ✨</h2>
+                <p className="max-w-2xl text-sm text-slate-200/90 md:text-base">
+                  Gelişmiş filtreler ve etkileşim butonlarıyla profilleri hızlıca keşfet, beğen ve tek dokunuşla sohbete başla.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5">Toplam profil: {discoverProfiles.length}</span>
+                  <span className="rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1.5">
+                    Çevrimiçi: {discoverProfiles.filter((p) => onlineProfiles[p.id]).length}
+                  </span>
+                  <span className="rounded-full border border-indigo-300/40 bg-indigo-400/10 px-3 py-1.5">Spotlight: {spotlightProfiles.length}</span>
+                </div>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2 xl:w-[460px]">
+                <label className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5">
+                  <span className="text-sm text-slate-300">⌕</span>
+                  <input
+                    placeholder="İsim, şehir veya hobi ara"
+                    value={profileSearch}
+                    onChange={(e) => setProfileSearch(e.target.value)}
+                    className="w-full bg-transparent text-sm text-white placeholder:text-slate-300/70 outline-none"
+                  />
+                </label>
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-300"
+                >
+                  <option value="all" className="text-slate-900">Tümü</option>
+                  <option value="Kadın" className="text-slate-900">Kadın</option>
+                  <option value="Erkek" className="text-slate-900">Erkek</option>
+                </select>
                 <input
-                  placeholder="İsim veya şehir ara..."
-                  value={profileSearch}
-                  onChange={(e) => {
-                    setProfileSearch(e.target.value);
-                    setCityFilter(e.target.value);
-                  }}
+                  placeholder="Şehir filtresi (örn. İstanbul)"
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
+                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-slate-300/70 outline-none focus:border-fuchsia-300"
                 />
-              </label>
-              <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
-                <option value="all">Tümü</option>
-                <option value="Kadın">Kadın</option>
-                <option value="Erkek">Erkek</option>
-              </select>
+                <select
+                  value={discoverSort}
+                  onChange={(e) => setDiscoverSort(e.target.value)}
+                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-300"
+                >
+                  <option value="match" className="text-slate-900">Uyuma göre sırala</option>
+                  <option value="newest" className="text-slate-900">En yeni profiller</option>
+                  <option value="age_asc" className="text-slate-900">Yaşa göre (artan)</option>
+                  <option value="online" className="text-slate-900">Önce çevrimiçi</option>
+                </select>
+              </div>
             </div>
           </section>
 
-          <section className="discover-card-grid">
-            {discoverProfiles.map((profile) => (
-              <article key={profile.id} className="discover-profile-card">
-                {profile.photo_url ? (
-                  <img src={profile.photo_url} alt={profile.name} className="discover-profile-photo" />
-                ) : (
-                  <div className="discover-profile-fallback">{profile.name?.slice(0, 1)}</div>
-                )}
-                <div className="discover-photo-mask" />
-                <div className="discover-online-chip">
-                  <span className={`online-dot ${onlineProfiles[profile.id] ? 'on' : ''}`} />
-                  {onlineProfiles[profile.id] ? 'Çevrimiçi' : 'Offline'}
-                </div>
-                <div className="discover-card-content">
-                  <h3>{profile.name}, {profile.age}</h3>
-                  <p>{profile.city || 'Türkiye'}</p>
-                  <div className="discover-card-actions">
+          <section className="relative grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+            {discoverProfiles.map((profile) => {
+              const hobbyBadges = (profile.hobbies || '')
+                .split(',')
+                .map((h) => h.trim())
+                .filter(Boolean)
+                .slice(0, 3);
+              const isOnline = !!onlineProfiles[profile.id];
+              const liked = !!likedProfiles[profile.id];
+              const hearted = !!heartedProfiles[profile.id];
+              const waved = !!wavedProfiles[profile.id];
+
+              return (
+                <article
+                  key={profile.id}
+                  className="group relative overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/[0.06] p-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-white/35 hover:bg-white/[0.11] hover:shadow-2xl hover:shadow-indigo-900/40"
+                >
+                  <div className="relative h-[330px] overflow-hidden rounded-[1.2rem]">
+                    {profile.photo_url ? (
+                      <img src={profile.photo_url} alt={profile.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 text-6xl font-semibold text-white/70">
+                        {profile.name?.slice(0, 1)}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/35 to-transparent" />
+                    <div className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                      {isOnline ? '🟢 Çevrimiçi' : '⚪ Offline'}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 space-y-2 p-4">
+                      <div>
+                        <h3 className="text-2xl font-semibold text-white">{profile.name}, {profile.age}</h3>
+                        <p className="text-sm text-slate-200">{profile.city || 'Türkiye'}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {hobbyBadges.length
+                          ? hobbyBadges.map((hobby) => (
+                            <span key={hobby} className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] text-slate-100">
+                              {hobby}
+                            </span>
+                          ))
+                          : <span className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] text-slate-100">Yeni tanışma</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
                     <button
                       type="button"
-                      className={heartedProfiles[profile.id] ? 'reaction-mini active' : 'reaction-mini'}
+                      className="rounded-xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/35 transition hover:brightness-110"
+                      onClick={() => openChatWithProfile(profile.id)}
+                    >
+                      Mesaj Gönder
+                    </button>
+                    <button
+                      type="button"
+                      className={`rounded-xl border px-3 py-2.5 text-sm transition ${liked ? 'border-pink-300/80 bg-pink-400/20 text-pink-100' : 'border-white/25 bg-white/10 text-white hover:bg-white/20'}`}
+                      onClick={() => setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }))}
+                    >
+                      {liked ? '★' : '☆'}
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between gap-2 text-xs">
+                    <button
+                      type="button"
+                      className={`rounded-full border px-3 py-1.5 transition ${hearted ? 'border-rose-300/80 bg-rose-400/20 text-rose-100' : 'border-white/20 bg-white/10 text-slate-100 hover:bg-white/20'}`}
                       onClick={() => {
                         setHeartedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }));
                         sendReaction(profile.id, 'heart');
                       }}
                     >
-                      ♡
+                      {hearted ? '❤️ Beğenildi' : '🤍 Kalp At'}
                     </button>
                     <button
                       type="button"
-                      className={wavedProfiles[profile.id] ? 'reaction-mini active' : 'reaction-mini'}
+                      className={`rounded-full border px-3 py-1.5 transition ${waved ? 'border-cyan-300/80 bg-cyan-400/20 text-cyan-100' : 'border-white/20 bg-white/10 text-slate-100 hover:bg-white/20'}`}
                       onClick={() => {
                         setWavedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }));
                         sendReaction(profile.id, 'wave');
                       }}
                     >
-                      👋
-                    </button>
-                    <button type="button" className="message-mini" onClick={() => openChatWithProfile(profile.id)}>
-                      Mesaj
+                      {waved ? '👋 Selamlandı' : '👋 Selam Gönder'}
                     </button>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </section>
+
+          {!discoverProfiles.length && (
+            <section className="relative rounded-3xl border border-dashed border-white/25 bg-white/5 p-10 text-center">
+              <h3 className="text-xl font-semibold">Bu filtrelerle profil bulunamadı</h3>
+              <p className="mt-2 text-sm text-slate-300">Arama kelimesini temizleyip şehir/cinsiyet filtrelerini değiştirerek tekrar dene.</p>
+            </section>
+          )}
         </main>
       ) : (
         <main className="dashboard user-grid user-dashboard user-chat-layout compact-shell">
