@@ -1057,17 +1057,17 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="user-center-nav rounded-2xl border border-slate-200 bg-white/90 p-1.5 shadow-sm backdrop-blur-md">
+            <div className="user-center-nav rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'discover' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-transparent text-slate-600 hover:bg-slate-100'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'discover' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
                 onClick={() => setUserView('discover')}
               >
                 Keşfet
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'chat' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-transparent text-slate-600 hover:bg-slate-100'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${userView === 'chat' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-transparent text-slate-700 hover:bg-slate-100'}`}
                 onClick={() => setUserView('chat')}
               >
                 Mesajlar
@@ -1085,14 +1085,21 @@ export default function App() {
             <div className="user-right-icons flex items-center gap-2">
               <button
                 type="button"
-                className="icon-circle flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-base shadow-sm"
-                title="Profil"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                onClick={() => setUserView('discover')}
               >
-                {memberProfile?.status_emoji || '🙂'}
+                Keşfet
               </button>
               <button
                 type="button"
-                className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                onClick={() => setUserView('chat')}
+              >
+                Mesajlar
+              </button>
+              <button
+                type="button"
+                className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
                 title="Çıkış"
                 onClick={handleSignOut}
               >
@@ -1110,41 +1117,41 @@ export default function App() {
           <div className="pointer-events-none absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-400/25 blur-3xl" />
 
           <div className="relative mx-auto grid max-w-6xl gap-6 lg:grid-cols-[430px_1fr]">
-            <div className="rounded-[2rem] border border-white/20 bg-white/10 p-6 shadow-2xl shadow-slate-950/45 backdrop-blur-2xl md:p-7">
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/95 p-6 shadow-2xl shadow-slate-950/25 backdrop-blur-2xl md:p-7">
               <div className="mb-6 space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-700">
                   <span className="h-2 w-2 rounded-full bg-emerald-300" />
                   Flort Quantum UI
                 </div>
                 <div>
-                  <p className="text-sm text-slate-300">Yeni nesil sosyal keşif deneyimi</p>
-                  <h2 className="mt-1 text-3xl font-semibold leading-tight text-white">
+                  <p className="text-sm text-slate-500">Yeni nesil sosyal keşif deneyimi</p>
+                  <h2 className="mt-1 text-3xl font-semibold leading-tight text-slate-900">
                     {mode === 'admin' ? 'Yönetici girişi' : 'Kullanıcı giriş merkezi'}
                   </h2>
                 </div>
               </div>
 
               <div className="space-y-3.5">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 transition-all focus-within:border-fuchsia-300 focus-within:bg-white/15 focus-within:shadow-lg focus-within:shadow-fuchsia-500/20">
-                  <span className="text-lg text-indigo-100">👤</span>
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-fuchsia-400 focus-within:shadow-lg focus-within:shadow-fuchsia-500/15">
+                  <span className="text-lg text-slate-500">👤</span>
                   <input
                     type="text"
                     placeholder={mode === 'admin' ? 'Admin modunda kullanıcı adı kapalı' : 'Kullanıcı adı'}
                     disabled={mode === 'admin'}
                     value={mode === 'admin' ? '' : authForm.username}
                     onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
-                    className="flex-1 bg-transparent py-2 text-sm text-white placeholder:text-slate-300/70 outline-none disabled:cursor-not-allowed disabled:text-slate-400"
+                    className="flex-1 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none disabled:cursor-not-allowed disabled:text-slate-400"
                   />
                 </div>
 
-                <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 transition-all focus-within:border-cyan-300 focus-within:bg-white/15 focus-within:shadow-lg focus-within:shadow-cyan-500/20">
-                  <span className="text-lg text-cyan-100">🔐</span>
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-cyan-400 focus-within:shadow-lg focus-within:shadow-cyan-500/15">
+                  <span className="text-lg text-slate-500">🔐</span>
                   <input
                     type="password"
                     placeholder="Şifre"
                     value={authForm.password}
                     onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
-                    className="flex-1 bg-transparent py-2 text-sm text-white placeholder:text-slate-300/70 outline-none"
+                    className="flex-1 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none"
                   />
                 </div>
               </div>
@@ -1161,14 +1168,14 @@ export default function App() {
                   <button
                     disabled={loading}
                     onClick={signUp}
-                    className="w-full rounded-2xl border border-white/25 bg-white/10 px-5 py-4 text-sm font-semibold text-white transition-all hover:bg-white/20 active:scale-[0.99] disabled:opacity-60"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 active:scale-[0.99] disabled:opacity-60"
                   >
                     Hesap Oluştur
                   </button>
                 )}
               </div>
 
-              <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/35 p-4 text-sm text-slate-200">
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
                 {mode === 'admin'
                   ? 'Admin girişi için tanımlı yönetici şifresini kullan.'
                   : 'Hızlıca hesap oluştur, eşleşmeleri keşfet ve gerçek zamanlı sohbete başla.'}
