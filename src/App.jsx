@@ -1046,6 +1046,541 @@ export default function App() {
   }
 
   return (
+    <div className={`min-h-screen bg-slate-50 ${isAdmin ? 'bg-slate-900' : 'bg-gradient-to-br from-indigo-50 via-white to-pink-50'}`}>
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
+        <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
+          <span className="text-3xl animate-pulse">✦</span> Flort Chat
+        </h1>
+        <div className="flex items-center gap-4">
+          {isAdmin && loggedIn && (
+            <nav className="hidden md:flex bg-slate-100 p-1 rounded-xl gap-1">
+              <button 
+                type="button" 
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${adminTab === 'chat' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`} 
+                onClick={() => setAdminTab('chat')}
+              >
+                Chat
+              </button>
+              <button 
+                type="button" 
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${adminTab === 'stats' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`} 
+                onClick={() => setAdminTab('stats')}
+              >
+                Stats
+              </button>
+              <button 
+                type="button" 
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${adminTab === 'settings' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`} 
+                onClick={() => setAdminTab('settings')}
+              >
+                Settings
+              </button>
+            </nav>
+          )}
+          {!loggedIn && (
+            <button 
+              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors" 
+              onClick={() => setMode(mode === 'user' ? 'admin' : 'user')}
+            >
+              {mode === 'user' ? 'Admin Paneli' : 'Kullanıcı Paneli'}
+            </button>
+          )}
+          {loggedIn && (
+            <button 
+              onClick={handleSignOut}
+              className="px-4 py-2 bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 rounded-full text-sm font-bold transition-all border border-transparent hover:border-red-100"
+            >
+              Çıkış Yap
+            </button>
+          )}
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        {loggedIn && !isAdmin && (
+          <section className="flex items-center gap-3 mb-8 bg-white/60 backdrop-blur-sm p-2 rounded-2xl border border-white shadow-xl shadow-indigo-100/50">
+            <button 
+              type="button" 
+              className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${userView === 'discover' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'hover:bg-indigo-50 text-slate-600'}`} 
+              onClick={() => setUserView('discover')}
+            >
+              Keşfet
+            </button>
+            <button 
+              type="button" 
+              className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${userView === 'chat' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'hover:bg-indigo-50 text-slate-600'}`} 
+              onClick={() => setUserView('chat')}
+            >
+              Mesajlarım
+            </button>
+            <div className="hidden sm:flex items-center gap-4 ml-auto px-4 border-l border-slate-200">
+              <span className="flex items-center gap-1 text-sm font-semibold text-slate-500">👍 {Object.values(likedProfiles).filter(Boolean).length}</span>
+              <span className="flex items-center gap-1 text-sm font-semibold text-slate-500">💘 {Object.values(heartedProfiles).filter(Boolean).length}</span>
+              <span className="flex items-center gap-1 text-sm font-semibold text-slate-500">👋 {Object.values(wavedProfiles).filter(Boolean).length}</span>
+            </div>
+          </section>
+        )}
+
+        {!loggedIn ? (
+          <section className="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4">
+            <div className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl shadow-indigo-200/50 border border-indigo-50 overflow-hidden relative group">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+              
+              <div className="p-8 md:p-10 pt-12">
+                <div className="flex justify-center mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-3xl rotate-12 flex items-center justify-center text-white text-4xl font-black shadow-xl group-hover:rotate-0 transition-transform duration-500">
+                    <span className="-rotate-12 group-hover:rotate-0 transition-transform duration-500">C</span>
+                  </div>
+                </div>
+
+                <h2 className="text-3xl font-black text-center text-slate-800 mb-2">
+                  {mode === 'admin' ? 'Admin Girişi' : 'Hoş Geldin!'}
+                </h2>
+                <p className="text-center text-slate-500 text-sm mb-8">
+                  {mode === 'admin' ? 'Yönetici bilgileriyle oturum aç' : 'Hemen kayıt ol ve sohbet etmeye başla'}
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Kullanıcı Adı</label>
+                    <input
+                      className="w-full bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500/20 rounded-2xl px-5 py-4 text-slate-700 placeholder-slate-300 transition-all font-medium"
+                      placeholder={mode === 'admin' ? 'Admin kullanıcı adı gerekmez' : 'HarikaBirIsim'}
+                      disabled={mode === 'admin'}
+                      value={mode === 'admin' ? '' : authForm.username}
+                      onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 ml-1">Şifre</label>
+                    <input
+                      className="w-full bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500/20 rounded-2xl px-5 py-4 text-slate-700 placeholder-slate-300 transition-all font-medium"
+                      placeholder="••••••••"
+                      type="password"
+                      value={authForm.password}
+                      onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
+                    />
+                  </div>
+                  
+                  <div className="pt-4 space-y-3">
+                    <button 
+                      disabled={loading} 
+                      onClick={signIn}
+                      className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-lg shadow-lg shadow-indigo-100 transition-all active:scale-[0.98] disabled:opacity-50"
+                    >
+                      {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+                    </button>
+                    {mode !== 'admin' && (
+                      <button 
+                        disabled={loading} 
+                        onClick={signUp}
+                        className="w-full py-4 bg-white border-2 border-indigo-50 hover:border-indigo-100 hover:bg-indigo-50 text-indigo-600 rounded-2xl font-bold transition-all active:scale-[0.98] disabled:opacity-50"
+                      >
+                        Hemen Kayıt Ol
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center max-w-lg">
+              <h3 className="text-xl font-bold text-slate-800 mb-3 uppercase tracking-[0.2em]">Sanal Dünya, Gerçek Duygular</h3>
+              <p className="text-slate-500 leading-relaxed font-medium">
+                Modern algoritmalarla eşleş, gerçek zamanlı sohbetin tadını çıkar. 
+                Binlerce aktif profil seni bekliyor.
+              </p>
+            </div>
+          </section>
+        ) : isAdmin ? (
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[calc(100vh-140px)] animate-in fade-in duration-500">
+          {/* Admin Sidebar: Active Threads */}
+          <aside className="lg:col-span-3 flex flex-col gap-6 overflow-hidden">
+            <div className="bg-slate-800 text-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col h-full border border-slate-700">
+              <div className="p-6 border-b border-slate-700">
+                <h3 className="text-lg font-black flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                  Aktif Konuşmalar
+                </h3>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar-dark">
+                {sortedIncomingThreads.map((thread) => {
+                  const threadProfile = profileById[thread.virtual_profile_id];
+                  const waitingReply = thread.last_sender_role === 'member';
+                  const isSelected = selectedThread?.member_id === thread.member_id && selectedThread?.virtual_profile_id === thread.virtual_profile_id;
+                  
+                  return (
+                    <div 
+                      key={`${thread.member_id}-${thread.virtual_profile_id}`}
+                      className={`relative group rounded-2xl transition-all duration-300 ${isSelected ? 'bg-indigo-600 shadow-lg' : 'hover:bg-slate-700/50'}`}
+                    >
+                      <button
+                        onClick={() => setSelectedThread(thread)}
+                        className="w-full flex items-center gap-3 p-4 text-left"
+                      >
+                        <div className="relative shrink-0">
+                          {threadProfile?.photo_url ? (
+                            <img src={threadProfile.photo_url} className="w-10 h-10 rounded-xl object-cover border border-slate-600" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-slate-700 flex items-center justify-center font-black text-slate-400">
+                              {thread.virtual_name?.slice(0, 1)}
+                            </div>
+                          )}
+                          {waitingReply && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-slate-800" />}
+                        </div>
+                        
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-sm truncate">{thread.member_username}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase truncate opacity-70">
+                            → {thread.virtual_name}
+                          </p>
+                          {thread.last_message_content && (
+                            <p className="text-xs text-slate-300 truncate mt-1 italic opacity-60">
+                              "{thread.last_message_content}"
+                            </p>
+                          )}
+                        </div>
+
+                        {adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)] > 0 && (
+                          <span className="bg-red-500 text-white w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black">
+                            {adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)]}
+                          </span>
+                        )}
+                      </button>
+                      
+                      <input
+                        type="checkbox"
+                        className="absolute top-4 right-2 w-4 h-4 rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-offset-slate-800"
+                        checked={!!selectedThreadKeys[threadKey(thread.member_id, thread.virtual_profile_id)]}
+                        onChange={(e) =>
+                          setSelectedThreadKeys((prev) => ({
+                            ...prev,
+                            [threadKey(thread.member_id, thread.virtual_profile_id)]: e.target.checked,
+                          }))
+                        }
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="p-4 bg-slate-900/50 border-t border-slate-700 space-y-3">
+                <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <span>SLA Durumu</span>
+                  <span className={slaStats.waitingCount > 5 ? 'text-red-400' : 'text-green-400'}>
+                    {slaStats.waitingCount} Bekleyen
+                  </span>
+                </div>
+                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ${slaStats.avgWaitMin > 10 ? 'bg-red-500' : 'bg-indigo-500'}`} 
+                    style={{ width: `${Math.min((slaStats.avgWaitMin / 30) * 100, 100)}%` }} 
+                  />
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Admin Center: Content Area */}
+          <section className="lg:col-span-6 flex flex-col gap-6">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 flex flex-col h-[75vh] lg:h-full overflow-hidden relative">
+              {adminTab === 'chat' && (
+                <>
+                  {/* Admin Chat Header */}
+                  <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 font-black text-xl">
+                          {selectedThread?.virtual_name?.slice(0, 1) || '?'}
+                        </div>
+                        <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${selectedThreadProfile && onlineProfiles[selectedThreadProfile.id] ? 'bg-green-500' : 'bg-slate-300'}`} />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-slate-800">{selectedThread?.virtual_name || 'Seçim Yapılmadı'}</h3>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          Kullanıcı: {selectedThread?.member_username || '-'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <select 
+                        className="bg-white border-slate-200 rounded-xl text-xs font-bold text-slate-600 focus:ring-indigo-500/20"
+                        value={selectedThread?.status_tag || 'takip_edilecek'} 
+                        onChange={(e) => updateSelectedThreadTag(e.target.value)}
+                      >
+                        {THREAD_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+                      </select>
+                      <button 
+                        className="p-2.5 hover:bg-slate-200 rounded-xl transition-colors text-slate-400"
+                        onClick={() => setAdminDrawerOpen(!adminDrawerOpen)}
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Admin Messages */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-slate-50/30 custom-scrollbar" ref={adminChatBoxRef}>
+                    {threadMessages.map((msg) => {
+                      const isVirtual = msg.sender_role === 'virtual';
+                      const audioUrl = getAudioUrl(msg.content);
+                      return (
+                        <div key={msg.id} className={`flex ${isVirtual ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] p-4 rounded-2xl text-sm font-medium shadow-sm ${isVirtual ? 'bg-slate-800 text-white rounded-tr-none' : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'}`}>
+                            <div className="flex justify-between items-center gap-8 mb-1 opacity-50 text-[9px] font-black uppercase">
+                              <span>{isVirtual ? selectedThread?.virtual_name : selectedThread?.member_username}</span>
+                              <span>{formatTime(msg.created_at)}</span>
+                            </div>
+                            {audioUrl ? <audio controls src={audioUrl} className="h-8 mt-1" /> : <p className="leading-relaxed">{msg.content}</p>}
+                            {isVirtual && (
+                              <div className="text-right mt-1">
+                                <span className={`text-[10px] ${msg.seen_by_member ? 'text-sky-400' : 'text-slate-500'}`}>
+                                  {msg.seen_by_member ? '✓✓ Görüldü' : '✓ Gönderildi'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Admin Input Area */}
+                  <div className="p-6 bg-white border-t border-slate-100 space-y-4">
+                    <div className="flex flex-wrap gap-2">
+                      {QUICK_REPLIES.map((reply) => (
+                        <button 
+                          key={reply} 
+                          className="px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-[10px] font-bold text-slate-500 transition-all border border-transparent hover:border-indigo-100"
+                          onClick={() => setAdminReply((prev) => `${prev ? `${prev}\n` : ''}${reply}`)}
+                        >
+                          {reply}
+                        </button>
+                      ))}
+                      <button 
+                        className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[10px] font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all"
+                        onClick={fetchAiSuggestions} 
+                        disabled={loadingSuggestions}
+                      >
+                        {loadingSuggestions ? 'AI...' : '✦ AI ÖNERİSİ'}
+                      </button>
+                    </div>
+
+                    {aiSuggestions.length > 0 && (
+                      <div className="flex flex-wrap gap-2 p-3 bg-indigo-50 rounded-2xl border border-indigo-100 animate-in zoom-in-95">
+                        {aiSuggestions.map((s) => (
+                          <button key={s} className="px-4 py-2 bg-white text-indigo-600 rounded-xl text-xs font-bold shadow-sm hover:shadow-md transition-all" onClick={() => setAdminReply(s)}>
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex gap-3 bg-slate-100 p-2 rounded-3xl border border-slate-200 focus-within:bg-white focus-within:border-indigo-500 transition-all">
+                      <textarea
+                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-semibold p-3 resize-none max-h-40"
+                        placeholder="Yanıtınızı buraya yazın..."
+                        value={adminReply}
+                        onChange={(e) => { setAdminReply(e.target.value); autoResizeTextarea(e.target, 160); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdminReply(); } }}
+                      />
+                      <button 
+                        onClick={sendAdminReply}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black shadow-lg shadow-indigo-100 transition-all"
+                      >
+                        GÖNDER
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {adminTab === 'stats' && (
+                <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-black text-slate-800">Performans Analizi</h3>
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                      {['daily', 'weekly', 'monthly'].map(r => (
+                        <button 
+                          key={r}
+                          className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${statsRange === r ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                          onClick={() => setStatsRange(r)}
+                        >
+                          {r === 'daily' ? 'Gün' : r === 'weekly' ? 'Hafta' : 'Ay'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Toplam Mesaj', value: adminStats.totalMessagesToday, color: 'indigo' },
+                      { label: 'Üye Mesajı', value: adminStats.memberMessagesToday, color: 'blue' },
+                      { label: 'Admin Cevabı', value: adminStats.adminRepliesToday, color: 'pink' },
+                      { label: 'Yeni Üye', value: adminStats.newMembersToday, color: 'emerald' },
+                    ].map(stat => (
+                      <div key={stat.label} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{stat.label}</p>
+                        <p className={`text-3xl font-black text-${stat.color}-600`}>{stat.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-slate-800 text-white p-8 rounded-[2.5rem] shadow-xl">
+                      <h4 className="text-lg font-black mb-6 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-indigo-500 rounded-xl flex items-center justify-center text-xs">⏰</span>
+                        Yanıt Süreleri
+                      </h4>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-end">
+                          <span className="text-sm font-bold opacity-60">Ortalama Cevap Süresi</span>
+                          <span className="text-3xl font-black text-indigo-400">{adminStats.avgResponseMinToday.toFixed(1)} dk</span>
+                        </div>
+                        <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-500" style={{ width: `${Math.max(100 - adminStats.avgResponseMinToday * 2, 0)}%` }} />
+                        </div>
+                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Hedef: 2.0 dakikanın altı</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                      <h4 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                        <span className="w-8 h-8 bg-pink-100 rounded-xl flex items-center justify-center text-xs">🔥</span>
+                        En Popüler Profiller
+                      </h4>
+                      <div className="space-y-3">
+                        {engagementInsights.topProfiles.map((p, i) => (
+                          <div key={p.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl">
+                            <span className="text-sm font-bold text-slate-700">{i+1}. {p.name}</span>
+                            <span className="text-xs font-black text-pink-500 bg-pink-50 px-3 py-1 rounded-lg">{p.count} Etkileşim</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {adminTab === 'settings' && (
+                <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar">
+                  <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-200">
+                    <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">✨</span> Sanal Profil Oluştur
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="relative">
+                          <input className="w-full bg-white border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-700 focus:ring-indigo-500/20" placeholder="İsim (veya 🎲)" value={profileForm.name} onChange={(e) => setProfileForm({ ...s, name: e.target.value })} />
+                          <button className="absolute right-4 top-1/2 -translate-y-1/2 text-xl" onClick={fillRandomVirtualProfile}>🎲</button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input className="bg-white border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-700 focus:ring-indigo-500/20" placeholder="Yaş" type="number" value={profileForm.age} onChange={(e) => setProfileForm({ ...s, age: e.target.value })} />
+                          <input className="bg-white border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-700 focus:ring-indigo-500/20" placeholder="Şehir" value={profileForm.city} onChange={(e) => setProfileForm({ ...s, city: e.target.value })} />
+                        </div>
+                        <textarea className="w-full bg-white border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-700 focus:ring-indigo-500/20 h-32" placeholder="Hobiler..." value={profileForm.hobbies} onChange={(e) => setProfileForm({ ...s, hobbies: e.target.value })} />
+                      </div>
+                      
+                      <div className="flex flex-col gap-4">
+                        <div className="flex-1 bg-white border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center p-6 relative overflow-hidden group">
+                          {profileForm.photo_url ? (
+                            <img src={profileForm.photo_url} className="absolute inset-0 w-full h-full object-cover" />
+                          ) : (
+                            <div className="text-center">
+                              <span className="text-4xl mb-2 block">📸</span>
+                              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Fotoğraf Yükle</span>
+                            </div>
+                          )}
+                          <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const url = await uploadImage(file, 'virtual-profiles');
+                            if (url) setProfileForm(s => ({ ...s, photo_url: url }));
+                          }} />
+                        </div>
+                        <button className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.5rem] font-black shadow-xl shadow-indigo-100 transition-all" onClick={createVirtualProfile}>
+                          PROFİLİ YAYINLA
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                    <h3 className="text-xl font-black text-slate-800 mb-6">Kayıtlı Üyeler</h3>
+                    <div className="space-y-3">
+                      {registeredMembers.map(m => (
+                        <div key={m.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group">
+                          <div>
+                            <p className="font-black text-slate-800">{m.username}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">{new Date(m.created_at).toLocaleDateString()}</p>
+                          </div>
+                          <button className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-xs font-black opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:text-white" onClick={() => deleteMember(m.id)}>SİL</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Admin Right: Quick Facts Drawer */}
+          {adminDrawerOpen && adminTab === 'chat' && (
+            <aside className="lg:col-span-3 space-y-6 animate-in slide-in-from-right duration-500">
+              {selectedThreadProfile && (
+                <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl">
+                  <div className="text-center mb-6">
+                    <img src={selectedThreadProfile.photo_url} className="w-24 h-24 rounded-3xl object-cover mx-auto mb-4 shadow-lg border-2 border-white" />
+                    <h4 className="text-lg font-black text-slate-800">{selectedThreadProfile.name}, {selectedThreadProfile.age}</h4>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedThreadProfile.city}</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Hakkında</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedThreadProfile.hobbies?.split(',').map(h => (
+                          <span key={h} className="px-3 py-1 bg-slate-50 text-slate-600 rounded-lg text-[10px] font-bold border border-slate-100">{h.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="bg-slate-800 text-white p-8 rounded-[2.5rem] shadow-xl space-y-6">
+                <h4 className="text-lg font-black flex items-center gap-2">
+                  <span className="w-8 h-8 bg-slate-700 rounded-xl flex items-center justify-center text-xs">📝</span>
+                  Quick Facts
+                </h4>
+                <textarea
+                  className="w-full bg-slate-700/50 border-slate-600 rounded-2xl p-4 text-sm font-medium focus:ring-indigo-500/20 h-40 resize-none text-slate-200"
+                  placeholder="Kullanıcıya özel notlar..."
+                  value={quickFactsText}
+                  onChange={(e) => setQuickFactsText(e.target.value)}
+                />
+                <button 
+                  className="w-full py-4 bg-white text-slate-800 rounded-2xl font-black shadow-lg transition-all active:scale-95"
+                  onClick={saveQuickFacts}
+                >
+                  NOTU KAYDET
+                </button>
+              </div>
+
+              <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Toplu İşlemler</h4>
+                <div className="space-y-3">
+                  <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-xs font-bold" value={bulkTemplate} onChange={(e) => setBulkTemplate(e.target.value)}>
+                    {BULK_TEMPLATES.map((tpl) => <option key={tpl} value={tpl}>{tpl}</option>)}
+                  </select>
+                  <button className="w-full py-3 bg-slate-100 hover:bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black transition-all" onClick={sendBulkTemplate}>
+                    SEÇİLİ {Object.values(selectedThreadKeys).filter(Boolean).length} KİŞİYE GÖNDER
+                  </button>
+                </div>
+              </div>
+=======
     <div className={`layout ${isAdmin ? 'layout-admin' : ''}`}>
       <header className={`topbar ${isAdmin ? 'topbar-admin' : ''}`}>
         <h1 className="brand"><span className="brand-icon">✦</span> Flort Chat</h1>
@@ -1397,10 +1932,117 @@ export default function App() {
                 <button onClick={saveQuickFacts}>Quick Facts Kaydet</button>
               </div>
 
+>>>>>>> 461019a74df50a7e7e99e887b36546377ed561e5
             </aside>
           )}
         </main>
       ) : userView === 'discover' ? (
+<<<<<<< HEAD
+        <main className="animate-in fade-in duration-700">
+          <section className="mb-10 text-center md:text-left">
+            <h2 className="text-4xl font-black text-slate-900 mb-2">Keşfet <span className="text-indigo-600">2026</span> ✨</h2>
+            <p className="text-slate-500 font-medium mb-8">Senin için en uygun profilleri bir araya getirdik.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-white/40 p-4 rounded-3xl border border-white shadow-xl shadow-indigo-100/30">
+              <input 
+                className="bg-white/80 border-none rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
+                placeholder="📍 Şehir ara..." 
+                value={cityFilter} 
+                onChange={(e) => setCityFilter(e.target.value)} 
+              />
+              <select 
+                className="bg-white/80 border-none rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
+                value={genderFilter} 
+                onChange={(e) => setGenderFilter(e.target.value)}
+              >
+                <option value="all">Tüm Cinsiyetler</option>
+                <option value="Kadın">Kadın</option>
+                <option value="Erkek">Erkek</option>
+              </select>
+              <input 
+                className="bg-white/80 border-none rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
+                placeholder="🔍 İsim veya hobi..." 
+                value={profileSearch} 
+                onChange={(e) => setProfileSearch(e.target.value)} 
+              />
+              <select 
+                className="bg-white/80 border-none rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-indigo-500/20 shadow-sm"
+                value={discoverSort} 
+                onChange={(e) => setDiscoverSort(e.target.value)}
+              >
+                <option value="match">Akıllı Sıralama</option>
+                <option value="online">Şu an Online</option>
+                <option value="newest">En Yeniler</option>
+                <option value="age_asc">Yaşa Göre (Artan)</option>
+              </select>
+            </div>
+          </section>
+
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {discoverProfiles.map((profile) => (
+              <article key={profile.id} className="group relative bg-white rounded-[2.5rem] overflow-hidden shadow-xl shadow-indigo-100/50 hover:shadow-2xl hover:shadow-indigo-200 transition-all duration-500 hover:-translate-y-2 border border-white">
+                <div className="aspect-[3/4] relative overflow-hidden">
+                  {profile.photo_url ? (
+                    <img src={profile.photo_url} alt={profile.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-4xl font-black text-slate-300">
+                      {profile.name?.slice(0, 1)}
+                    </div>
+                  )}
+                  
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                  
+                  {/* Status Badges */}
+                  <div className="absolute top-5 left-5 flex gap-2">
+                    <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md border ${displayOnlineProfiles[profile.id] ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${displayOnlineProfiles[profile.id] ? 'bg-green-400 animate-pulse' : 'bg-slate-400'}`} />
+                      {displayOnlineProfiles[profile.id] ? 'Online' : 'Offline'}
+                    </span>
+                    <span className="bg-blue-500/20 text-blue-300 border border-blue-500/30 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                      Doğrulandı
+                    </span>
+                  </div>
+
+                  {/* Profile Info Overlay */}
+                  <div className="absolute bottom-6 left-6 right-6 text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                    <h3 className="text-2xl font-black mb-1">{profile.name}, {profile.age}</h3>
+                    <p className="text-white/80 text-sm font-semibold mb-4 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      {profile.city || 'Türkiye'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 pt-2">
+                  <div className="flex gap-2 mb-6">
+                    <button 
+                      className={`flex-1 flex justify-center items-center py-3 rounded-2xl transition-all ${heartedProfiles[profile.id] ? 'bg-pink-100 text-pink-600' : 'bg-slate-50 text-slate-400 hover:bg-pink-50 hover:text-pink-500'}`}
+                      onClick={() => { setHeartedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] })); sendReaction(profile.id, 'heart'); }}
+                    >
+                      <span className="text-xl">💘</span>
+                    </button>
+                    <button 
+                      className={`flex-1 flex justify-center items-center py-3 rounded-2xl transition-all ${wavedProfiles[profile.id] ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-400 hover:bg-amber-50 hover:text-amber-500'}`}
+                      onClick={() => { setWavedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] })); sendReaction(profile.id, 'wave'); }}
+                    >
+                      <span className="text-xl">👋</span>
+                    </button>
+                    <button 
+                      className={`flex-1 flex justify-center items-center py-3 rounded-2xl transition-all ${likedProfiles[profile.id] ? 'bg-blue-100 text-blue-600' : 'bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-500'}`}
+                      onClick={() => { setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] })); sendReaction(profile.id, 'like'); }}
+                    >
+                      <span className="text-xl">👍</span>
+                    </button>
+                  </div>
+                  
+                  <button 
+                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black transition-all shadow-lg shadow-indigo-100 active:scale-[0.98]"
+                    onClick={() => openChatWithProfile(profile.id)}
+                  >
+                    Sohbet Başlat
+                  </button>
+=======
         <main className="dashboard compact-shell discover-shell">
           <section className="card discover-hero">
             <h2>Discover 2026 ✨</h2>
@@ -1444,12 +2086,260 @@ export default function App() {
                   <button type="button" onClick={() => { setWavedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] })); sendReaction(profile.id, 'wave'); }}>{wavedProfiles[profile.id] ? '👋 El Sallandı' : '👋 El Salla'}</button>
                   <button type="button" onClick={() => { setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] })); sendReaction(profile.id, 'like'); }}>{likedProfiles[profile.id] ? '👍 Beğenildi' : '👍 Beğen'}</button>
                   <button type="button" className="cta-message" onClick={() => openChatWithProfile(profile.id)}>Mesaj At</button>
+>>>>>>> 461019a74df50a7e7e99e887b36546377ed561e5
                 </div>
               </article>
             ))}
           </section>
         </main>
       ) : (
+<<<<<<< HEAD
+        <main className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[calc(100vh-140px)] animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Left Sidebar: Conversations */}
+          <aside className="lg:col-span-3 flex flex-col gap-6">
+            <div className="bg-white/70 backdrop-blur-md rounded-[2.5rem] border border-white shadow-xl shadow-indigo-100/30 overflow-hidden flex flex-col h-full">
+              <div className="p-6 pb-2 border-b border-slate-100">
+                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                  Mesajlar <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-lg text-xs">{sortedProfiles.length}</span>
+                </h3>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                {sortedProfiles.map((profile) => (
+                  <button 
+                    key={profile.id} 
+                    onClick={() => setSelectedProfileId(profile.id)} 
+                    className={`w-full flex items-center gap-4 p-4 rounded-3xl transition-all duration-300 group ${selectedProfileId === profile.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'hover:bg-indigo-50 text-slate-600'}`}
+                  >
+                    <div className="relative">
+                      {profile.photo_url ? (
+                        <img src={profile.photo_url} alt={profile.name} className={`w-12 h-12 rounded-2xl object-cover border-2 ${selectedProfileId === profile.id ? 'border-indigo-400' : 'border-white'}`} />
+                      ) : (
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-black">
+                          {profile.name?.slice(0,1)}
+                        </div>
+                      )}
+                      <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${displayOnlineProfiles[profile.id] ? 'bg-green-500' : 'bg-slate-300'}`} />
+                    </div>
+                    <div className="flex-1 text-left min-w-0">
+                      <p className={`font-bold truncate ${selectedProfileId === profile.id ? 'text-white' : 'text-slate-800'}`}>{profile.name}</p>
+                      <p className={`text-xs truncate ${selectedProfileId === profile.id ? 'text-indigo-100' : 'text-slate-400'}`}>{profile.city || 'Türkiye'}</p>
+                    </div>
+                    {unreadByProfile[profile.id] > 0 && (
+                      <span className={`w-6 h-6 flex items-center justify-center rounded-xl text-[10px] font-black ${selectedProfileId === profile.id ? 'bg-white text-indigo-600' : 'bg-indigo-600 text-white'}`}>
+                        {unreadByProfile[profile.id]}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* Center: Chat Window */}
+          <section className="lg:col-span-6 flex flex-col gap-6">
+            <div className="bg-white rounded-[2.5rem] border border-white shadow-2xl shadow-indigo-100/50 overflow-hidden flex flex-col h-[70vh] lg:h-full relative">
+              {/* Chat Header */}
+              {selectedProfile && (
+                <div className="p-6 bg-white border-b border-slate-50 flex items-center gap-4">
+                  <div className="relative">
+                    <img src={selectedProfile.photo_url} className="w-12 h-12 rounded-2xl object-cover" />
+                    <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${displayOnlineProfiles[selectedProfile.id] ? 'bg-green-500' : 'bg-slate-300'}`} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-800 text-lg">{selectedProfile.name}</h3>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      {displayOnlineProfiles[selectedProfile.id] ? 'Şu an aktif' : 'Çevrimdışı'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Chat Box */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/50" ref={chatBoxRef}>
+                {messages.map((msg) => {
+                  const isMember = msg.sender_role === 'member';
+                  const audioUrl = getAudioUrl(msg.content);
+                  return (
+                    <div key={msg.id} className={`flex ${isMember ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                      <div className={`max-w-[80%] px-5 py-3.5 rounded-3xl shadow-sm ${isMember ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white text-slate-800 border border-indigo-50 rounded-tl-sm'}`}>
+                        <div className="text-[10px] font-bold opacity-50 mb-1 uppercase tracking-wider">
+                          {isMember ? 'Sen' : selectedProfile?.name}
+                        </div>
+                        {audioUrl ? (
+                          <audio controls src={audioUrl} className="w-full h-10 mt-1" />
+                        ) : (
+                          <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        )}
+                        <div className={`text-[9px] font-bold mt-2 flex items-center justify-end gap-1 opacity-60 ${isMember ? 'text-indigo-100' : 'text-slate-400'}`}>
+                          {formatTime(msg.created_at)}
+                          {isMember && (
+                            <span className={msg.seen_by_admin ? 'text-sky-300' : 'text-indigo-200'}>
+                              {msg.seen_by_admin ? '✓✓' : '✓'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {typingLabel && (
+                  <div className="flex justify-start animate-pulse">
+                    <div className="bg-white border border-indigo-50 px-5 py-3 rounded-3xl text-xs font-bold text-indigo-600">
+                      {typingLabel}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Chat Input */}
+              <div className="p-6 bg-white border-t border-slate-50">
+                <div className="flex items-end gap-3 bg-slate-50 p-2 rounded-[2rem] border border-slate-100 focus-within:border-indigo-200 focus-within:bg-white transition-all">
+                  <textarea
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm font-semibold p-3 resize-none max-h-32 text-slate-700 placeholder-slate-400"
+                    placeholder="Mesajınızı buraya yazın..."
+                    rows="1"
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      autoResizeTextarea(e.target, 128);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                  />
+                  <button 
+                    onClick={sendMessage}
+                    className="p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.5rem] shadow-lg shadow-indigo-100 transition-all active:scale-90"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Right Sidebar: Profile Details & Own Profile */}
+          <aside className="lg:col-span-3 space-y-8">
+            {selectedProfile && (
+              <div className="bg-white rounded-[2.5rem] border border-white shadow-xl shadow-indigo-100/30 overflow-hidden p-6 animate-in fade-in zoom-in-95 duration-500">
+                <div className="flex flex-col items-center text-center">
+                  <img src={selectedProfile.photo_url} className="w-24 h-24 rounded-3xl object-cover mb-4 shadow-lg" />
+                  <h3 className="text-xl font-black text-slate-800">{selectedProfile.name}, {selectedProfile.age}</h3>
+                  <p className="text-sm font-bold text-slate-400 mb-6">{selectedProfile.city || 'Türkiye'}</p>
+                  
+                  <div className="w-full space-y-4">
+                    <div className="bg-indigo-50 p-4 rounded-2xl">
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Ortak İlgi Skoru</p>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 bg-indigo-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${interestScore}%` }} />
+                        </div>
+                        <span className="text-sm font-black text-indigo-600">%{interestScore}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="text-left space-y-3">
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hobiler</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedProfile.hobbies?.split(',').map(h => (
+                            <span key={h} className="px-3 py-1 bg-slate-50 text-slate-600 rounded-lg text-[10px] font-bold border border-slate-100">
+                              {h.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white rounded-[2.5rem] border border-white shadow-xl shadow-indigo-100/30 p-8">
+              <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center justify-between">
+                Profilim
+                <span className="text-2xl">{memberProfile.status_emoji}</span>
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="relative group">
+                  {memberProfile.photo_url ? (
+                    <img src={memberProfile.photo_url} className="w-full aspect-square rounded-[2rem] object-cover mb-4 border-2 border-indigo-50" />
+                  ) : (
+                    <div className="w-full aspect-square rounded-[2rem] bg-indigo-50 flex items-center justify-center text-indigo-300 text-5xl mb-4">📸</div>
+                  )}
+                  <input
+                    type="file"
+                    className="hidden"
+                    id="profile-upload"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const url = await uploadImage(file, 'members');
+                      if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
+                    }}
+                  />
+                  <label htmlFor="profile-upload" className="absolute bottom-6 right-2 p-3 bg-white hover:bg-indigo-600 hover:text-white text-indigo-600 rounded-2xl shadow-xl cursor-pointer transition-all border border-indigo-50">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-indigo-500/20"
+                    placeholder="Yaş"
+                    type="number"
+                    value={memberProfile.age}
+                    onChange={(e) => setMemberProfile((s) => ({ ...s, age: e.target.value }))}
+                  />
+                  <input
+                    className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-indigo-500/20"
+                    placeholder="Şehir"
+                    value={memberProfile.city}
+                    onChange={(e) => setMemberProfile((s) => ({ ...s, city: e.target.value }))}
+                  />
+                </div>
+                
+                <textarea
+                  className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-indigo-500/20 resize-none h-24"
+                  placeholder="Hobiler (virgülle ayır)"
+                  value={memberProfile.hobbies}
+                  onChange={(e) => setMemberProfile((s) => ({ ...s, hobbies: e.target.value }))}
+                />
+
+                <select 
+                  className="w-full bg-slate-50 border-none rounded-2xl px-4 py-3 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 text-slate-600"
+                  value={memberProfile.status_emoji} 
+                  onChange={(e) => setMemberProfile((s) => ({ ...s, status_emoji: e.target.value }))}
+                >
+                  <option value="🙂">🙂 Normal</option>
+                  <option value="☕">☕ Kahve içiyor</option>
+                  <option value="💃">💃 Dans ediyor</option>
+                  <option value="🎧">🎧 Müzik dinliyor</option>
+                  <option value="🌙">🌙 Dinleniyor</option>
+                </select>
+
+                <button 
+                  onClick={saveOwnProfile}
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black transition-all shadow-lg shadow-indigo-100"
+                >
+                  Profili Güncelle
+                </button>
+              </div>
+            </div>
+          </aside>
+        </main>
+      )}
+
+      {status && (
+        <div className="fixed bottom-6 right-6 z-[100] animate-in slide-in-from-right duration-500">
+          <div className="bg-slate-900 text-white px-6 py-4 rounded-3xl shadow-2xl border border-white/10 flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <p className="text-sm font-bold">{status}</p>
+            <button onClick={() => setStatus('')} className="ml-2 hover:text-indigo-400">✕</button>
+          </div>
+        </div>
+      )}
+=======
         <main className="dashboard user-grid user-dashboard user-chat-layout compact-shell">
           <aside className="card">
             <h3>Sohbetler</h3>
@@ -1553,6 +2443,7 @@ export default function App() {
       )}
 
       {status && <p className="status">{status}</p>}
+>>>>>>> 461019a74df50a7e7e99e887b36546377ed561e5
     </div>
   );
 }
