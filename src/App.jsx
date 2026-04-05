@@ -1081,100 +1081,126 @@ export default function App() {
       </header>
 
       {!loggedIn ? (
-        <section className="min-h-[78vh] rounded-[2rem] bg-[#F4F7FB] p-4 md:p-8">
-          <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[420px_1fr]">
-            <div className="bg-white/70 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-sm p-6 md:p-7">
-              <div className="mb-6">
-                <p className="text-slate-500 text-sm">Flort Chat</p>
-                <h2 className="text-3xl font-bold text-slate-900">{mode === 'admin' ? 'Admin Login' : 'Login / Register'}</h2>
+        <section className="relative isolate min-h-[78vh] overflow-hidden rounded-[2rem] border border-slate-200/40 bg-slate-950 px-4 py-6 md:px-8 md:py-8">
+          <div className="pointer-events-none absolute -left-16 top-1/4 h-56 w-56 rounded-full bg-fuchsia-500/35 blur-3xl" />
+          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-400/35 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-400/25 blur-3xl" />
+
+          <div className="relative mx-auto grid max-w-6xl gap-6 lg:grid-cols-[430px_1fr]">
+            <div className="rounded-[2rem] border border-white/20 bg-white/10 p-6 shadow-2xl shadow-slate-950/45 backdrop-blur-2xl md:p-7">
+              <div className="mb-6 space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  Flort Quantum UI
+                </div>
+                <div>
+                  <p className="text-sm text-slate-300">Yeni nesil sosyal keşif deneyimi</p>
+                  <h2 className="mt-1 text-3xl font-semibold leading-tight text-white">
+                    {mode === 'admin' ? 'Yönetici girişi' : 'Kullanıcı giriş merkezi'}
+                  </h2>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400 transition-all">
+              <div className="space-y-3.5">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 transition-all focus-within:border-fuchsia-300 focus-within:bg-white/15 focus-within:shadow-lg focus-within:shadow-fuchsia-500/20">
+                  <span className="text-lg text-indigo-100">👤</span>
                   <input
                     type="text"
-                    placeholder={mode === 'admin' ? 'Username disabled for admin' : 'Username'}
+                    placeholder={mode === 'admin' ? 'Admin modunda kullanıcı adı kapalı' : 'Kullanıcı adı'}
                     disabled={mode === 'admin'}
                     value={mode === 'admin' ? '' : authForm.username}
                     onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
-                    className="flex-1 bg-transparent px-4 py-2 outline-none text-slate-800 disabled:text-slate-400"
+                    className="flex-1 bg-transparent py-2 text-sm text-white placeholder:text-slate-300/70 outline-none disabled:cursor-not-allowed disabled:text-slate-400"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400 transition-all">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 transition-all focus-within:border-cyan-300 focus-within:bg-white/15 focus-within:shadow-lg focus-within:shadow-cyan-500/20">
+                  <span className="text-lg text-cyan-100">🔐</span>
                   <input
                     type="password"
-                    placeholder="Password"
+                    placeholder="Şifre"
                     value={authForm.password}
                     onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
-                    className="flex-1 bg-transparent px-4 py-2 outline-none text-slate-800"
+                    className="flex-1 bg-transparent py-2 text-sm text-white placeholder:text-slate-300/70 outline-none"
                   />
                 </div>
               </div>
 
-              <div className="mt-5 space-y-3">
+              <div className="mt-6 space-y-3">
                 <button
                   disabled={loading}
                   onClick={signIn}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl px-5 py-4 shadow-lg shadow-slate-900/20 transition-all active:scale-[0.98] disabled:opacity-60"
+                  className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-400 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-indigo-700/35 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-fuchsia-500/35 active:scale-[0.99] disabled:opacity-60"
                 >
-                  Sign in
+                  {loading ? 'İşleniyor...' : 'Giriş Yap'}
                 </button>
                 {mode !== 'admin' && (
                   <button
                     disabled={loading}
                     onClick={signUp}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl px-5 py-4 shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98] disabled:opacity-60"
+                    className="w-full rounded-2xl border border-white/25 bg-white/10 px-5 py-4 text-sm font-semibold text-white transition-all hover:bg-white/20 active:scale-[0.99] disabled:opacity-60"
                   >
-                    Register
+                    Hesap Oluştur
                   </button>
                 )}
               </div>
 
-              <p className="mt-4 text-sm text-slate-500">
-                {mode === 'admin' ? 'Use admin password to login.' : 'No account yet? Register and continue.'}
-              </p>
+              <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/35 p-4 text-sm text-slate-200">
+                {mode === 'admin'
+                  ? 'Admin girişi için tanımlı yönetici şifresini kullan.'
+                  : 'Hızlıca hesap oluştur, eşleşmeleri keşfet ve gerçek zamanlı sohbete başla.'}
+              </div>
             </div>
 
-            <div className="bg-gradient-to-r from-slate-900 to-indigo-900 rounded-[2rem] p-5 md:p-7">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4 md:p-5">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="group relative rounded-[2rem] overflow-hidden bg-white aspect-[3/4] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2 border border-slate-100">
-                    <img
-                      src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      alt="Discover profile"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h3 className="text-2xl font-bold text-white mb-1">Sena, 24</h3>
-                      <p className="text-white/80 text-sm font-medium">Istanbul</p>
+            <div className="rounded-[2rem] border border-white/20 bg-gradient-to-br from-slate-900/80 via-indigo-950/75 to-slate-900/85 p-5 shadow-2xl shadow-slate-950/40 md:p-7">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 backdrop-blur-sm">
+                  <img
+                    src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    alt="Flort profil kartı"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                    <h3 className="text-2xl font-semibold">Sena, 24</h3>
+                    <p className="text-sm text-white/80">İstanbul · Fotoğraf · Dans · Kahve</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+                    <p className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Canlı Etkileşim</p>
+                    <div className="mt-3 space-y-2">
+                      <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm text-slate-800 shadow-sm">Selam! Akşam kahve planı var mı? ☕</div>
+                      <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-4 py-3 text-sm text-white shadow-lg shadow-indigo-700/30">Olur! 20:30 Nişantaşı nasıl? ✨</div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3">
-                    <div className="self-start max-w-[75%] flex flex-col gap-1">
-                      <div className="bg-white border border-slate-200 text-slate-800 px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm">
-                        <p className="leading-relaxed">Selam, nasilsin?</p>
-                      </div>
-                      <span className="text-[11px] text-slate-400 ml-1">12:44</span>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                      <p className="text-lg font-bold text-white">98%</p>
+                      <p className="text-[11px] text-slate-300">Uyum</p>
                     </div>
+                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                      <p className="text-lg font-bold text-white">2.1s</p>
+                      <p className="text-[11px] text-slate-300">Yanıt</p>
+                    </div>
+                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                      <p className="text-lg font-bold text-white">24/7</p>
+                      <p className="text-[11px] text-slate-300">Aktif</p>
+                    </div>
+                  </div>
 
-                    <div className="self-end max-w-[75%] flex flex-col gap-1 items-end">
-                      <div className="bg-indigo-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md shadow-indigo-500/20">
-                        <p className="leading-relaxed">Iyiyim, sen?</p>
-                      </div>
-                      <span className="text-[11px] text-slate-300 mr-1">12:45 ✓✓</span>
-                    </div>
-
-                    <div className="mt-auto flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400 transition-all">
-                      <input
-                        type="text"
-                        placeholder="Bir mesaj yaz..."
-                        className="flex-1 bg-transparent px-4 py-2 outline-none text-slate-800"
-                        readOnly
-                      />
-                    </div>
+                  <div className="mt-auto flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-1.5">
+                    <input
+                      type="text"
+                      placeholder="Bir mesaj yaz..."
+                      className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder:text-slate-300/70 outline-none"
+                      readOnly
+                    />
+                    <button type="button" className="rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 px-4 py-2 text-xs font-semibold text-white">
+                      Gönder
+                    </button>
                   </div>
                 </div>
               </div>
