@@ -274,8 +274,9 @@ export default function App() {
   useEffect(() => {
     if (!loggedIn) return;
     fetchVirtualProfiles();
+    if (!isAdmin) fetchUnreadCounts();
     if (isAdmin) fetchIncomingThreads();
-  }, [loggedIn, isAdmin]);
+  }, [loggedIn, isAdmin, memberSession]);
 
   useEffect(() => {
     if (!memberSession || !selectedProfileId || isAdmin || userView !== 'chat') return;
@@ -283,9 +284,9 @@ export default function App() {
   }, [memberSession, selectedProfileId, isAdmin, userView]);
 
   useEffect(() => {
-    if (!selectedProfileId || isAdmin) return;
+    if (!selectedProfileId || isAdmin || userView !== 'chat') return;
     setUnreadByProfile((prev) => ({ ...prev, [selectedProfileId]: 0 }));
-  }, [selectedProfileId, isAdmin]);
+  }, [selectedProfileId, isAdmin, userView]);
 
   useEffect(() => {
     if (!isAdmin || !selectedThread) return;
@@ -399,7 +400,9 @@ export default function App() {
           playNotificationSound();
         }
 
-        if (selectedProfileId && changed.virtual_profile_id === selectedProfileId) {
+        const viewingSelectedChat = userView === 'chat' && selectedProfileId && changed.virtual_profile_id === selectedProfileId;
+
+        if (viewingSelectedChat) {
           fetchMessages(selectedProfileId);
           if (changed.sender_role === 'virtual') {
             setUnreadByProfile((prev) => ({ ...prev, [selectedProfileId]: 0 }));
@@ -416,7 +419,7 @@ export default function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loggedIn, isAdmin, memberSession, selectedProfileId, selectedThread]);
+  }, [loggedIn, isAdmin, memberSession, selectedProfileId, selectedThread, userView]);
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -599,6 +602,26 @@ export default function App() {
     }
   }
 
+  async function fetchUnreadCounts() {
+    if (!memberSession || isAdmin) return;
+    const { data, error } = await supabase
+      .from('messages')
+      .select('virtual_profile_id')
+      .eq('member_id', memberSession.id)
+      .eq('sender_role', 'virtual')
+      .eq('seen_by_member', false);
+
+    if (error) return setStatus(error.message);
+
+    const counts = (data || []).reduce((acc, row) => {
+      const key = row.virtual_profile_id;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    setUnreadByProfile(counts);
+  }
+
   async function fetchMessages(profileId) {
     const { data, error } = await supabase
       .from('messages')
@@ -617,6 +640,8 @@ export default function App() {
       .eq('member_id', memberSession.id)
       .eq('sender_role', 'virtual')
       .eq('seen_by_member', false);
+
+    setUnreadByProfile((prev) => ({ ...prev, [profileId]: 0 }));
   }
 
   async function sendMessage() {
