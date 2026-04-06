@@ -153,14 +153,17 @@ export default function App() {
   }, [incomingThreads, selectedThread, adminUnreadByThread]);
 
   const interestScore = useMemo(() => {
-    if (!selectedProfile?.hobbies || !memberProfile?.hobbies) return 0;
-    const a = new Set(selectedProfile.hobbies.toLowerCase().split(',').map((x) => x.trim()).filter(Boolean));
-    const b = new Set(memberProfile.hobbies.toLowerCase().split(',').map((x) => x.trim()).filter(Boolean));
-    if (!a.size || !b.size) return 0;
-    let common = 0;
-    a.forEach((item) => { if (b.has(item)) common += 1; });
-    return Math.round((common / Math.max(a.size, b.size)) * 100);
-  }, [selectedProfile, memberProfile]);
+    if (!selectedProfileId) return 0;
+    const weekKey = (() => {
+      const now = new Date();
+      const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+      const dayOfYear = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - start.getTime()) / 86400000) + 1;
+      return `${now.getUTCFullYear()}-W${Math.ceil(dayOfYear / 7)}`;
+    })();
+    const seed = `${weekKey}-${memberSession?.id || 'guest'}-${selectedProfileId}`;
+    const score = 70 + (hashToInt(seed) % 31); // 70-100
+    return Math.min(100, Math.max(70, score));
+  }, [selectedProfileId, memberSession?.id]);
 
   useEffect(() => {
     if (!loggedIn || isAdmin) return;
@@ -1118,17 +1121,17 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="user-center-nav rounded-2xl border border-slate-300 bg-slate-100 p-1.5 shadow-sm">
+            <div className="user-center-nav rounded-2xl border border-indigo-200 bg-gradient-to-r from-white via-indigo-50 to-fuchsia-50 p-1.5 shadow-lg shadow-indigo-100/60">
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${userView === 'discover' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-900 hover:bg-slate-200'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] transition-all ${userView === 'discover' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40' : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-700'}`}
                 onClick={() => setUserView('discover')}
               >
                 Keşfet
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${userView === 'chat' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-900 hover:bg-slate-200'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] transition-all ${userView === 'chat' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40' : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-700'}`}
                 onClick={() => setUserView('chat')}
               >
                 Mesajlar
@@ -1136,14 +1139,14 @@ export default function App() {
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${userView === 'profile' ? 'active bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-900 hover:bg-slate-200'}`}
+                className={`rounded-xl px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] transition-all ${userView === 'profile' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40' : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-700'}`}
                 onClick={() => setUserView('profile')}
               >
                 Profilim
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                className="rounded-xl border border-rose-300 bg-gradient-to-r from-rose-500 to-pink-500 px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:from-rose-600 hover:to-pink-600"
                 onClick={handleSignOut}
               >
                 Çıkış
