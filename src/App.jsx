@@ -10,7 +10,9 @@ const initialProfile = { name: '', age: '', city: '', gender: '', hobbies: '', p
 const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂' };
 
 const NAME_SEEDS = [
-  'Alara','Asya','Defne','Nehir','Derin','Lina','Mira','Arya','Ela','Ada','Duru','Elif','Zeynep','Eylül','İdil','İpek','Mina','Nisa','Sude','Su','Beren','Naz','Aylin','Yaren','Lara','Selin','Melis','Ayşe','Buse','Ceren','Yasemin','Sena','Gizem','Selen','Nehir','Yelda','Esila','İrem','Tuana','Merve','Hilal','Nisanur','Ece','Nazlı','Güneş','Ecrin','Hazal','Helin','Sıla','Berfin','Damla','Sinem','Yağmur','Derya','Pelin','Cansu','Gökçe','Deniz','Meryem','Beste','Aden','Alina','Maya','Sahara','Lavin','Lavinya','Rüya','Nehirsu','Miray','Sahra','Mina','Nehirnaz','Aysu','Melisa','Zümra','Ecrinsu','Asel','Rabia','Nursena','Pınar','Leman','Öykü','Çağla','Açelya','Irmak','Ahu','Nehircan','Beliz','Elvan','Ayça','Mislina','Mislinay','Aren','Arven','Helia','Hira','Yüsra','Elisa','Liya','Mona','Noa','Talia'
+  'Alara', 'Asya', 'Defne', 'Nehir', 'Derin', 'Lina', 'Mira', 'Arya', 'Ela', 'Ada', 'Duru', 'Elif', 'Zeynep', 'Eylül', 'İdil', 'İpek', 'Mina', 'Nisa', 'Sude', 'Su', 'Beren', 'Naz', 'Aylin', 'Yaren', 'Lara', 'Selin', 'Melis', 'Ayşe', 'Buse', 'Ceren', 'Yasemin', 'Sena', 'Gizem', 'Selen', 'Yelda', 'Esila', 'İrem', 'Tuana', 'Merve', 'Hilal', 'Nisanur', 'Ece', 'Nazlı', 'Güneş', 'Ecrin', 'Hazal', 'Helin', 'Sıla', 'Berfin', 'Damla', 'Sinem', 'Yağmur', 'Derya', 'Pelin', 'Cansu', 'Gökçe', 'Deniz', 'Meryem', 'Beste', 'Aden', 'Alina', 'Maya', 'Sahara', 'Lavin', 'Lavinya', 'Rüya', 'Nehirsu', 'Miray', 'Sahra', 'Nehirnaz', 'Aysu', 'Melisa', 'Zümra', 'Ecrinsu', 'Asel', 'Rabia', 'Nursena', 'Pınar', 'Leman', 'Öykü', 'Çağla', 'Açelya', 'Irmak', 'Ahu', 'Nehircan', 'Beliz', 'Elvan', 'Ayça', 'Mislina', 'Mislinay', 'Aren', 'Arven', 'Helia', 'Hira', 'Yüsra', 'Elisa', 'Liya', 'Mona', 'Noa', 'Talia',
+  'Alya', 'Azra', 'Bade', 'Beren', 'Ceylin', 'Doğa', 'Efsun', 'Eslem', 'Gece', 'İlknur', 'Kumsal', 'Lavin', 'Masal', 'Nefes', 'Öykü', 'Peri', 'Sare', 'Simge', 'Talia', 'Umay', 'Vera', 'Yaz', 'Zeren', 'Almina', 'Bahar', 'Cemre', 'Dilek', 'Ebru', 'Feride', 'Gamze', 'Hande', 'Işıl', 'Jale', 'Kader', 'Lale', 'Meltem', 'Nalan', 'Oya', 'Özlem', 'Papatya', 'Reyhan', 'Seda', 'Şebnem', 'Tülay', 'Ufuk', 'Vildan', 'Yonca', 'Zuhal', 'Alev', 'Belgin', 'Canan', 'Demet', 'Emel', 'Fulya', 'Gül', 'Hale', 'Itrı', 'Jülide', 'Kamuran', 'Leyla', 'Müjde', 'Nevin', 'Oylum', 'Ömür', 'Parla', 'Rana', 'Suna', 'Şule', 'Tansu', 'Ulviye', 'Vuslat', 'Yeliz', 'Zerrin', 'Arzu', 'Binnaz', 'Cavidan', 'Dürriye', 'Esma', 'Feriha', 'Güzin', 'Huriye', 'Itır', 'Janset', 'Kıvılcım', 'Lamia', 'Münevver', 'Nigar', 'Olga', 'Özen', 'Perran', 'Rezzan', 'Semiramis', 'Şermin', 'Tezer', 'Uğur', 'Vahide', 'Yıldız', 'Zekiye',
+  'Açangül', 'Afet', 'Ahsen', 'Akasya', 'Alçin', 'Anka', 'Arın', 'Asu', 'Avis', 'Ayana', 'Aybüke', 'Ayçıl', 'Aydan', 'Ayfer', 'Aygün', 'Ayhan', 'Ayla', 'Aylu', 'Aysel', 'Ayşen', 'Aytan', 'Ayten', 'Azize', 'Bahar', 'Balkan', 'Banis', 'Banu', 'Başak', 'Bedriye', 'Begüm', 'Behiye', 'Belemir', 'Belma', 'Benan', 'Bengü', 'Bensu', 'Beren', 'Beril', 'Berna', 'Berra', 'Berrin', 'Busem', 'Büşra', 'Canay', 'Cansel', 'Cavidan', 'Ceyda', 'Ceylan', 'Çağıl', 'Çiçek', 'Çiğdem', 'Çiler', 'Çisil', 'Dalya', 'Defnesu', 'Değer', 'Deren', 'Destina', 'Devrim', 'Dicle', 'Didemsu', 'Dilara', 'Dilay', 'Diler', 'Dilhan', 'Duru', 'Duygu', 'Dünya', 'Ecem', 'Edanur', 'Efil', 'Ekin', 'Elanur', 'Elçin', 'Elen', 'Elifsu', 'Elis', 'Eliz', 'Elmas', 'Elmira', 'Emanet', 'Emet', 'Emine', 'Emsal', 'Ender', 'Enise', 'Erda', 'Erem', 'Eren', 'Erna', 'Esin', 'Esma', 'Esmeray', 'Esra', 'Evren', 'Ezel', 'Ezgi', 'Faden', 'Fahriye', 'Fatma', 'Fatoş', 'Faye', 'Fazilet', 'Felek', 'Feri', 'Ferrah', 'Feyza', 'Fidan', 'Figen', 'Fisun', 'Flora', 'Funda', 'Füruzan', 'Gülay', 'Gülben', 'Gülcan', 'Gülçin', 'Gülen', 'Güler', 'Gülfem', 'Güliz', 'Güllü', 'Gülriz', 'Gülsüm', 'Gülşen', 'Günay', 'Güneş', 'Güney', 'Güniz', 'Günseli', 'Güz', 'Güzide', 'Habibe', 'Hacer', 'Hafize', 'Harika', 'Hasret', 'Hatice', 'Havva', 'Hayal', 'Hayat', 'Hayriye', 'Hazan', 'Hazar', 'Hediye', 'Heves', 'Hevin', 'Hicran', 'Hicret', 'Hilal', 'Huri', 'Hülya', 'Hüner', 'Hürrem', 'Hülya', 'Hümeyra', 'Hüsna', 'Ilgım', 'Ilgın', 'Iraz', 'Irmak', 'Işık', 'İclal', 'İffet', 'İkbal', 'İlay', 'İlayda', 'İlgi', 'İlkay', 'İlke', 'İlkim', 'İmge', 'İmren', 'İnci', 'İpek', 'İrem', 'İris', 'İzel', 'İzgi', 'Kardelen', 'Kayra', 'Kezban', 'Kübra', 'Ladin', 'Lalezar', 'Lara', 'Lavin', 'Leman', 'Lemis', 'Lerzan', 'Lina', 'Linet', 'Loya', 'Mahperi', 'Makbule', 'Manolya', 'Maral', 'Mehtap', 'Melda', 'Melek', 'Melike', 'Melis', 'Melisa', 'Melsa', 'Meral', 'Mercan', 'Merih', 'Merva', 'Meryem', 'Merve', 'Mevsim', 'Mısra', 'Mihriban', 'Mihrimah', 'Mina', 'Mine', 'Mira', 'Miran', 'Miray', 'Mislina', 'Mualla', 'Mukaddes', 'Mutlu', 'Müfide', 'Müge', 'Mükerrem', 'Münire', 'Müesser', 'Müşerref', 'Nalan', 'Narin', 'Nazan', 'Nazife', 'Nazlı', 'Nebahat', 'Necla', 'Nehir', 'Nergis', 'Neriman', 'Neslihan', 'Nesrin', 'Neşe', 'Neval', 'Nevra', 'Nezahat', 'Nida', 'Nihal', 'Nihan', 'Nil', 'Nilay', 'Nilgün', 'Nilsu', 'Niran', 'Nisa', 'Nisan', 'Nisra', 'Nurbanu', 'Nurcan', 'Nurdan', 'Nurefşan', 'Nurgül', 'Nurşen', 'Nurten', 'Nükhet', 'Okşan', 'Olca', 'Olgun', 'Oya', 'Ömür', 'Önay', 'Özden', 'Özge', 'Özgül', 'Özgür', 'Özlem', 'Öznur', 'Özsu', 'Pakiye', 'Pamira', 'Papatya', 'Parla', 'Pelin', 'Pelinsu', 'Pembe', 'Peri', 'Perihan', 'Perran', 'Pervin', 'Petek', 'Pınar', 'Piraye', 'Pürçek', 'Rabia', 'Rahime', 'Rahşan', 'Rana', 'Ravza', 'Refika', 'Remziye', 'Rengin', 'Resmiye', 'Reyhan', 'Rezzan', 'Ruhsar', 'Rümeysa', 'Rüya', 'Saba', 'Sabahat', 'Sabiha', 'Sabite', 'Sabriye', 'Safiye', 'Saadet', 'Sahra', 'Saliha', 'Salime', 'Salkım', 'Saniye', 'Sargül', 'Seda', 'Sedef', 'Seden', 'Seher', 'Selcan', 'Selda', 'Selen', 'Selime', 'Selin', 'Selma', 'Selvi', 'Sema', 'Semra', 'Sena', 'Senay', 'Seniha', 'Serap', 'Seray', 'Seren', 'Serra', 'Sertap', 'Servet', 'Seva', 'Sevcan', 'Sevda', 'Sevecen', 'Sevgi', 'Sevil', 'Sevilay', 'Sevinç', 'Seyyal', 'Sezen', 'Sezer', 'Sıla', 'Sibel', 'Simge', 'Sinem', 'Solmaz', 'Sonay', 'Songül', 'Suna', 'Suat', 'Sude', 'Sultan', 'Sumru', 'Süheyla', 'Süreyya', 'Şadiye', 'Şafak', 'Şahika', 'Şayeste', 'Şebnem', 'Şefika', 'Şehnaz', 'Şelale', 'Şenay', 'Şengül', 'Şennur', 'Şerife', 'Şermin', 'Şevval', 'Şeyda', 'Şeyma', 'Şiir', 'Şükran', 'Şükriye', 'Talia', 'Tardu', 'Tijen', 'Tuba', 'Tuğba', 'Tuğçe', 'Turna', 'Tutku', 'Tülay', 'Tülin', 'Türkan', 'Umay', 'Ufuk', 'Uğur', 'Ulviye', 'Ulya', 'Uzay', 'Ülker', 'Ümit', 'Ümran', 'Ünseli', 'Vahide', 'Vebia', 'Veledan', 'Vera', 'Verda', 'Vesile', 'Vicdan', 'Vildan', 'Vuslat', 'Yağmur', 'Yakamoz', 'Yalın', 'Yaprak', 'Yaren', 'Yasemin', 'Yaz', 'Yelda', 'Yeliz', 'Yeşim', 'Yıldız', 'Yonca', 'Yosun', 'Yurdagül', 'Yurdanur', 'Yüksel', 'Yüsra', 'Zahide', 'Zehra', 'Zekiye', 'Zeliha', 'Zerrin', 'Zeynep', 'Ziba', 'Zinnur', 'Zübeyde', 'Zühal', 'Zülal', 'Züleyha', 'Zülfiye'
 ];
 const NAME_SUFFIXES = ['', ' Nur', ' Su', ' Naz', ' Ada'];
 const FEMALE_NAMES = Array.from(new Set(NAME_SEEDS.flatMap((seed) => NAME_SUFFIXES.map((s) => `${seed}${s}`)))).slice(0, 250);
@@ -404,7 +406,6 @@ export default function App() {
       if (!isAdmin) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        // setCommandPaletteOpen omitted due to state missing in original, kept to match original logic layout
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -1117,211 +1118,123 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-slate-200 antialiased selection:bg-cyan-500/30 pb-10">
-      {/* GLOWING HEADER */}
-      <header className="sticky top-4 z-50 mx-auto max-w-7xl px-4 mb-8">
-        <div className="flex items-center justify-between rounded-3xl border border-white/10 bg-slate-900/60 p-4 backdrop-blur-2xl shadow-2xl">
-          <h1 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 flex items-center gap-2">
-            <span className="text-fuchsia-400">✦</span> Flort.
-          </h1>
-          <div className="flex items-center gap-3">
-            {isAdmin && loggedIn && (
-              <div className="flex items-center gap-1 rounded-2xl bg-white/5 p-1 border border-white/10">
-                <button type="button" className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${adminTab === 'chat' ? 'bg-indigo-500 shadow-lg text-white' : 'text-slate-400 hover:text-white'}`} onClick={() => setAdminTab('chat')}>Chat</button>
-                <button type="button" className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${adminTab === 'stats' ? 'bg-indigo-500 shadow-lg text-white' : 'text-slate-400 hover:text-white'}`} onClick={() => setAdminTab('stats')}>Stats</button>
-                <button type="button" className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${adminTab === 'settings' ? 'bg-indigo-500 shadow-lg text-white' : 'text-slate-400 hover:text-white'}`} onClick={() => setAdminTab('settings')}>Settings</button>
-              </div>
-            )}
-            {loggedIn && !isAdmin && (
-              <div className="flex items-center gap-2 rounded-2xl border border-blue-300/40 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 p-2 shadow-2xl shadow-blue-500/40 backdrop-blur-xl">
-                <button
-                  type="button"
-                  className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
-                  onClick={() => setUserView('discover')}
-                >
-                  Keşfet
-                </button>
-                <button
-                  type="button"
-                  className={`relative rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
-                  onClick={() => setUserView('chat')}
-                >
-                  Mesajlar
-                  {totalUnreadCount > 0 && <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-blue-500" />}
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
-                  onClick={() => setUserView('profile')}
-                >
-                  Profilim
-                </button>
-                <button
-                  type="button"
-                  className="rounded-xl border border-rose-200/50 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
-                  onClick={handleSignOut}
-                >
-                  Çıkış
-                </button>
-              </div>
-            )}
-            {!loggedIn && (
-              <button className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors" onClick={() => setMode(mode === 'user' ? 'admin' : 'user')}>
-                {mode === 'user' ? 'Admin girişi' : 'Kullanıcı girişi'}
+    <div className="min-h-screen bg-zinc-50 text-zinc-950 font-sans selection:bg-zinc-200 antialiased pb-10">
+      {/* HEADER - Clean, white, border-b */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200 px-6 py-3 flex items-center justify-between shadow-sm">
+        <h1 className="text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-zinc-900" /> Flort.
+        </h1>
+        <div className="flex items-center gap-2">
+          {isAdmin && loggedIn && (
+            <div className="flex items-center gap-1 mr-4 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
+              <button className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${adminTab === 'chat' ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setAdminTab('chat')}>Chat</button>
+              <button className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${adminTab === 'stats' ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setAdminTab('stats')}>Stats</button>
+              <button className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${adminTab === 'settings' ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setAdminTab('settings')}>Ayarlar</button>
+            </div>
+          )}
+          {loggedIn && !isAdmin && (
+            <div className="flex items-center gap-2 mr-4 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
+              <button className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${userView === 'discover' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setUserView('discover')}>Keşfet</button>
+              <button className={`relative px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${userView === 'chat' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setUserView('chat')}>
+                Mesajlar
+                {totalUnreadCount > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-600" />}
               </button>
-            )}
-            {loggedIn && isAdmin && (
-              <button className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-rose-400 hover:bg-rose-500/20 transition-all border border-rose-500/30" onClick={handleSignOut}>
-                Çıkış
-              </button>
-            )}
-          </div>
+              <button className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${userView === 'profile' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setUserView('profile')}>Profil</button>
+            </div>
+          )}
+          {!loggedIn && (
+            <button className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors" onClick={() => setMode(mode === 'user' ? 'admin' : 'user')}>
+              {mode === 'user' ? 'Admin Girişi' : 'Kullanıcı Girişi'}
+            </button>
+          )}
+          {loggedIn && (
+            <button className="rounded-lg border border-zinc-200 bg-white px-4 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors" onClick={handleSignOut}>
+              Çıkış
+            </button>
+          )}
         </div>
       </header>
 
       {/* LOGIN VIEW */}
       {!loggedIn ? (
-        <section className="relative isolate min-h-[78vh] overflow-hidden rounded-[2rem] border border-white/10 mx-4 max-w-6xl md:mx-auto bg-slate-900/40 px-4 py-6 md:px-8 md:py-8 backdrop-blur-3xl shadow-2xl">
-          <div className="pointer-events-none absolute -left-16 top-1/4 h-56 w-56 rounded-full bg-fuchsia-500/35 blur-[100px]" />
-          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-500/30 blur-[100px]" />
-          <div className="pointer-events-none absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-500/25 blur-[100px]" />
+        <section className="flex min-h-[80vh] items-center justify-center p-6">
+          <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+            <div className="mb-8 text-center">
+              <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">
+                {mode === 'admin' ? 'Yönetici Girişi' : 'Sisteme Giriş Yap'}
+              </h2>
+              <p className="mt-2 text-sm text-zinc-500">
+                Lütfen hesap bilgilerinizi giriniz.
+              </p>
+            </div>
 
-          <div className="relative mx-auto grid max-w-5xl gap-6 lg:grid-cols-[430px_1fr] items-center h-full">
-            <div className="rounded-[2.5rem] border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-2xl md:p-10">
-              <div className="mb-8 space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Flort Quantum UI
-                </div>
-                <div>
-                  <p className="text-sm text-slate-400">Yeni nesil sosyal keşif deneyimi</p>
-                  <h2 className="mt-2 text-4xl font-bold tracking-tight text-white">
-                    {mode === 'admin' ? 'Yönetici Girişi' : 'Kullanıcı Merkezi'}
-                  </h2>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700">Kullanıcı Adı</label>
+                <input
+                  type="text"
+                  placeholder={mode === 'admin' ? 'Kapalı' : 'Kullanıcı adınız'}
+                  disabled={mode === 'admin'}
+                  value={mode === 'admin' ? '' : authForm.username}
+                  onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
+                  className="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 disabled:cursor-not-allowed disabled:opacity-50"
+                />
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition-all focus-within:border-fuchsia-400 focus-within:bg-white/10 focus-within:shadow-[0_0_20px_rgba(217,70,239,0.2)]">
-                  <span className="text-lg text-slate-400">👤</span>
-                  <input
-                    type="text"
-                    placeholder={mode === 'admin' ? 'Kullanıcı adı (Kapalı)' : 'Kullanıcı adı'}
-                    disabled={mode === 'admin'}
-                    value={mode === 'admin' ? '' : authForm.username}
-                    onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
-                    className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition-all focus-within:border-cyan-400 focus-within:bg-white/10 focus-within:shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                  <span className="text-lg text-slate-400">🔐</span>
-                  <input
-                    type="password"
-                    placeholder="Şifre"
-                    value={authForm.password}
-                    onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
-                    className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 space-y-3">
-                <button
-                  disabled={loading}
-                  onClick={signIn}
-                  className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-500 px-5 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] hover:shadow-fuchsia-500/40 active:scale-95 disabled:opacity-50"
-                >
-                  {loading ? 'İşleniyor...' : 'Giriş Yap'}
-                </button>
-                {mode !== 'admin' && (
-                  <button
-                    disabled={loading}
-                    onClick={signUp}
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50"
-                  >
-                    Hesap Oluştur
-                  </button>
-                )}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700">Şifre</label>
+                <input
+                  type="password"
+                  placeholder="Şifreniz"
+                  value={authForm.password}
+                  onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
+                  className="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5"
+                />
               </div>
             </div>
 
-            <div className="hidden lg:block rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-indigo-900/40 to-fuchsia-900/20 p-8 shadow-2xl backdrop-blur-xl">
-              <div className="grid gap-6 md:grid-cols-2 h-full">
-                <div className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/5 backdrop-blur-sm">
-                  <img
-                    src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    alt="Flort profil kartı"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-3xl font-bold">Sena, 24</h3>
-                    <p className="mt-1 text-sm text-white/70 font-medium tracking-wide">İstanbul · Fotoğraf · Dans · Kahve</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-xl">
-                    <p className="text-xs uppercase tracking-[0.2em] font-bold text-cyan-400 mb-4">Canlı Etkileşim</p>
-                    <div className="space-y-3">
-                      <div className="max-w-[85%] rounded-2xl rounded-tl-none bg-white/10 border border-white/5 px-4 py-3 text-sm text-white backdrop-blur-md">Selam! Akşam kahve planı var mı? ☕</div>
-                      <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-none bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-4 py-3 text-sm text-white shadow-lg shadow-indigo-500/30">Olur! 20:30 Nişantaşı nasıl? ✨</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 text-center">
-                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md">
-                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">98%</p>
-                      <p className="text-xs font-medium text-slate-400 mt-1">Uyum</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md">
-                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">2.1s</p>
-                      <p className="text-xs font-medium text-slate-400 mt-1">Yanıt</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md">
-                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">24/7</p>
-                      <p className="text-xs font-medium text-slate-400 mt-1">Aktif</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-2 backdrop-blur-md shadow-xl">
-                    <input type="text" placeholder="Bir mesaj yaz..." className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder-slate-500 outline-none" readOnly />
-                    <button type="button" className="rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-cyan-500/30">
-                      Gönder
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div className="mt-8 space-y-3">
+              <button
+                disabled={loading}
+                onClick={signIn}
+                className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50"
+              >
+                {loading ? 'İşleniyor...' : 'Giriş Yap'}
+              </button>
+              {mode !== 'admin' && (
+                <button
+                  disabled={loading}
+                  onClick={signUp}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 disabled:opacity-50"
+                >
+                  Yeni Hesap Oluştur
+                </button>
+              )}
             </div>
           </div>
         </section>
 
       // ADMIN DASHBOARD
       ) : isAdmin ? (
-        <main className="mx-auto max-w-[1600px] px-4 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[82vh]">
+        <main className="mx-auto max-w-[1400px] p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-5rem)]">
           {/* Admin Sol Menü */}
-          <aside className="col-span-1 lg:col-span-3 flex flex-col gap-6 overflow-y-auto rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl p-5 shadow-2xl hide-scrollbar">
+          <aside className="col-span-1 lg:col-span-3 flex flex-col gap-4 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-sm hide-scrollbar">
             {selectedThread && (
-              <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-md">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3">Aktif Kullanıcı</h4>
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Aktif Kullanıcı</h4>
                 <div className="flex items-center gap-3 mb-3">
-                  {selectedMemberProfile?.photo_url ? <img src={selectedMemberProfile.photo_url} alt="" className="h-12 w-12 rounded-full object-cover border border-white/20" /> : <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-xl">{selectedThread.member_username?.slice(0,1)}</div>}
+                  {selectedMemberProfile?.photo_url ? <img src={selectedMemberProfile.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-zinc-200" /> : <div className="h-10 w-10 rounded-full bg-zinc-200 flex items-center justify-center font-medium text-zinc-600">{selectedThread.member_username?.slice(0,1)}</div>}
                   <div>
-                    <p className="font-bold text-white text-lg">{selectedThread.member_username}</p>
-                    <p className="text-xs text-slate-400">{selectedMemberProfile?.city || '-'} • {selectedMemberProfile?.age || '-'} yaş</p>
+                    <p className="font-medium text-zinc-900">{selectedThread.member_username}</p>
+                    <p className="text-xs text-zinc-500">{selectedMemberProfile?.city || '-'} • {selectedMemberProfile?.age || '-'} yaş</p>
                   </div>
-                </div>
-                <div className="text-xs text-slate-300 space-y-1">
-                  <p><span className="text-slate-500">Durum:</span> {selectedMemberProfile?.status_emoji || '🙂'}</p>
-                  <p><span className="text-slate-500">Hobiler:</span> {selectedMemberProfile?.hobbies || '-'}</p>
                 </div>
               </div>
             )}
 
             <div className="flex flex-col flex-1 overflow-hidden">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 sticky top-0 bg-black/40 backdrop-blur-xl py-2 z-10">Kuyruk</h3>
-              <div className="flex flex-col gap-2 overflow-y-auto hide-scrollbar" ref={threadQueueRef}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2 sticky top-0 bg-white py-2 z-10">Gelen Kutusu</h3>
+              <div className="flex flex-col gap-1 overflow-y-auto hide-scrollbar" ref={threadQueueRef}>
                 {sortedIncomingThreads.map((thread) => {
                   const threadProfile = profileById[thread.virtual_profile_id];
                   const waitingReply = thread.last_sender_role === 'member';
@@ -1331,7 +1244,7 @@ export default function App() {
                     <div
                       key={`${thread.member_id}-${thread.virtual_profile_id}`}
                       onClick={() => setSelectedThread(thread)}
-                      className={`group cursor-pointer flex items-center gap-3 p-3 rounded-2xl border transition-all ${isActive ? 'border-fuchsia-500/50 bg-fuchsia-500/10 shadow-[0_0_15px_rgba(217,70,239,0.1)]' : 'border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10'}`}
+                      className={`group cursor-pointer flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${isActive ? 'border-zinc-300 bg-zinc-100' : 'border-transparent hover:bg-zinc-50'}`}
                     >
                       <input
                         type="checkbox"
@@ -1343,119 +1256,119 @@ export default function App() {
                             [threadKey(thread.member_id, thread.virtual_profile_id)]: e.target.checked,
                           }))
                         }
-                        className="rounded border-white/20 bg-black/50 text-fuchsia-500 focus:ring-fuchsia-500/50"
+                        className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20"
                       />
                       <div className="relative">
                         {threadProfile?.photo_url ? (
-                          <img src={threadProfile.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-white/10" />
+                          <img src={threadProfile.photo_url} alt="" className="h-8 w-8 rounded-full object-cover border border-zinc-200" />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-sm border border-indigo-500/30">{thread.virtual_name?.slice(0, 1)}</div>
+                          <div className="h-8 w-8 rounded-full bg-zinc-200 text-zinc-600 flex items-center justify-center text-xs font-medium">{thread.virtual_name?.slice(0, 1)}</div>
                         )}
                         {adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)] > 0 && (
-                          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-rose-500 text-[9px] font-bold flex items-center justify-center border border-black">{adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)]}</span>
+                          <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-zinc-900 text-white text-[9px] font-medium flex items-center justify-center">{adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)]}</span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">
-                          {thread.member_username} <span className="text-slate-500">→</span> {thread.virtual_name}
+                        <p className="text-sm font-medium text-zinc-900 truncate">
+                          {thread.member_username} <span className="text-zinc-400 font-normal">→</span> {thread.virtual_name}
                         </p>
-                        <p className="text-xs text-slate-400 truncate">
-                          {adminTypingByThread[threadKey(thread.member_id, thread.virtual_profile_id)] ? <span className="text-cyan-400 italic">Yazıyor...</span> : thread.last_message_content || 'Mesaj yok'}
+                        <p className="text-xs text-zinc-500 truncate">
+                          {adminTypingByThread[threadKey(thread.member_id, thread.virtual_profile_id)] ? <span className="text-zinc-900 italic">Yazıyor...</span> : thread.last_message_content || 'Mesaj yok'}
                         </p>
                       </div>
-                      {waitingReply && <div className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />}
+                      {waitingReply && <div className="h-2 w-2 rounded-full bg-blue-600" />}
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-sm">
-               <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">SLA Paneli</h4>
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm mt-auto">
+               <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Metrikler</h4>
                <div className="flex justify-between items-center mb-1">
-                 <span className="text-slate-400">Bekleyen:</span>
-                 <span className="font-bold text-white">{slaStats.waitingCount}</span>
+                 <span className="text-zinc-600">Bekleyen:</span>
+                 <span className="font-medium text-zinc-900">{slaStats.waitingCount}</span>
                </div>
                <div className="flex justify-between items-center">
-                 <span className="text-slate-400">Ort. Yanıt:</span>
-                 <span className="font-bold text-white">{slaStats.avgWaitMin > 0 && slaStats.avgWaitMin < 1 ? '<1 dk' : `${slaStats.avgWaitMin.toFixed(1)} dk`}</span>
+                 <span className="text-zinc-600">Ort. Yanıt:</span>
+                 <span className="font-medium text-zinc-900">{slaStats.avgWaitMin > 0 && slaStats.avgWaitMin < 1 ? '<1 dk' : `${slaStats.avgWaitMin.toFixed(1)} dk`}</span>
                </div>
             </div>
           </aside>
 
-          {/* Admin Orta Alan (Chat veya Stats) */}
-          <section className="col-span-1 lg:col-span-6 flex flex-col rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+          {/* Admin Orta Alan */}
+          <section className="col-span-1 lg:col-span-6 flex flex-col rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
             {adminTab === 'chat' && (
               <>
-                <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
+                <div className="flex items-center justify-between p-4 border-b border-zinc-200 bg-zinc-50/50">
                   <div>
-                    <h3 className="text-xl font-bold text-white">{selectedThread?.virtual_name || 'Sohbet Seçilmedi'}</h3>
+                    <h3 className="text-lg font-semibold text-zinc-900">{selectedThread?.virtual_name || 'Sohbet Seçilmedi'}</h3>
                     {selectedThreadProfile && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`h-2 w-2 rounded-full ${onlineProfiles[selectedThreadProfile.id] ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-slate-600'}`} />
-                        <span className="text-xs text-slate-400">{onlineProfiles[selectedThreadProfile.id] ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className={`h-1.5 w-1.5 rounded-full ${onlineProfiles[selectedThreadProfile.id] ? 'bg-green-500' : 'bg-zinc-300'}`} />
+                        <span className="text-xs text-zinc-500">{onlineProfiles[selectedThreadProfile.id] ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <select
                       value={selectedThread?.status_tag || 'takip_edilecek'}
                       onChange={(e) => updateSelectedThreadTag(e.target.value)}
-                      className="rounded-xl border border-white/10 bg-black/50 px-3 py-1.5 text-xs font-semibold text-slate-200 outline-none focus:border-indigo-500"
+                      className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-xs font-medium text-zinc-700 outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5"
                     >
                       {THREAD_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
                     </select>
-                    <button type="button" className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition-colors border border-white/5" onClick={() => setAdminDrawerOpen(!adminDrawerOpen)}>
-                      {adminDrawerOpen ? 'Kapat ⇥' : 'Bilgi ⇤'}
+                    <button type="button" className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors" onClick={() => setAdminDrawerOpen(!adminDrawerOpen)}>
+                      Paneli {adminDrawerOpen ? 'Gizle' : 'Aç'}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar" ref={adminChatBoxRef}>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar" ref={adminChatBoxRef}>
                   {threadMessages.map((msg) => {
                     const audioUrl = getAudioUrl(msg.content);
                     const isMember = msg.sender_role === 'member';
                     return (
                       <div key={msg.id} className={`flex flex-col ${isMember ? 'items-start' : 'items-end'}`}>
-                        <span className="text-[10px] text-slate-500 mb-1 ml-1">{isMember ? selectedThread?.member_username : selectedThread?.virtual_name}</span>
-                        <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg ${isMember ? 'bg-white/10 text-white rounded-tl-none border border-white/5' : 'bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white rounded-tr-none'}`}>
+                        <span className="text-[10px] font-medium text-zinc-400 mb-1 ml-1">{isMember ? selectedThread?.member_username : selectedThread?.virtual_name}</span>
+                        <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-[14px] ${isMember ? 'bg-zinc-100 text-zinc-900 rounded-tl-sm border border-zinc-200/50' : 'bg-zinc-900 text-white rounded-tr-sm'}`}>
                           {audioUrl ? <audio controls src={audioUrl} className="h-8 max-w-[200px]" /> : <p className="leading-relaxed">{msg.content}</p>}
                         </div>
-                        <div className="flex items-center gap-1 mt-1 mr-1 text-[10px] text-slate-500">
+                        <div className="flex items-center gap-1 mt-1 mr-1 text-[10px] text-zinc-400">
                           {formatTime(msg.created_at)}
-                          {!isMember && <span className={msg.seen_by_member ? 'text-cyan-400' : 'text-slate-600'}>✓✓</span>}
+                          {!isMember && <span className={msg.seen_by_member ? 'text-blue-500' : 'text-zinc-400'}>✓✓</span>}
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="p-4 border-t border-white/10 bg-white/5">
+                <div className="p-4 border-t border-zinc-200 bg-zinc-50">
                   <div className="flex flex-wrap gap-2 mb-3">
                     {QUICK_REPLIES.map((reply) => (
-                      <button key={reply} type="button" className="rounded-full border border-white/10 bg-black/40 px-3 py-1 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors" onClick={() => setAdminReply((prev) => `${prev ? `${prev}\n` : ''}${reply}`)}>{reply}</button>
+                      <button key={reply} type="button" className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors" onClick={() => setAdminReply((prev) => `${prev ? `${prev}\n` : ''}${reply}`)}>{reply}</button>
                     ))}
-                    <button type="button" className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-3 py-1 text-[11px] font-bold text-fuchsia-300 hover:bg-fuchsia-500/20 transition-colors shadow-[0_0_10px_rgba(217,70,239,0.1)]" onClick={fetchAiSuggestions} disabled={loadingSuggestions}>
-                      {loadingSuggestions ? 'AI Düşünüyor...' : '✨ AI Önerisi'}
+                    <button type="button" className="rounded-full border border-zinc-900 bg-zinc-900 px-3 py-1 text-xs font-medium text-white hover:bg-zinc-800 transition-colors" onClick={fetchAiSuggestions} disabled={loadingSuggestions}>
+                      {loadingSuggestions ? 'Düşünüyor...' : 'AI Önerisi'}
                     </button>
                   </div>
                   {!!aiSuggestions.length && (
                     <div className="flex flex-wrap gap-2 mb-3">
                       {aiSuggestions.map((suggestion) => (
-                        <button key={suggestion} type="button" className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-[12px] text-left text-cyan-100 hover:bg-cyan-500/20 transition-colors" onClick={() => setAdminReply(suggestion)}>{suggestion}</button>
+                        <button key={suggestion} type="button" className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-left text-zinc-700 hover:bg-zinc-50 transition-colors" onClick={() => setAdminReply(suggestion)}>{suggestion}</button>
                       ))}
                     </div>
                   )}
                   <div className="flex items-end gap-2">
                     <textarea
-                      className="flex-1 resize-none rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 min-h-[50px] max-h-[150px] hide-scrollbar"
-                      placeholder="Sanal profil olarak yanıtla..."
+                      className="flex-1 resize-none rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 min-h-[44px] max-h-[120px] hide-scrollbar"
+                      placeholder="Mesaj yazın..."
                       value={adminReply}
-                      onChange={(e) => { setAdminReply(e.target.value); autoResizeTextarea(e.target, 150); }}
+                      onChange={(e) => { setAdminReply(e.target.value); autoResizeTextarea(e.target, 120); }}
                       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdminReply(); } }}
                     />
-                    <button onClick={sendAdminReply} className="rounded-2xl bg-gradient-to-r from-fuchsia-500 to-indigo-500 p-3 text-white shadow-lg shadow-fuchsia-500/25 hover:brightness-110 transition-all h-[50px] w-[50px] flex items-center justify-center">
-                      <span className="transform -rotate-45 block">➤</span>
+                    <button onClick={sendAdminReply} className="rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 transition-colors h-[44px] px-4 font-medium text-sm flex items-center justify-center">
+                      Gönder
                     </button>
                   </div>
                 </div>
@@ -1463,202 +1376,201 @@ export default function App() {
             )}
 
             {adminTab === 'stats' && (
-              <div className="p-6 overflow-y-auto hide-scrollbar">
+              <div className="p-8 overflow-y-auto hide-scrollbar">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-2xl font-bold text-white">Sistem Metrikleri</h3>
-                  <div className="flex rounded-xl bg-white/5 p-1 border border-white/10">
+                  <h3 className="text-xl font-semibold text-zinc-900">Sistem İstatistikleri</h3>
+                  <div className="flex rounded-lg border border-zinc-200 p-0.5 bg-zinc-50">
                     {['daily', 'weekly', 'monthly'].map((r) => (
-                      <button key={r} type="button" className={`px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${statsRange === r ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`} onClick={() => setStatsRange(r)}>
-                        {r === 'daily' ? 'Gün' : r === 'weekly' ? 'Hafta' : 'Ay'}
+                      <button key={r} type="button" className={`px-3 py-1.5 rounded-md text-xs font-medium capitalize transition-colors ${statsRange === r ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-900'}`} onClick={() => setStatsRange(r)}>
+                        {r === 'daily' ? 'Günlük' : r === 'weekly' ? 'Haftalık' : 'Aylık'}
                       </button>
                     ))}
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Toplam Msj</p>
-                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">{adminStats.totalMessagesToday}</p>
+                  <div className="rounded-xl border border-zinc-200 p-5 bg-white shadow-sm">
+                    <p className="text-sm font-medium text-zinc-500 mb-1">Toplam Mesaj</p>
+                    <p className="text-2xl font-semibold text-zinc-900">{adminStats.totalMessagesToday}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Yeni Üye</p>
-                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">{adminStats.newMembersToday}</p>
+                  <div className="rounded-xl border border-zinc-200 p-5 bg-white shadow-sm">
+                    <p className="text-sm font-medium text-zinc-500 mb-1">Yeni Üye</p>
+                    <p className="text-2xl font-semibold text-zinc-900">{adminStats.newMembersToday}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Aktif Thread</p>
-                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-500">{adminStats.activeThreadsToday}</p>
+                  <div className="rounded-xl border border-zinc-200 p-5 bg-white shadow-sm">
+                    <p className="text-sm font-medium text-zinc-500 mb-1">Aktif Thread</p>
+                    <p className="text-2xl font-semibold text-zinc-900">{adminStats.activeThreadsToday}</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Ort Yanıt</p>
-                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">{adminStats.avgResponseMinToday.toFixed(1)}m</p>
+                  <div className="rounded-xl border border-zinc-200 p-5 bg-white shadow-sm">
+                    <p className="text-sm font-medium text-zinc-500 mb-1">Ortalama Yanıt</p>
+                    <p className="text-2xl font-semibold text-zinc-900">{adminStats.avgResponseMinToday.toFixed(1)} dk</p>
                   </div>
                 </div>
               </div>
             )}
 
             {adminTab === 'settings' && (
-              <div className="p-6 overflow-y-auto hide-scrollbar space-y-6">
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-                   <h3 className="text-lg font-bold text-white mb-4">Sistem Ayarları</h3>
+              <div className="p-8 overflow-y-auto hide-scrollbar space-y-8">
+                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                   <h3 className="text-base font-semibold text-zinc-900 mb-4">Genel Ayarlar</h3>
                    <label className="flex items-center justify-between cursor-pointer">
-                     <span className="text-sm font-medium text-slate-300">Gelen Mesaj Sesi</span>
+                     <span className="text-sm text-zinc-700">Sesli bildirimleri etkinleştir</span>
                      <input type="checkbox" className="sr-only peer" checked={notificationSoundEnabled} onChange={(e) => setNotificationSoundEnabled(e.target.checked)} />
-                     <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                     <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zinc-900"></div>
                    </label>
                 </div>
 
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+                <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-white">Bot Profili Üret</h3>
-                    <button className="rounded-xl bg-indigo-500/20 text-indigo-300 px-4 py-2 text-sm font-bold border border-indigo-500/30 hover:bg-indigo-500/40 transition-colors" onClick={fillRandomVirtualProfile}>🎲 Rastgele Doldur</button>
+                    <h3 className="text-base font-semibold text-zinc-900">Sanal Profil Oluştur</h3>
+                    <button className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors" onClick={fillRandomVirtualProfile}>Rastgele Doldur</button>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="İsim" value={profileForm.name} onChange={(e) => setProfileForm((s) => ({ ...s, name: e.target.value }))} />
-                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="Yaş" type="number" value={profileForm.age} onChange={(e) => setProfileForm((s) => ({ ...s, age: e.target.value }))} />
-                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="Şehir" value={profileForm.city} onChange={(e) => setProfileForm((s) => ({ ...s, city: e.target.value }))} />
-                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="Cinsiyet" value={profileForm.gender} onChange={(e) => setProfileForm((s) => ({ ...s, gender: e.target.value }))} />
-                    <textarea className="col-span-2 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500 min-h-[80px]" placeholder="Hobiler" value={profileForm.hobbies} onChange={(e) => setProfileForm((s) => ({ ...s, hobbies: e.target.value }))} />
+                    <input className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5" placeholder="İsim" value={profileForm.name} onChange={(e) => setProfileForm((s) => ({ ...s, name: e.target.value }))} />
+                    <input className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5" placeholder="Yaş" type="number" value={profileForm.age} onChange={(e) => setProfileForm((s) => ({ ...s, age: e.target.value }))} />
+                    <input className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5" placeholder="Şehir" value={profileForm.city} onChange={(e) => setProfileForm((s) => ({ ...s, city: e.target.value }))} />
+                    <input className="rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5" placeholder="Cinsiyet" value={profileForm.gender} onChange={(e) => setProfileForm((s) => ({ ...s, gender: e.target.value }))} />
+                    <textarea className="col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 min-h-[80px]" placeholder="Hobiler" value={profileForm.hobbies} onChange={(e) => setProfileForm((s) => ({ ...s, hobbies: e.target.value }))} />
                     <div className="col-span-2">
                       <input type="file" accept="image/*" className="hidden" id="admin-photo-upload" onChange={async (e) => { const f = e.target.files?.[0]; if(f) { const u = await uploadImage(f, 'virtual-profiles'); if(u) setProfileForm(s => ({...s, photo_url: u})) } }} />
-                      <label htmlFor="admin-photo-upload" className="flex items-center justify-center w-full rounded-xl border-2 border-dashed border-white/20 bg-black/20 py-6 text-sm font-medium text-slate-400 hover:bg-black/40 cursor-pointer transition-colors">
-                        {profileForm.photo_url ? 'Fotoğraf Yüklendi (Değiştir)' : '📸 Fotoğraf Seç'}
+                      <label htmlFor="admin-photo-upload" className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-zinc-300 px-6 py-8 text-sm font-medium text-zinc-600 hover:border-zinc-400 hover:bg-zinc-50 cursor-pointer transition-colors">
+                        {profileForm.photo_url ? 'Fotoğraf Seçildi' : 'Profil Fotoğrafı Yükle'}
                       </label>
                     </div>
-                    <button className="col-span-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 hover:scale-[1.01] transition-transform" onClick={createVirtualProfile}>Profili Kaydet</button>
+                    <button className="col-span-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 transition-colors" onClick={createVirtualProfile}>Profili Kaydet</button>
                   </div>
                 </div>
               </div>
             )}
           </section>
 
-          {/* Admin Sağ Menü (Seçili Thread Bilgileri) */}
+          {/* Admin Sağ Menü */}
           {adminDrawerOpen && adminTab === 'chat' && (
-            <aside className="col-span-1 lg:col-span-3 flex flex-col gap-6 overflow-y-auto rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl p-5 shadow-2xl hide-scrollbar">
+            <aside className="col-span-1 lg:col-span-3 flex flex-col gap-4 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-sm hide-scrollbar">
               {selectedThreadProfile && (
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-5 text-center relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="rounded-lg border border-zinc-200 p-4 text-center bg-zinc-50/50">
                   {selectedThreadProfile.photo_url ? (
-                    <img src={selectedThreadProfile.photo_url} alt="" className="h-24 w-24 rounded-full object-cover mx-auto mb-4 border-2 border-white/20 shadow-lg" />
+                    <img src={selectedThreadProfile.photo_url} alt="" className="h-20 w-20 rounded-full object-cover mx-auto mb-3 border border-zinc-200 shadow-sm" />
                   ) : (
-                    <div className="h-24 w-24 rounded-full bg-fuchsia-500/20 mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-fuchsia-300 border-2 border-fuchsia-500/30">{selectedThreadProfile.name?.slice(0,1)}</div>
+                    <div className="h-20 w-20 rounded-full bg-zinc-200 mx-auto mb-3 flex items-center justify-center text-xl font-semibold text-zinc-600">{selectedThreadProfile.name?.slice(0,1)}</div>
                   )}
-                  <h4 className="text-xl font-bold text-white">{selectedThreadProfile.name}, {selectedThreadProfile.age}</h4>
-                  <p className="text-sm text-slate-400 mt-1">{selectedThreadProfile.city || '-'}</p>
-                  <div className="mt-4 flex flex-wrap justify-center gap-1">
-                    {(selectedThreadProfile.hobbies || '').split(',').filter(Boolean).map(h => (
-                       <span key={h} className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] text-slate-300 border border-white/5">{h.trim()}</span>
-                    ))}
-                  </div>
+                  <h4 className="text-base font-semibold text-zinc-900">{selectedThreadProfile.name}, {selectedThreadProfile.age}</h4>
+                  <p className="text-xs text-zinc-500 mt-0.5">{selectedThreadProfile.city || '-'}</p>
                 </div>
               )}
 
-              <div className="flex-1 rounded-2xl border border-white/5 bg-white/5 p-4 flex flex-col">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">Quick Facts (Notlar)</h4>
+              <div className="flex-1 rounded-lg border border-zinc-200 bg-white p-4 flex flex-col shadow-sm">
+                <h4 className="text-xs font-semibold text-zinc-900 mb-2">Hızlı Notlar</h4>
                 <textarea
-                  className="flex-1 w-full resize-none rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-slate-600 outline-none focus:border-amber-500/50 min-h-[150px] hide-scrollbar"
-                  placeholder="Kullanıcı zaafları, yalanlar, senaryo notları..."
+                  className="flex-1 w-full resize-none rounded-md border border-zinc-200 bg-zinc-50 p-2 text-sm text-zinc-700 placeholder:text-zinc-400 outline-none focus:border-zinc-300 min-h-[120px] hide-scrollbar"
+                  placeholder="Kullanıcı notları..."
                   value={quickFactsText}
                   onChange={(e) => setQuickFactsText(e.target.value)}
                 />
-                <button className="mt-3 w-full rounded-xl bg-amber-500/20 text-amber-400 font-bold py-2 border border-amber-500/30 hover:bg-amber-500/30 transition-colors" onClick={saveQuickFacts}>Notu Kaydet</button>
+                <button className="mt-2 w-full rounded-md border border-zinc-200 bg-white py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors" onClick={saveQuickFacts}>Kaydet</button>
               </div>
 
-              <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                 <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-3">Toplu İşlem</h4>
-                 <select className="w-full rounded-xl border border-white/10 bg-black/50 p-2.5 text-sm text-white outline-none mb-3" value={bulkTemplate} onChange={(e) => setBulkTemplate(e.target.value)}>
+              <div className="rounded-lg border border-zinc-200 p-4 bg-zinc-50/50">
+                 <h4 className="text-xs font-semibold text-zinc-900 mb-2">Toplu Şablon Gönderimi</h4>
+                 <select className="w-full rounded-md border border-zinc-300 bg-white p-2 text-sm text-zinc-700 outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 mb-2" value={bulkTemplate} onChange={(e) => setBulkTemplate(e.target.value)}>
                    {BULK_TEMPLATES.map(t => <option key={t} value={t}>{t}</option>)}
                  </select>
-                 <button className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 py-2.5 font-bold text-white shadow-lg shadow-rose-500/25 hover:brightness-110" onClick={sendBulkTemplate}>Seçili Kuyruğa Gönder</button>
+                 <button className="w-full rounded-md bg-zinc-900 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors" onClick={sendBulkTemplate}>Seçili Kuyruğa Gönder</button>
               </div>
             </aside>
           )}
         </main>
 
-      // USER DISCOVER VIEW (Zaten bayağı modern Tailwind idi, biraz daha Glassmorphism/Dark Space eklendi)
+      // USER DISCOVER VIEW
       ) : userView === 'discover' ? (
-        <main className="relative isolate mx-auto max-w-7xl space-y-8 overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 p-6 text-white shadow-2xl backdrop-blur-2xl md:p-8">
-          <div className="pointer-events-none absolute -left-24 top-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-[120px]" />
-          <div className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full bg-cyan-500/15 blur-[120px]" />
-          <div className="pointer-events-none absolute bottom-0 right-1/3 h-52 w-52 rounded-full bg-indigo-500/15 blur-[120px]" />
-
-          <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-6 text-slate-100 shadow-xl backdrop-blur-md md:p-8">
-            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
-            <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-              <div className="relative space-y-4">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-fuchsia-300">
-                  <span className="h-2 w-2 rounded-full bg-fuchsia-400 animate-pulse" />
-                  Keşfet Radarı
-                </span>
-                <h2 className="text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 md:text-5xl">Gelecekteki Eşleşmen ✨</h2>
-                <p className="max-w-2xl text-sm text-slate-400 font-medium md:text-base leading-relaxed">
-                  Kuantum algoritmamızla senin için en ideal profilleri süzüyoruz. Hemen birini seç ve sohbete başla.
-                </p>
-                <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-300">Toplam: {discoverProfiles.length}</span>
-                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-emerald-400">
-                    Çevrimiçi: {discoverProfiles.filter((p) => effectiveOnlineProfiles[p.id]).length}
-                  </span>
-                </div>
-              </div>
-
-              <div className="relative grid gap-3 sm:grid-cols-2 xl:w-[500px]">
-                <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 shadow-inner transition-colors focus-within:border-cyan-500">
-                  <span className="text-sm text-cyan-400">⌕</span>
-                  <input placeholder="Kimi arıyorsun?" value={profileSearch} onChange={(e) => setProfileSearch(e.target.value)} className="w-full bg-transparent text-sm text-white placeholder-slate-500 outline-none" />
-                </label>
-                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)} className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm font-semibold text-slate-200 outline-none shadow-inner focus:border-cyan-500 appearance-none">
-                  <option value="all">Herkes</option>
-                  <option value="Kadın">Kadın</option>
-                  <option value="Erkek">Erkek</option>
-                </select>
-                <input placeholder="Şehir filtresi" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none shadow-inner focus:border-fuchsia-500" />
-                <select value={discoverSort} onChange={(e) => setDiscoverSort(e.target.value)} className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm font-semibold text-slate-200 outline-none shadow-inner focus:border-indigo-500 appearance-none">
-                  <option value="match">Uyuma göre diz</option>
-                  <option value="newest">En yeniler</option>
-                  <option value="online">Aktif olanlar</option>
-                </select>
-              </div>
+        <main className="mx-auto max-w-7xl px-6 py-8">
+          <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight text-zinc-900">Keşfet</h2>
+              <p className="mt-1 text-sm text-zinc-500">Sizin için önerilen eşleşmeler.</p>
             </div>
-          </section>
 
-          <section className="relative grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <input 
+                placeholder="Arama..." 
+                value={profileSearch} 
+                onChange={(e) => setProfileSearch(e.target.value)} 
+                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 w-48" 
+              />
+              <select 
+                value={genderFilter} 
+                onChange={(e) => setGenderFilter(e.target.value)} 
+                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 bg-white"
+              >
+                <option value="all">Tümü</option>
+                <option value="Kadın">Kadın</option>
+                <option value="Erkek">Erkek</option>
+              </select>
+              <input 
+                placeholder="Şehir" 
+                value={cityFilter} 
+                onChange={(e) => setCityFilter(e.target.value)} 
+                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 w-32" 
+              />
+              <select 
+                value={discoverSort} 
+                onChange={(e) => setDiscoverSort(e.target.value)} 
+                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 bg-white"
+              >
+                <option value="match">Önerilenler</option>
+                <option value="newest">En Yeniler</option>
+                <option value="online">Aktif Olanlar</option>
+              </select>
+            </div>
+          </div>
+
+          <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {discoverProfiles.map((profile) => {
-              const hobbyBadges = (profile.hobbies || '').split(',').map((h) => h.trim()).filter(Boolean).slice(0, 3);
+              const hobbyBadges = (profile.hobbies || '').split(',').map((h) => h.trim()).filter(Boolean).slice(0, 2);
               const isOnline = !!effectiveOnlineProfiles[profile.id];
               const liked = !!likedProfiles[profile.id];
               
               return (
-                <article key={profile.id} className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-3 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_20px_40px_-15px_rgba(79,70,229,0.3)]">
-                  <div className="relative h-[380px] overflow-hidden rounded-[1.5rem]">
+                <article key={profile.id} className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  <div className="relative h-64 overflow-hidden bg-zinc-100">
                     {profile.photo_url ? (
-                      <img src={profile.photo_url} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <img src={profile.photo_url} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-indigo-900 to-slate-900 text-7xl font-bold text-white/30">{profile.name?.slice(0, 1)}</div>
+                      <div className="flex h-full items-center justify-center text-5xl font-semibold text-zinc-300">{profile.name?.slice(0, 1)}</div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                    <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-xs font-bold tracking-wide text-white backdrop-blur-md flex items-center gap-1.5">
-                      <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-slate-500'}`} />
-                      {isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 space-y-3 p-5">
-                      <div>
-                        <h3 className="text-3xl font-black text-white tracking-tight">{profile.name}, {profile.age}</h3>
-                        <p className="text-sm font-medium text-slate-300 mt-1">{profile.city || 'Belirtilmemiş'}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {hobbyBadges.length ? hobbyBadges.map((hobby) => (
-                          <span key={hobby} className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold tracking-wider uppercase text-slate-200 backdrop-blur-md">{hobby}</span>
-                        )) : <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-slate-200">Gizemli</span>}
-                      </div>
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 shadow-sm">
+                      <span className={`h-1.5 w-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-zinc-400'}`} />
+                      <span className="text-[10px] font-medium text-zinc-700">{isOnline ? 'Aktif' : 'Çevrimdışı'}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-[1fr_auto] gap-3">
-                    <button type="button" className="rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95" onClick={() => openChatWithProfile(profile.id)}>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-zinc-900">{profile.name}, {profile.age}</h3>
+                        <p className="text-sm text-zinc-500">{profile.city || 'Belirtilmemiş'}</p>
+                      </div>
+                      <button 
+                        type="button" 
+                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${liked ? 'bg-red-50 text-red-500' : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100'}`} 
+                        onClick={() => setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }))}
+                      >
+                        {liked ? '♥' : '♡'}
+                      </button>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {hobbyBadges.map((hobby) => (
+                        <span key={hobby} className="rounded-md bg-zinc-100 px-2 py-1 text-[11px] font-medium text-zinc-600">{hobby}</span>
+                      ))}
+                    </div>
+
+                    <button 
+                      type="button" 
+                      className="mt-5 w-full rounded-lg bg-zinc-900 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800" 
+                      onClick={() => openChatWithProfile(profile.id)}
+                    >
                       Mesaj Gönder
-                    </button>
-                    <button type="button" className={`flex items-center justify-center rounded-2xl border px-4 py-3 text-lg transition-all active:scale-90 ${liked ? 'border-rose-500/50 bg-rose-500/20 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-white/10 bg-black/40 text-slate-400 hover:text-white'}`} onClick={() => setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }))}>
-                      {liked ? '♥' : '♡'}
                     </button>
                   </div>
                 </article>
@@ -1667,36 +1579,38 @@ export default function App() {
           </section>
 
           {!discoverProfiles.length && (
-            <div className="rounded-[2.5rem] border border-dashed border-white/20 bg-white/5 py-20 text-center backdrop-blur-sm">
-              <h3 className="text-2xl font-bold text-white">Radarda kimse kalmadı</h3>
-              <p className="mt-2 text-slate-400">Arama kriterlerini esneterek yeni evrenler keşfedebilirsin.</p>
+            <div className="rounded-2xl border border-dashed border-zinc-300 py-20 text-center">
+              <h3 className="text-sm font-medium text-zinc-900">Sonuç bulunamadı</h3>
+              <p className="mt-1 text-sm text-zinc-500">Arama kriterlerinizi değiştirerek tekrar deneyin.</p>
             </div>
           )}
         </main>
 
-      // USER CHAT & PROFILE VIEW (Sıfırdan modern Glassmorphism tasarım)
+      // USER CHAT & PROFILE VIEW
       ) : (
-        <main className="mx-auto max-w-7xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[80vh]">
-          {/* Kullanıcı Sol Menü (Sohbet Listesi) */}
-          <aside className="col-span-1 lg:col-span-4 flex flex-col gap-4 overflow-y-auto rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-2xl p-5 shadow-2xl hide-scrollbar">
-            <h3 className="text-xl font-bold text-white mb-2 px-2">Mesajlar</h3>
-            <div className="flex flex-col gap-2 overflow-y-auto hide-scrollbar" ref={profileListRef}>
+        <main className="mx-auto max-w-5xl px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-6rem)]">
+          {/* Sol Sohbet Listesi */}
+          <aside className="col-span-1 lg:col-span-4 flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-200 p-4 bg-zinc-50/50">
+              <h3 className="font-semibold text-zinc-900">Mesajlar</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 hide-scrollbar" ref={profileListRef}>
               {sortedProfiles.map((profile) => {
                  const isActive = selectedProfileId === profile.id;
                  const hasUnread = unreadByProfile[profile.id] > 0;
                  return (
-                   <button key={profile.id} onClick={() => setSelectedProfileId(profile.id)} className={`group relative flex items-center gap-4 p-3 rounded-2xl border transition-all text-left ${isActive ? 'border-cyan-500/50 bg-cyan-500/10 shadow-[0_0_15px_rgba(34,211,238,0.1)]' : 'border-transparent hover:bg-white/5'}`}>
-                     <div className="relative">
+                   <button key={profile.id} onClick={() => setSelectedProfileId(profile.id)} className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors text-left ${isActive ? 'bg-zinc-100' : 'hover:bg-zinc-50'}`}>
+                     <div className="relative shrink-0">
                        {profile.photo_url ? (
-                         <img src={profile.photo_url} alt="" className="h-14 w-14 rounded-full object-cover border border-white/10" />
+                         <img src={profile.photo_url} alt="" className="h-12 w-12 rounded-full object-cover border border-zinc-200" />
                        ) : (
-                         <div className="h-14 w-14 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xl text-slate-400 border border-white/10">{profile.name?.slice(0,1)}</div>
+                         <div className="h-12 w-12 rounded-full bg-zinc-200 flex items-center justify-center font-medium text-lg text-zinc-600">{profile.name?.slice(0,1)}</div>
                        )}
-                       {onlineProfiles[profile.id] && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-black" />}
+                       {onlineProfiles[profile.id] && <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white" />}
                      </div>
                      <div className="flex-1 min-w-0">
-                       <h4 className={`text-base font-bold truncate ${hasUnread ? 'text-white' : 'text-slate-200'}`}>{profile.name}</h4>
-                       <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-cyan-400 font-semibold' : 'text-slate-500'}`}>
+                       <h4 className={`text-sm font-medium truncate ${hasUnread ? 'text-zinc-900 font-semibold' : 'text-zinc-700'}`}>{profile.name}</h4>
+                       <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-blue-600 font-medium' : 'text-zinc-500'}`}>
                          {hasUnread ? `Yeni mesaj (${unreadByProfile[profile.id]})` : profile.city || 'Sohbet et'}
                        </p>
                      </div>
@@ -1706,108 +1620,111 @@ export default function App() {
             </div>
           </aside>
 
-          {/* Kullanıcı Orta/Sağ Alan */}
-          <section className="col-span-1 lg:col-span-8 flex flex-col rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+          {/* Orta Alan */}
+          <section className="col-span-1 lg:col-span-8 flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
             {userView === 'profile' ? (
-               <div className="p-8 md:p-12 max-w-2xl mx-auto w-full overflow-y-auto hide-scrollbar">
-                 <div className="text-center mb-8">
-                   <div className="relative inline-block group cursor-pointer mb-6">
+               <div className="p-8 max-w-lg mx-auto w-full overflow-y-auto hide-scrollbar">
+                 <h2 className="text-xl font-semibold text-zinc-900 mb-6">Profil Ayarları</h2>
+                 
+                 <div className="flex items-center gap-5 mb-8">
+                   <div className="relative group cursor-pointer shrink-0">
                      {memberProfile.photo_url ? (
-                       <img src={memberProfile.photo_url} alt="" className="h-32 w-32 rounded-full object-cover border-4 border-white/10 shadow-2xl" />
+                       <img src={memberProfile.photo_url} alt="" className="h-20 w-20 rounded-full object-cover border border-zinc-200" />
                      ) : (
-                       <div className="h-32 w-32 rounded-full bg-indigo-900/50 flex items-center justify-center text-4xl text-indigo-300 border-4 border-white/10">👤</div>
+                       <div className="h-20 w-20 rounded-full bg-zinc-100 flex items-center justify-center text-2xl text-zinc-400 border border-zinc-200">👤</div>
                      )}
-                     <label htmlFor="member-photo-upload" className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">Değiştir</span>
+                     <label htmlFor="member-photo-upload" className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <span className="text-[10px] font-semibold text-white uppercase tracking-wider">Değiştir</span>
                      </label>
                      <input id="member-photo-upload" type="file" accept="image/*" className="hidden" onChange={async(e)=>{ const f=e.target.files?.[0]; if(!f)return; const u=await uploadImage(f,'members'); if(u) setMemberProfile(s=>({...s,photo_url:u})); }} />
                    </div>
-                   <h2 className="text-3xl font-black text-white">{memberSession?.username}</h2>
-                   <p className="text-slate-400 font-medium mt-1">Sanal Evren Profili</p>
+                   <div>
+                     <p className="text-lg font-medium text-zinc-900">{memberSession?.username}</p>
+                     <p className="text-sm text-zinc-500">Bilgilerinizi güncelleyin.</p>
+                   </div>
                  </div>
 
-                 <div className="space-y-5">
-                   <div className="grid grid-cols-2 gap-5">
-                     <div className="space-y-1.5">
-                       <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Yaş</label>
-                       <input type="number" placeholder="Örn. 24" value={memberProfile.age} onChange={(e)=>setMemberProfile(s=>({...s,age:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500" />
+                 <div className="space-y-4">
+                   <div className="grid grid-cols-2 gap-4">
+                     <div>
+                       <label className="text-xs font-medium text-zinc-700 block mb-1">Yaş</label>
+                       <input type="number" placeholder="Yaşınız" value={memberProfile.age} onChange={(e)=>setMemberProfile(s=>({...s,age:e.target.value}))} className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5" />
                      </div>
-                     <div className="space-y-1.5">
-                       <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Şehir</label>
-                       <input placeholder="Örn. İzmir" value={memberProfile.city} onChange={(e)=>setMemberProfile(s=>({...s,city:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500" />
+                     <div>
+                       <label className="text-xs font-medium text-zinc-700 block mb-1">Şehir</label>
+                       <input placeholder="Şehriniz" value={memberProfile.city} onChange={(e)=>setMemberProfile(s=>({...s,city:e.target.value}))} className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5" />
                      </div>
                    </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Şu anki Ruh Halin</label>
-                     <select value={memberProfile.status_emoji} onChange={(e)=>setMemberProfile(s=>({...s,status_emoji:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500 appearance-none">
-                       <option value="🙂">🙂 Her şey yolunda</option>
-                       <option value="☕">☕ Kahve modunda</option>
-                       <option value="💃">💃 Eğlence arıyor</option>
-                       <option value="🎧">🎧 Müziğe dalmış</option>
-                       <option value="🌙">🌙 Dinlenme safhasında</option>
+                   <div>
+                     <label className="text-xs font-medium text-zinc-700 block mb-1">Durum</label>
+                     <select value={memberProfile.status_emoji} onChange={(e)=>setMemberProfile(s=>({...s,status_emoji:e.target.value}))} className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 bg-white">
+                       <option value="🙂">🙂 Normal</option>
+                       <option value="☕">☕ Kahve</option>
+                       <option value="💃">💃 Eğlence</option>
+                       <option value="🎧">🎧 Müzik</option>
+                       <option value="🌙">🌙 Dinlenme</option>
                      </select>
                    </div>
-                   <div className="space-y-1.5">
-                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Nelerden Hoşlanırsın?</label>
-                     <textarea placeholder="Kitaplar, yürüyüş, teknoloji..." value={memberProfile.hobbies} onChange={(e)=>setMemberProfile(s=>({...s,hobbies:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500 min-h-[100px] resize-none" />
+                   <div>
+                     <label className="text-xs font-medium text-zinc-700 block mb-1">İlgi Alanları</label>
+                     <textarea placeholder="Virgülle ayırarak yazın..." value={memberProfile.hobbies} onChange={(e)=>setMemberProfile(s=>({...s,hobbies:e.target.value}))} className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 min-h-[100px] resize-none" />
                    </div>
-                   <button onClick={saveOwnProfile} className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-indigo-500 py-4 font-bold text-white shadow-lg shadow-fuchsia-500/25 hover:brightness-110 hover:scale-[1.01] transition-all active:scale-95">Değişiklikleri Kaydet</button>
+                   <button onClick={saveOwnProfile} className="w-full rounded-lg bg-zinc-900 py-2.5 font-medium text-sm text-white hover:bg-zinc-800 transition-colors mt-2">Kaydet</button>
                  </div>
                </div>
             ) : (
-              // Kullanıcı Sohbet Alanı
+              // Chat Bölümü
               selectedProfile ? (
                 <>
-                  <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5 backdrop-blur-md z-10">
-                    <div className="flex items-center gap-4">
-                      {selectedProfile.photo_url ? <img src={selectedProfile.photo_url} alt="" className="h-12 w-12 rounded-full object-cover border border-white/20" /> : <div className="h-12 w-12 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xl">{selectedProfile.name?.slice(0,1)}</div>}
+                  <div className="flex items-center justify-between p-4 border-b border-zinc-200 bg-zinc-50/50">
+                    <div className="flex items-center gap-3">
+                      {selectedProfile.photo_url ? <img src={selectedProfile.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-zinc-200" /> : <div className="h-10 w-10 rounded-full bg-zinc-200 flex items-center justify-center font-medium text-zinc-600">{selectedProfile.name?.slice(0,1)}</div>}
                       <div>
-                        <h3 className="text-xl font-bold text-white">{selectedProfile.name}</h3>
-                        <p className="text-xs font-medium text-slate-400 mt-0.5">{selectedProfile.city} • Uyum: %{interestScore}</p>
+                        <h3 className="text-sm font-semibold text-zinc-900">{selectedProfile.name}</h3>
+                        <p className="text-xs text-zinc-500 mt-0.5">{selectedProfile.city || '-'} • Uyum: %{interestScore}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar relative" ref={chatBoxRef}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+                  <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar" ref={chatBoxRef}>
                     {messages.map((msg) => {
                       const audioUrl = getAudioUrl(msg.content);
                       const isMe = msg.sender_role === 'member';
                       return (
-                        <div key={msg.id} className={`flex flex-col relative z-10 ${isMe ? 'items-end' : 'items-start'}`}>
-                          <div className={`max-w-[75%] rounded-3xl px-5 py-3 text-[15px] shadow-lg ${isMe ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-tr-sm' : 'bg-white/10 text-white rounded-tl-sm border border-white/10 backdrop-blur-md'}`}>
-                            {audioUrl ? <audio controls src={audioUrl} className="h-10 max-w-[220px] rounded-full" /> : <p className="leading-normal">{msg.content}</p>}
+                        <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                          <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm ${isMe ? 'bg-zinc-900 text-white rounded-tr-sm' : 'bg-zinc-100 text-zinc-900 rounded-tl-sm border border-zinc-200/50'}`}>
+                            {audioUrl ? <audio controls src={audioUrl} className="h-8 max-w-[200px]" /> : <p className="leading-relaxed">{msg.content}</p>}
                           </div>
-                          <div className="flex items-center gap-1 mt-1.5 text-[10px] text-slate-500 font-medium px-2">
+                          <div className="flex items-center gap-1 mt-1 text-[10px] text-zinc-400 font-medium px-1">
                             {formatTime(msg.created_at)}
-                            {isMe && <span className={msg.seen_by_admin ? 'text-cyan-400' : 'text-slate-600'}>✓✓</span>}
+                            {isMe && <span className={msg.seen_by_admin ? 'text-blue-500' : 'text-zinc-400'}>✓✓</span>}
                           </div>
                         </div>
                       );
                     })}
-                    {typingLabel && <div className="text-xs text-fuchsia-400 italic font-medium relative z-10 px-2 animate-pulse">{selectedProfile.name} yazıyor...</div>}
+                    {typingLabel && <div className="text-xs text-zinc-500 italic font-medium px-1">Yazıyor...</div>}
                   </div>
 
-                  <div className="p-4 border-t border-white/10 bg-white/5 backdrop-blur-md relative z-10">
-                    <div className="flex items-end gap-3 rounded-3xl border border-white/10 bg-black/50 p-2 shadow-inner focus-within:border-cyan-500/50 transition-colors">
+                  <div className="p-4 border-t border-zinc-200 bg-zinc-50">
+                    <div className="flex items-end gap-2 bg-white rounded-xl border border-zinc-300 p-1.5 focus-within:border-zinc-400 focus-within:ring-2 focus-within:ring-zinc-900/5 transition-shadow">
                       <textarea
-                        className="flex-1 resize-none bg-transparent px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none min-h-[44px] max-h-[120px] hide-scrollbar"
-                        placeholder="Bir şeyler yaz..."
+                        className="flex-1 resize-none bg-transparent px-3 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none min-h-[40px] max-h-[120px] hide-scrollbar"
+                        placeholder="Bir mesaj yazın..."
                         value={newMessage}
                         onChange={(e) => { setNewMessage(e.target.value); autoResizeTextarea(e.target, 120); }}
                         onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                       />
-                      <button onClick={sendMessage} className="rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-3 text-white shadow-lg hover:brightness-110 active:scale-90 transition-all h-[44px] w-[44px] flex items-center justify-center shrink-0">
-                        <span className="transform -rotate-45 block mb-0.5 ml-0.5">➤</span>
+                      <button onClick={sendMessage} className="rounded-lg bg-zinc-900 text-white px-4 py-2 text-sm font-medium hover:bg-zinc-800 transition-colors h-[40px]">
+                        Gönder
                       </button>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
-                   <div className="text-6xl mb-4 opacity-50">🌌</div>
-                   <h3 className="text-2xl font-bold text-white mb-2">Uzayda Ses Yok</h3>
-                   <p className="text-slate-400 max-w-sm">Soldaki listeden bir profil seçerek konuşmayı başlat veya "Keşfet" sekmesinden yeni eşleşmeler bul.</p>
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-zinc-50/50">
+                   <div className="h-16 w-16 bg-zinc-100 rounded-full flex items-center justify-center mb-4 text-zinc-400 text-2xl border border-zinc-200">💬</div>
+                   <h3 className="text-base font-medium text-zinc-900 mb-1">Sohbet Seçilmedi</h3>
+                   <p className="text-sm text-zinc-500 max-w-[250px]">Soldaki listeden birini seçin veya yeni kişilerle tanışmak için keşfete gidin.</p>
                 </div>
               )
             )}
@@ -1815,21 +1732,17 @@ export default function App() {
         </main>
       )}
 
-      {/* GLOBAL STATUS TOAST */}
+      {/* TOAST NOTIFICATION */}
       {status && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-slate-900/90 px-6 py-3 text-sm font-medium text-white shadow-2xl backdrop-blur-xl z-[100] flex items-center gap-3 animate-[slideUp_0.3s_ease-out]">
-          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+        <div className="fixed bottom-6 right-6 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-900 shadow-lg z-[100] flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
           {status}
         </div>
       )}
       
-      {/* İnce scrollbar CSS Inject (Varsa global css içinde halletmek en iyisidir ama komponent tam dolsun diye ekliyorum) */}
       <style dangerouslySetInnerHTML={{__html: `
-        .hide-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .hide-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .hide-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        .hide-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-        @keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        .hide-scrollbar::-webkit-scrollbar { width: 0px; height: 0px; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
     </div>
   );
