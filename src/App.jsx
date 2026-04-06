@@ -1121,17 +1121,17 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="user-center-nav rounded-2xl border border-indigo-200 bg-gradient-to-r from-white via-indigo-50 to-fuchsia-50 p-1.5 shadow-lg shadow-indigo-100/60">
+            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-900 p-2 shadow-2xl shadow-slate-900/30">
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] transition-all ${userView === 'discover' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40' : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-700'}`}
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/45' : 'bg-slate-800 text-slate-100 ring-1 ring-slate-700 hover:-translate-y-0.5 hover:bg-slate-700'}`}
                 onClick={() => setUserView('discover')}
               >
                 Keşfet
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] transition-all ${userView === 'chat' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40' : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-700'}`}
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/45' : 'bg-slate-800 text-slate-100 ring-1 ring-slate-700 hover:-translate-y-0.5 hover:bg-slate-700'}`}
                 onClick={() => setUserView('chat')}
               >
                 Mesajlar
@@ -1139,14 +1139,14 @@ export default function App() {
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] transition-all ${userView === 'profile' ? 'active bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40' : 'bg-white text-slate-900 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-700'}`}
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/45' : 'bg-slate-800 text-slate-100 ring-1 ring-slate-700 hover:-translate-y-0.5 hover:bg-slate-700'}`}
                 onClick={() => setUserView('profile')}
               >
                 Profilim
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-rose-300 bg-gradient-to-r from-rose-500 to-pink-500 px-4 py-2.5 text-sm font-extrabold tracking-[0.01em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:from-rose-600 hover:to-pink-600"
+                className="rounded-xl border border-rose-300 bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
                 onClick={handleSignOut}
               >
                 Çıkış
