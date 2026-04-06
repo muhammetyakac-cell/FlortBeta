@@ -29,13 +29,21 @@ function hashToInt(text) {
 
 function buildHourlyOnlineMap(profiles, hourKey) {
   const map = {};
-  (profiles || []).forEach((profile) => {
-    const score = hashToInt(`${hourKey}-${profile.id}`) % 100;
-    map[profile.id] = score < 48;
+  const list = profiles || [];
+  if (!list.length) return map;
+
+  const targetOnlineCount = Math.min(list.length, Math.floor(list.length / 2) + 3);
+  const ranked = [...list]
+    .map((profile) => ({
+      id: profile.id,
+      score: hashToInt(`${hourKey}-${profile.id}`),
+    }))
+    .sort((a, b) => a.score - b.score);
+
+  ranked.forEach((item, index) => {
+    map[item.id] = index < targetOnlineCount;
   });
-  if ((profiles || []).length && !Object.values(map).some(Boolean)) {
-    map[profiles[0].id] = true;
-  }
+
   return map;
 }
 
@@ -1121,17 +1129,17 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-900 p-2 shadow-2xl shadow-slate-900/30">
+            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-fuchsia-300/40 bg-gradient-to-r from-[#160b2e] via-[#1f1648] to-[#10233f] p-2 shadow-2xl shadow-indigo-900/45 backdrop-blur-xl">
               <button
                 type="button"
-                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/45' : 'bg-slate-800 text-slate-100 ring-1 ring-slate-700 hover:-translate-y-0.5 hover:bg-slate-700'}`}
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
                 onClick={() => setUserView('discover')}
               >
                 Keşfet
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/45' : 'bg-slate-800 text-slate-100 ring-1 ring-slate-700 hover:-translate-y-0.5 hover:bg-slate-700'}`}
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
                 onClick={() => setUserView('chat')}
               >
                 Mesajlar
@@ -1139,14 +1147,14 @@ export default function App() {
               </button>
               <button
                 type="button"
-                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/45' : 'bg-slate-800 text-slate-100 ring-1 ring-slate-700 hover:-translate-y-0.5 hover:bg-slate-700'}`}
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
                 onClick={() => setUserView('profile')}
               >
                 Profilim
               </button>
               <button
                 type="button"
-                className="rounded-xl border border-rose-300 bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
+                className="rounded-xl border border-rose-200/50 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
                 onClick={handleSignOut}
               >
                 Çıkış
