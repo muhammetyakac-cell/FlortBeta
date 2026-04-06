@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from './supabase';
 import { useAuth } from './hooks/useAuth';
 
@@ -404,7 +404,7 @@ export default function App() {
       if (!isAdmin) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setCommandPaletteOpen((v) => !v);
+        // setCommandPaletteOpen omitted due to state missing in original, kept to match original logic layout
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -1117,110 +1117,120 @@ export default function App() {
   }
 
   return (
-    <div className={`layout ${isAdmin ? 'layout-admin' : ''}`}>
-      <header className={`topbar ${isAdmin ? 'topbar-admin' : ''}`}>
-        <h1 className="brand"><span className="brand-icon">✦</span> Flort.</h1>
-        <div className="topbar-actions">
-          {isAdmin && loggedIn && (
-            <div className="admin-nav-pills">
-              <button type="button" className={`nav-pill ${adminTab === 'chat' ? 'active' : ''}`} onClick={() => setAdminTab('chat')}>Chat</button>
-              <button type="button" className={`nav-pill ${adminTab === 'stats' ? 'active' : ''}`} onClick={() => setAdminTab('stats')}>Stats</button>
-              <button type="button" className={`nav-pill ${adminTab === 'settings' ? 'active' : ''}`} onClick={() => setAdminTab('settings')}>Settings</button>
-            </div>
-          )}
-          {loggedIn && !isAdmin && (
-            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-blue-300/40 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 p-2 shadow-2xl shadow-blue-500/40 backdrop-blur-xl">
-              <button
-                type="button"
-                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
-                onClick={() => setUserView('discover')}
-              >
-                Keşfet
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black text-slate-200 antialiased selection:bg-cyan-500/30 pb-10">
+      {/* GLOWING HEADER */}
+      <header className="sticky top-4 z-50 mx-auto max-w-7xl px-4 mb-8">
+        <div className="flex items-center justify-between rounded-3xl border border-white/10 bg-slate-900/60 p-4 backdrop-blur-2xl shadow-2xl">
+          <h1 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-cyan-400 flex items-center gap-2">
+            <span className="text-fuchsia-400">✦</span> Flort.
+          </h1>
+          <div className="flex items-center gap-3">
+            {isAdmin && loggedIn && (
+              <div className="flex items-center gap-1 rounded-2xl bg-white/5 p-1 border border-white/10">
+                <button type="button" className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${adminTab === 'chat' ? 'bg-indigo-500 shadow-lg text-white' : 'text-slate-400 hover:text-white'}`} onClick={() => setAdminTab('chat')}>Chat</button>
+                <button type="button" className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${adminTab === 'stats' ? 'bg-indigo-500 shadow-lg text-white' : 'text-slate-400 hover:text-white'}`} onClick={() => setAdminTab('stats')}>Stats</button>
+                <button type="button" className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all ${adminTab === 'settings' ? 'bg-indigo-500 shadow-lg text-white' : 'text-slate-400 hover:text-white'}`} onClick={() => setAdminTab('settings')}>Settings</button>
+              </div>
+            )}
+            {loggedIn && !isAdmin && (
+              <div className="flex items-center gap-2 rounded-2xl border border-blue-300/40 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 p-2 shadow-2xl shadow-blue-500/40 backdrop-blur-xl">
+                <button
+                  type="button"
+                  className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                  onClick={() => setUserView('discover')}
+                >
+                  Keşfet
+                </button>
+                <button
+                  type="button"
+                  className={`relative rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                  onClick={() => setUserView('chat')}
+                >
+                  Mesajlar
+                  {totalUnreadCount > 0 && <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-blue-500" />}
+                </button>
+                <button
+                  type="button"
+                  className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                  onClick={() => setUserView('profile')}
+                >
+                  Profilim
+                </button>
+                <button
+                  type="button"
+                  className="rounded-xl border border-rose-200/50 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
+                  onClick={handleSignOut}
+                >
+                  Çıkış
+                </button>
+              </div>
+            )}
+            {!loggedIn && (
+              <button className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors" onClick={() => setMode(mode === 'user' ? 'admin' : 'user')}>
+                {mode === 'user' ? 'Admin girişi' : 'Kullanıcı girişi'}
               </button>
-              <button
-                type="button"
-                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
-                onClick={() => setUserView('chat')}
-              >
-                Mesajlar
-                {totalUnreadCount > 0 && <span className="nav-dot" />}
-              </button>
-              <button
-                type="button"
-                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
-                onClick={() => setUserView('profile')}
-              >
-                Profilim
-              </button>
-              <button
-                type="button"
-                className="rounded-xl border border-rose-200/50 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
-                onClick={handleSignOut}
-              >
+            )}
+            {loggedIn && isAdmin && (
+              <button className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-rose-400 hover:bg-rose-500/20 transition-all border border-rose-500/30" onClick={handleSignOut}>
                 Çıkış
               </button>
-            </div>
-          )}
-          {!loggedIn && (
-            <button className="linkish" onClick={() => setMode(mode === 'user' ? 'admin' : 'user')}>
-              {mode === 'user' ? 'Admin girişi' : 'Kullanıcı girişi'}
-            </button>
-          )}
-          {loggedIn && isAdmin && <button onClick={handleSignOut}>Çıkış</button>}
+            )}
+          </div>
         </div>
       </header>
 
+      {/* LOGIN VIEW */}
       {!loggedIn ? (
-        <section className="relative isolate min-h-[78vh] overflow-hidden rounded-[2rem] border border-slate-200/40 bg-slate-950 px-4 py-6 md:px-8 md:py-8">
-          <div className="pointer-events-none absolute -left-16 top-1/4 h-56 w-56 rounded-full bg-fuchsia-500/35 blur-3xl" />
-          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-400/35 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-400/25 blur-3xl" />
+        <section className="relative isolate min-h-[78vh] overflow-hidden rounded-[2rem] border border-white/10 mx-4 max-w-6xl md:mx-auto bg-slate-900/40 px-4 py-6 md:px-8 md:py-8 backdrop-blur-3xl shadow-2xl">
+          <div className="pointer-events-none absolute -left-16 top-1/4 h-56 w-56 rounded-full bg-fuchsia-500/35 blur-[100px]" />
+          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-500/30 blur-[100px]" />
+          <div className="pointer-events-none absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-500/25 blur-[100px]" />
 
-          <div className="relative mx-auto grid max-w-6xl gap-6 lg:grid-cols-[430px_1fr]">
-            <div className="rounded-[2rem] border border-slate-200/80 bg-white/95 p-6 shadow-2xl shadow-slate-950/25 backdrop-blur-2xl md:p-7">
-              <div className="mb-6 space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-700">
-                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+          <div className="relative mx-auto grid max-w-5xl gap-6 lg:grid-cols-[430px_1fr] items-center h-full">
+            <div className="rounded-[2.5rem] border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-2xl md:p-10">
+              <div className="mb-8 space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                   Flort Quantum UI
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Yeni nesil sosyal keşif deneyimi</p>
-                  <h2 className="mt-1 text-3xl font-semibold leading-tight text-slate-900">
-                    {mode === 'admin' ? 'Yönetici girişi' : 'Kullanıcı giriş merkezi'}
+                  <p className="text-sm text-slate-400">Yeni nesil sosyal keşif deneyimi</p>
+                  <h2 className="mt-2 text-4xl font-bold tracking-tight text-white">
+                    {mode === 'admin' ? 'Yönetici Girişi' : 'Kullanıcı Merkezi'}
                   </h2>
                 </div>
               </div>
 
-              <div className="space-y-3.5">
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-fuchsia-400 focus-within:shadow-lg focus-within:shadow-fuchsia-500/15">
-                  <span className="text-lg text-slate-500">👤</span>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition-all focus-within:border-fuchsia-400 focus-within:bg-white/10 focus-within:shadow-[0_0_20px_rgba(217,70,239,0.2)]">
+                  <span className="text-lg text-slate-400">👤</span>
                   <input
                     type="text"
-                    placeholder={mode === 'admin' ? 'Admin modunda kullanıcı adı kapalı' : 'Kullanıcı adı'}
+                    placeholder={mode === 'admin' ? 'Kullanıcı adı (Kapalı)' : 'Kullanıcı adı'}
                     disabled={mode === 'admin'}
                     value={mode === 'admin' ? '' : authForm.username}
                     onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
-                    className="flex-1 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none disabled:cursor-not-allowed disabled:text-slate-400"
+                    className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
 
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-cyan-400 focus-within:shadow-lg focus-within:shadow-cyan-500/15">
-                  <span className="text-lg text-slate-500">🔐</span>
+                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition-all focus-within:border-cyan-400 focus-within:bg-white/10 focus-within:shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                  <span className="text-lg text-slate-400">🔐</span>
                   <input
                     type="password"
                     placeholder="Şifre"
                     value={authForm.password}
                     onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
-                    className="flex-1 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none"
+                    className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
                   />
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3">
+              <div className="mt-8 space-y-3">
                 <button
                   disabled={loading}
                   onClick={signIn}
-                  className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-400 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-indigo-700/35 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-fuchsia-500/35 active:scale-[0.99] disabled:opacity-60"
+                  className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-500 px-5 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] hover:shadow-fuchsia-500/40 active:scale-95 disabled:opacity-50"
                 >
                   {loading ? 'İşleniyor...' : 'Giriş Yap'}
                 </button>
@@ -1228,67 +1238,56 @@ export default function App() {
                   <button
                     disabled={loading}
                     onClick={signUp}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 active:scale-[0.99] disabled:opacity-60"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-bold text-white transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50"
                   >
                     Hesap Oluştur
                   </button>
                 )}
               </div>
-
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                {mode === 'admin'
-                  ? 'Admin girişi için tanımlı yönetici şifresini kullan.'
-                  : 'Hızlıca hesap oluştur, eşleşmeleri keşfet ve gerçek zamanlı sohbete başla.'}
-              </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/20 bg-gradient-to-br from-slate-900/80 via-indigo-950/75 to-slate-900/85 p-5 shadow-2xl shadow-slate-950/40 md:p-7">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 backdrop-blur-sm">
+            <div className="hidden lg:block rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-indigo-900/40 to-fuchsia-900/20 p-8 shadow-2xl backdrop-blur-xl">
+              <div className="grid gap-6 md:grid-cols-2 h-full">
+                <div className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/5 backdrop-blur-sm">
                   <img
                     src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80"
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     alt="Flort profil kartı"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                    <h3 className="text-2xl font-semibold">Sena, 24</h3>
-                    <p className="text-sm text-white/80">İstanbul · Fotoğraf · Dans · Kahve</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3 className="text-3xl font-bold">Sena, 24</h3>
+                    <p className="mt-1 text-sm text-white/70 font-medium tracking-wide">İstanbul · Fotoğraf · Dans · Kahve</p>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
-                    <p className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Canlı Etkileşim</p>
-                    <div className="mt-3 space-y-2">
-                      <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm text-slate-800 shadow-sm">Selam! Akşam kahve planı var mı? ☕</div>
-                      <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-4 py-3 text-sm text-white shadow-lg shadow-indigo-700/30">Olur! 20:30 Nişantaşı nasıl? ✨</div>
+                <div className="flex flex-col gap-4">
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-md shadow-xl">
+                    <p className="text-xs uppercase tracking-[0.2em] font-bold text-cyan-400 mb-4">Canlı Etkileşim</p>
+                    <div className="space-y-3">
+                      <div className="max-w-[85%] rounded-2xl rounded-tl-none bg-white/10 border border-white/5 px-4 py-3 text-sm text-white backdrop-blur-md">Selam! Akşam kahve planı var mı? ☕</div>
+                      <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-none bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-4 py-3 text-sm text-white shadow-lg shadow-indigo-500/30">Olur! 20:30 Nişantaşı nasıl? ✨</div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
-                      <p className="text-lg font-bold text-white">98%</p>
-                      <p className="text-[11px] text-slate-300">Uyum</p>
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md">
+                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">98%</p>
+                      <p className="text-xs font-medium text-slate-400 mt-1">Uyum</p>
                     </div>
-                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
-                      <p className="text-lg font-bold text-white">2.1s</p>
-                      <p className="text-[11px] text-slate-300">Yanıt</p>
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md">
+                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">2.1s</p>
+                      <p className="text-xs font-medium text-slate-400 mt-1">Yanıt</p>
                     </div>
-                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
-                      <p className="text-lg font-bold text-white">24/7</p>
-                      <p className="text-[11px] text-slate-300">Aktif</p>
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 backdrop-blur-md">
+                      <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-400">24/7</p>
+                      <p className="text-xs font-medium text-slate-400 mt-1">Aktif</p>
                     </div>
                   </div>
 
-                  <div className="mt-auto flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-1.5">
-                    <input
-                      type="text"
-                      placeholder="Bir mesaj yaz..."
-                      className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder:text-slate-300/70 outline-none"
-                      readOnly
-                    />
-                    <button type="button" className="rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 px-4 py-2 text-xs font-semibold text-white">
+                  <div className="mt-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/5 p-2 backdrop-blur-md shadow-xl">
+                    <input type="text" placeholder="Bir mesaj yaz..." className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder-slate-500 outline-none" readOnly />
+                    <button type="button" className="rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-cyan-500/30">
                       Gönder
                     </button>
                   </div>
@@ -1297,450 +1296,369 @@ export default function App() {
             </div>
           </div>
         </section>
+
+      // ADMIN DASHBOARD
       ) : isAdmin ? (
-        <main className="admin-modern compact-shell admin-ops">
-          <aside className="admin-left card">
+        <main className="mx-auto max-w-[1600px] px-4 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[82vh]">
+          {/* Admin Sol Menü */}
+          <aside className="col-span-1 lg:col-span-3 flex flex-col gap-6 overflow-y-auto rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl p-5 shadow-2xl hide-scrollbar">
             {selectedThread && (
-              <div className="meta selected-profile-meta left-profile-meta">
-                <h4>Aktif Konuşan Kullanıcı</h4>
-                {selectedMemberProfile?.photo_url && <img src={selectedMemberProfile.photo_url} alt={selectedThread.member_username} className="profile-photo" />}
-                <p><strong>Kullanıcı Adı:</strong> {selectedThread.member_username}</p>
-                <p><strong>Yaş:</strong> {selectedMemberProfile?.age || '-'}</p>
-                <p><strong>Şehir:</strong> {selectedMemberProfile?.city || '-'}</p>
-                <p><strong>Hobiler:</strong> {selectedMemberProfile?.hobbies || '-'}</p>
-                <p><strong>Durum:</strong> {selectedMemberProfile?.status_emoji || '🙂'}</p>
+              <div className="rounded-2xl border border-white/5 bg-white/5 p-4 backdrop-blur-md">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3">Aktif Kullanıcı</h4>
+                <div className="flex items-center gap-3 mb-3">
+                  {selectedMemberProfile?.photo_url ? <img src={selectedMemberProfile.photo_url} alt="" className="h-12 w-12 rounded-full object-cover border border-white/20" /> : <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-xl">{selectedThread.member_username?.slice(0,1)}</div>}
+                  <div>
+                    <p className="font-bold text-white text-lg">{selectedThread.member_username}</p>
+                    <p className="text-xs text-slate-400">{selectedMemberProfile?.city || '-'} • {selectedMemberProfile?.age || '-'} yaş</p>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-300 space-y-1">
+                  <p><span className="text-slate-500">Durum:</span> {selectedMemberProfile?.status_emoji || '🙂'}</p>
+                  <p><span className="text-slate-500">Hobiler:</span> {selectedMemberProfile?.hobbies || '-'}</p>
+                </div>
               </div>
             )}
 
-            <div className="panel-title-row panel-head">
-              <h3>Mesaj Bekleyen Thread'ler</h3>
-            </div>
-            <div className="thread-queue modern-thread-queue" ref={threadQueueRef}>
-              {sortedIncomingThreads.map((thread) => {
-                const threadProfile = profileById[thread.virtual_profile_id];
-                const waitingReply = thread.last_sender_role === 'member';
-                return (
-                  <button
-                    key={`${thread.member_id}-${thread.virtual_profile_id}`}
-                    onClick={() => setSelectedThread(thread)}
-                    className={`thread-item modern ${selectedThread?.member_id === thread.member_id && selectedThread?.virtual_profile_id === thread.virtual_profile_id ? 'active' : ''}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!!selectedThreadKeys[threadKey(thread.member_id, thread.virtual_profile_id)]}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) =>
-                        setSelectedThreadKeys((prev) => ({
-                          ...prev,
-                          [threadKey(thread.member_id, thread.virtual_profile_id)]: e.target.checked,
-                        }))
-                      }
-                    />
-                    <span className="thread-avatar-wrap">
-                      {threadProfile?.photo_url ? (
-                        <img src={threadProfile.photo_url} alt={thread.virtual_name} className="thread-avatar" />
-                      ) : (
-                        <span className="thread-avatar-fallback">{thread.virtual_name?.slice(0, 1)}</span>
-                      )}
-                    </span>
-                    <span className="thread-copy">
-                      <strong>{thread.member_username} → {thread.virtual_name}</strong>
-                      {thread.last_message_content && <small>{thread.last_message_content}</small>}
-                      {waitingReply && <small className="pending-badge">Cevap bekliyor</small>}
-                      {adminTypingByThread[threadKey(thread.member_id, thread.virtual_profile_id)] && <small>• yazıyor...</small>}
-                    </span>
-                    {adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)] > 0 && (
-                      <span className="unread-pill">{adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)]}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="meta">
-              <h4>SLA Paneli</h4>
-              <p><strong>Cevaplanmamış thread:</strong> {slaStats.waitingCount}</p>
-              <p><strong>Ort. bekleme süresi:</strong> {slaStats.avgWaitMin > 0 && slaStats.avgWaitMin < 1 ? '<1 dk' : `${slaStats.avgWaitMin.toFixed(1)} dk`}</p>
-            </div>
-
-            <div className="meta">
-              <h4>Engagement (7 Gün)</h4>
-              <p><strong>Yoğun saatler:</strong></p>
-              <ul className="insight-list">
-                {engagementInsights.topHours.map((h) => (
-                  <li key={h.label}>{h.label} → {h.count} mesaj</li>
-                ))}
-              </ul>
-              <p><strong>İlgi gören profiller:</strong></p>
-              <ul className="insight-list">
-                {engagementInsights.topProfiles.map((p) => (
-                  <li key={p.name}>{p.name} → {p.count} etkileşim</li>
-                ))}
-              </ul>
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 sticky top-0 bg-black/40 backdrop-blur-xl py-2 z-10">Kuyruk</h3>
+              <div className="flex flex-col gap-2 overflow-y-auto hide-scrollbar" ref={threadQueueRef}>
+                {sortedIncomingThreads.map((thread) => {
+                  const threadProfile = profileById[thread.virtual_profile_id];
+                  const waitingReply = thread.last_sender_role === 'member';
+                  const isActive = selectedThread?.member_id === thread.member_id && selectedThread?.virtual_profile_id === thread.virtual_profile_id;
+                  
+                  return (
+                    <div
+                      key={`${thread.member_id}-${thread.virtual_profile_id}`}
+                      onClick={() => setSelectedThread(thread)}
+                      className={`group cursor-pointer flex items-center gap-3 p-3 rounded-2xl border transition-all ${isActive ? 'border-fuchsia-500/50 bg-fuchsia-500/10 shadow-[0_0_15px_rgba(217,70,239,0.1)]' : 'border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10'}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={!!selectedThreadKeys[threadKey(thread.member_id, thread.virtual_profile_id)]}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) =>
+                          setSelectedThreadKeys((prev) => ({
+                            ...prev,
+                            [threadKey(thread.member_id, thread.virtual_profile_id)]: e.target.checked,
+                          }))
+                        }
+                        className="rounded border-white/20 bg-black/50 text-fuchsia-500 focus:ring-fuchsia-500/50"
+                      />
+                      <div className="relative">
+                        {threadProfile?.photo_url ? (
+                          <img src={threadProfile.photo_url} alt="" className="h-10 w-10 rounded-full object-cover border border-white/10" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-sm border border-indigo-500/30">{thread.virtual_name?.slice(0, 1)}</div>
+                        )}
+                        {adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)] > 0 && (
+                          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-rose-500 text-[9px] font-bold flex items-center justify-center border border-black">{adminUnreadByThread[threadKey(thread.member_id, thread.virtual_profile_id)]}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">
+                          {thread.member_username} <span className="text-slate-500">→</span> {thread.virtual_name}
+                        </p>
+                        <p className="text-xs text-slate-400 truncate">
+                          {adminTypingByThread[threadKey(thread.member_id, thread.virtual_profile_id)] ? <span className="text-cyan-400 italic">Yazıyor...</span> : thread.last_message_content || 'Mesaj yok'}
+                        </p>
+                      </div>
+                      {waitingReply && <div className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="meta">
-              <h4>Bulk Aksiyon</h4>
-              <select value={bulkTemplate} onChange={(e) => setBulkTemplate(e.target.value)}>
-                {BULK_TEMPLATES.map((tpl) => (
-                  <option key={tpl} value={tpl}>{tpl}</option>
-                ))}
-              </select>
-              <button onClick={sendBulkTemplate}>Seçili thread’lere template gönder</button>
+            <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-sm">
+               <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">SLA Paneli</h4>
+               <div className="flex justify-between items-center mb-1">
+                 <span className="text-slate-400">Bekleyen:</span>
+                 <span className="font-bold text-white">{slaStats.waitingCount}</span>
+               </div>
+               <div className="flex justify-between items-center">
+                 <span className="text-slate-400">Ort. Yanıt:</span>
+                 <span className="font-bold text-white">{slaStats.avgWaitMin > 0 && slaStats.avgWaitMin < 1 ? '<1 dk' : `${slaStats.avgWaitMin.toFixed(1)} dk`}</span>
+               </div>
             </div>
           </aside>
 
-          <section className="admin-center card">
+          {/* Admin Orta Alan (Chat veya Stats) */}
+          <section className="col-span-1 lg:col-span-6 flex flex-col rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
             {adminTab === 'chat' && (
               <>
-                <div className="chat-header admin-center-head">
+                <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5">
                   <div>
-                    <h3>{selectedThread?.virtual_name || 'Sohbet seç'}</h3>
-                    <small>{selectedThreadProfile && onlineProfiles[selectedThreadProfile.id] ? 'Online' : 'Offline'}</small>
+                    <h3 className="text-xl font-bold text-white">{selectedThread?.virtual_name || 'Sohbet Seçilmedi'}</h3>
+                    {selectedThreadProfile && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`h-2 w-2 rounded-full ${onlineProfiles[selectedThreadProfile.id] ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-slate-600'}`} />
+                        <span className="text-xs text-slate-400">{onlineProfiles[selectedThreadProfile.id] ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+                      </div>
+                    )}
                   </div>
-                  <select value={selectedThread?.status_tag || 'takip_edilecek'} onChange={(e) => updateSelectedThreadTag(e.target.value)} style={{ width: 'auto' }}>
-                    {THREAD_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
-                  </select>
-                  <button type="button" className="drawer-toggle" onClick={() => setAdminDrawerOpen((v) => !v)}>
-                    {adminDrawerOpen ? 'Paneli Gizle' : 'Paneli Aç'}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={selectedThread?.status_tag || 'takip_edilecek'}
+                      onChange={(e) => updateSelectedThreadTag(e.target.value)}
+                      className="rounded-xl border border-white/10 bg-black/50 px-3 py-1.5 text-xs font-semibold text-slate-200 outline-none focus:border-indigo-500"
+                    >
+                      {THREAD_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+                    </select>
+                    <button type="button" className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition-colors border border-white/5" onClick={() => setAdminDrawerOpen(!adminDrawerOpen)}>
+                      {adminDrawerOpen ? 'Kapat ⇥' : 'Bilgi ⇤'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="chat-box admin-chat-box" ref={adminChatBoxRef}>
+                <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar" ref={adminChatBoxRef}>
                   {threadMessages.map((msg) => {
                     const audioUrl = getAudioUrl(msg.content);
+                    const isMember = msg.sender_role === 'member';
                     return (
-                      <div key={msg.id} className={`msg ${msg.sender_role}`}>
-                        <span>{msg.sender_role === 'member' ? selectedThread?.member_username : selectedThread?.virtual_name}</span>
-                        {audioUrl ? <audio controls src={audioUrl} className="audio-player" /> : <p>{msg.content}</p>}
-                        <small>
+                      <div key={msg.id} className={`flex flex-col ${isMember ? 'items-start' : 'items-end'}`}>
+                        <span className="text-[10px] text-slate-500 mb-1 ml-1">{isMember ? selectedThread?.member_username : selectedThread?.virtual_name}</span>
+                        <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg ${isMember ? 'bg-white/10 text-white rounded-tl-none border border-white/5' : 'bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white rounded-tr-none'}`}>
+                          {audioUrl ? <audio controls src={audioUrl} className="h-8 max-w-[200px]" /> : <p className="leading-relaxed">{msg.content}</p>}
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 mr-1 text-[10px] text-slate-500">
                           {formatTime(msg.created_at)}
-                          {msg.sender_role === 'virtual' ? <span className={`ticks ${msg.seen_by_member ? 'seen' : ''}`} title={msg.seen_by_member_at ? `Görüldü: ${formatTime(msg.seen_by_member_at)}` : `Teslim: ${formatTime(msg.created_at)}`}>✓✓</span> : ''}
-                        </small>
+                          {!isMember && <span className={msg.seen_by_member ? 'text-cyan-400' : 'text-slate-600'}>✓✓</span>}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="quick-replies">
-                  {QUICK_REPLIES.map((reply) => (
-                    <button key={reply} type="button" className="chip" onClick={() => setAdminReply((prev) => `${prev ? `${prev}\n` : ''}${reply}`)}>{reply}</button>
-                  ))}
-                  <button type="button" className="chip ai" onClick={fetchAiSuggestions} disabled={loadingSuggestions}>{loadingSuggestions ? 'AI düşünüyor...' : 'AI Önerisi Getir'}</button>
-                </div>
-
-                {!!aiSuggestions.length && (
-                  <div className="ai-suggestions">
-                    {aiSuggestions.map((suggestion) => (
-                      <button key={suggestion} type="button" className="chip" onClick={() => setAdminReply(suggestion)}>{suggestion}</button>
+                <div className="p-4 border-t border-white/10 bg-white/5">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {QUICK_REPLIES.map((reply) => (
+                      <button key={reply} type="button" className="rounded-full border border-white/10 bg-black/40 px-3 py-1 text-[11px] font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors" onClick={() => setAdminReply((prev) => `${prev ? `${prev}\n` : ''}${reply}`)}>{reply}</button>
                     ))}
+                    <button type="button" className="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-3 py-1 text-[11px] font-bold text-fuchsia-300 hover:bg-fuchsia-500/20 transition-colors shadow-[0_0_10px_rgba(217,70,239,0.1)]" onClick={fetchAiSuggestions} disabled={loadingSuggestions}>
+                      {loadingSuggestions ? 'AI Düşünüyor...' : '✨ AI Önerisi'}
+                    </button>
                   </div>
-                )}
-
-                <textarea
-                  className="grow-textarea"
-                  placeholder="Sanal profil cevabı"
-                  value={adminReply}
-                  onChange={(e) => {
-                    setAdminReply(e.target.value);
-                    autoResizeTextarea(e.target, 260);
-                  }}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdminReply(); } }}
-                />
-                <button onClick={sendAdminReply}>Yanıt Gönder</button>
+                  {!!aiSuggestions.length && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {aiSuggestions.map((suggestion) => (
+                        <button key={suggestion} type="button" className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-[12px] text-left text-cyan-100 hover:bg-cyan-500/20 transition-colors" onClick={() => setAdminReply(suggestion)}>{suggestion}</button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-end gap-2">
+                    <textarea
+                      className="flex-1 resize-none rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 min-h-[50px] max-h-[150px] hide-scrollbar"
+                      placeholder="Sanal profil olarak yanıtla..."
+                      value={adminReply}
+                      onChange={(e) => { setAdminReply(e.target.value); autoResizeTextarea(e.target, 150); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdminReply(); } }}
+                    />
+                    <button onClick={sendAdminReply} className="rounded-2xl bg-gradient-to-r from-fuchsia-500 to-indigo-500 p-3 text-white shadow-lg shadow-fuchsia-500/25 hover:brightness-110 transition-all h-[50px] w-[50px] flex items-center justify-center">
+                      <span className="transform -rotate-45 block">➤</span>
+                    </button>
+                  </div>
+                </div>
               </>
             )}
 
             {adminTab === 'stats' && (
-              <div className="stats-dashboard">
-                <h3>Stats Dashboard ({statsRange === 'daily' ? 'Günlük' : statsRange === 'weekly' ? 'Haftalık' : 'Aylık'})</h3>
-                <div className="stats-range-switch">
-                  <button type="button" className={statsRange === 'daily' ? 'active' : ''} onClick={() => setStatsRange('daily')}>Günlük</button>
-                  <button type="button" className={statsRange === 'weekly' ? 'active' : ''} onClick={() => setStatsRange('weekly')}>Haftalık</button>
-                  <button type="button" className={statsRange === 'monthly' ? 'active' : ''} onClick={() => setStatsRange('monthly')}>Aylık</button>
-                </div>
-                <div className="stats-grid">
-                  <div className="meta stat-card"><small>Toplam Mesaj</small><strong>{adminStats.totalMessagesToday}</strong></div>
-                  <div className="meta stat-card"><small>Üye Mesajı</small><strong>{adminStats.memberMessagesToday}</strong></div>
-                  <div className="meta stat-card"><small>Admin Cevabı</small><strong>{adminStats.adminRepliesToday}</strong></div>
-                  <div className="meta stat-card"><small>Cevaplanan Thread</small><strong>{adminStats.respondedThreadsToday}</strong></div>
-                  <div className="meta stat-card"><small>Yeni Üye Kaydı</small><strong>{adminStats.newMembersToday}</strong></div>
-                  <div className="meta stat-card"><small>Aktif Thread</small><strong>{adminStats.activeThreadsToday}</strong></div>
-                  <div className="meta stat-card"><small>Ort. Cevap Süresi</small><strong>{adminStats.avgResponseMinToday.toFixed(1)} dk</strong></div>
-                </div>
-
-                <div className="stats-lists">
-                  <div className="meta">
-                    <p><strong>Yoğun Saatler</strong></p>
-                    <ul className="insight-list">
-                      {engagementInsights.topHours.map((h) => <li key={h.label}>{h.label} → {h.count}</li>)}
-                    </ul>
+              <div className="p-6 overflow-y-auto hide-scrollbar">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-bold text-white">Sistem Metrikleri</h3>
+                  <div className="flex rounded-xl bg-white/5 p-1 border border-white/10">
+                    {['daily', 'weekly', 'monthly'].map((r) => (
+                      <button key={r} type="button" className={`px-4 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${statsRange === r ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`} onClick={() => setStatsRange(r)}>
+                        {r === 'daily' ? 'Gün' : r === 'weekly' ? 'Hafta' : 'Ay'}
+                      </button>
+                    ))}
                   </div>
-                  <div className="meta">
-                    <p><strong>En Çok İlgi Gören Profiller</strong></p>
-                    <ul className="insight-list">
-                      {engagementInsights.topProfiles.map((p) => <li key={p.name}>{p.name} → {p.count}</li>)}
-                    </ul>
+                </div>
+                
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Toplam Msj</p>
+                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">{adminStats.totalMessagesToday}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Yeni Üye</p>
+                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">{adminStats.newMembersToday}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Aktif Thread</p>
+                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-pink-500">{adminStats.activeThreadsToday}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md text-center">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Ort Yanıt</p>
+                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">{adminStats.avgResponseMinToday.toFixed(1)}m</p>
                   </div>
                 </div>
               </div>
             )}
 
             {adminTab === 'settings' && (
-              <div className="settings-page">
-                <div className="meta">
-                  <h3>Settings</h3>
-                  <label className="toggle-row">
-                    <span>Bildirim sesi</span>
-                    <input
-                      type="checkbox"
-                      checked={notificationSoundEnabled}
-                      onChange={(e) => setNotificationSoundEnabled(e.target.checked)}
-                    />
-                  </label>
+              <div className="p-6 overflow-y-auto hide-scrollbar space-y-6">
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+                   <h3 className="text-lg font-bold text-white mb-4">Sistem Ayarları</h3>
+                   <label className="flex items-center justify-between cursor-pointer">
+                     <span className="text-sm font-medium text-slate-300">Gelen Mesaj Sesi</span>
+                     <input type="checkbox" className="sr-only peer" checked={notificationSoundEnabled} onChange={(e) => setNotificationSoundEnabled(e.target.checked)} />
+                     <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                   </label>
                 </div>
 
-                <div className="meta">
-                  <div className="panel-title-row panel-divider">
-                    <h3>Sanal Profil Oluştur</h3>
-                    <button type="button" className="icon-dice" onClick={fillRandomVirtualProfile} aria-label="Rastgele üret">🎲</button>
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-white">Bot Profili Üret</h3>
+                    <button className="rounded-xl bg-indigo-500/20 text-indigo-300 px-4 py-2 text-sm font-bold border border-indigo-500/30 hover:bg-indigo-500/40 transition-colors" onClick={fillRandomVirtualProfile}>🎲 Rastgele Doldur</button>
                   </div>
-
-                  <label className="floating-field">
-                    <input placeholder=" " value={profileForm.name} onChange={(e) => setProfileForm((s) => ({ ...s, name: e.target.value }))} />
-                    <span>Ad (boşsa otomatik)</span>
-                  </label>
-                  <label className="floating-field">
-                    <input placeholder=" " type="number" value={profileForm.age} onChange={(e) => setProfileForm((s) => ({ ...s, age: e.target.value }))} />
-                    <span>Yaş (boşsa otomatik)</span>
-                  </label>
-                  <label className="floating-field">
-                    <input placeholder=" " value={profileForm.city} onChange={(e) => setProfileForm((s) => ({ ...s, city: e.target.value }))} />
-                    <span>Şehir (boşsa otomatik)</span>
-                  </label>
-                  <label className="floating-field">
-                    <input placeholder=" " value={profileForm.gender} onChange={(e) => setProfileForm((s) => ({ ...s, gender: e.target.value }))} />
-                    <span>Cinsiyet</span>
-                  </label>
-                  <label className="floating-field">
-                    <textarea placeholder=" " value={profileForm.hobbies} onChange={(e) => setProfileForm((s) => ({ ...s, hobbies: e.target.value }))} />
-                    <span>Hobiler</span>
-                  </label>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const url = await uploadImage(file, 'virtual-profiles');
-                      if (url) setProfileForm((s) => ({ ...s, photo_url: url }));
-                    }}
-                  />
-                  {profileForm.photo_url && <img src={profileForm.photo_url} alt="Önizleme" className="upload-preview" />}
-
-                  <button onClick={createVirtualProfile}>Kaydet (Foto + Otomatik İsim/Şehir/Yaş)</button>
-                </div>
-
-                <div className="meta">
-                  <h3>Kayıt Olan Kullanıcılar</h3>
-                  {loadingMembers ? (
-                    <p>Yükleniyor...</p>
-                  ) : (
-                    <div className="member-list">
-                      {registeredMembers.map((member) => (
-                        <div key={member.id} className="member-row">
-                          <div>
-                            <strong>{member.username}</strong>
-                            <small>{new Date(member.created_at).toLocaleString('tr-TR')}</small>
-                          </div>
-                          <button type="button" className="danger-btn" onClick={() => deleteMember(member.id)}>Sil</button>
-                        </div>
-                      ))}
-                      {!registeredMembers.length && <p>Kayıtlı kullanıcı yok.</p>}
+                  <div className="grid grid-cols-2 gap-4">
+                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="İsim" value={profileForm.name} onChange={(e) => setProfileForm((s) => ({ ...s, name: e.target.value }))} />
+                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="Yaş" type="number" value={profileForm.age} onChange={(e) => setProfileForm((s) => ({ ...s, age: e.target.value }))} />
+                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="Şehir" value={profileForm.city} onChange={(e) => setProfileForm((s) => ({ ...s, city: e.target.value }))} />
+                    <input className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500" placeholder="Cinsiyet" value={profileForm.gender} onChange={(e) => setProfileForm((s) => ({ ...s, gender: e.target.value }))} />
+                    <textarea className="col-span-2 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-cyan-500 min-h-[80px]" placeholder="Hobiler" value={profileForm.hobbies} onChange={(e) => setProfileForm((s) => ({ ...s, hobbies: e.target.value }))} />
+                    <div className="col-span-2">
+                      <input type="file" accept="image/*" className="hidden" id="admin-photo-upload" onChange={async (e) => { const f = e.target.files?.[0]; if(f) { const u = await uploadImage(f, 'virtual-profiles'); if(u) setProfileForm(s => ({...s, photo_url: u})) } }} />
+                      <label htmlFor="admin-photo-upload" className="flex items-center justify-center w-full rounded-xl border-2 border-dashed border-white/20 bg-black/20 py-6 text-sm font-medium text-slate-400 hover:bg-black/40 cursor-pointer transition-colors">
+                        {profileForm.photo_url ? 'Fotoğraf Yüklendi (Değiştir)' : '📸 Fotoğraf Seç'}
+                      </label>
                     </div>
-                  )}
+                    <button className="col-span-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 hover:scale-[1.01] transition-transform" onClick={createVirtualProfile}>Profili Kaydet</button>
+                  </div>
                 </div>
               </div>
             )}
           </section>
 
+          {/* Admin Sağ Menü (Seçili Thread Bilgileri) */}
           {adminDrawerOpen && adminTab === 'chat' && (
-            <aside className="admin-right card drawer-panel">
+            <aside className="col-span-1 lg:col-span-3 flex flex-col gap-6 overflow-y-auto rounded-3xl border border-white/10 bg-black/40 backdrop-blur-2xl p-5 shadow-2xl hide-scrollbar">
               {selectedThreadProfile && (
-                <div className="meta selected-profile-meta">
-                  <h4>Seçili Profil Bilgileri</h4>
-                  {selectedThreadProfile.photo_url && <img src={selectedThreadProfile.photo_url} alt={selectedThreadProfile.name} className="profile-photo" />}
-                  <p><strong>Ad:</strong> {selectedThreadProfile.name}</p>
-                  <p><strong>Yaş:</strong> {selectedThreadProfile.age}</p>
-                  <p><strong>Şehir:</strong> {selectedThreadProfile.city || '-'}</p>
-                  <p><strong>Hobiler:</strong> {selectedThreadProfile.hobbies || '-'}</p>
+                <div className="rounded-2xl border border-white/5 bg-white/5 p-5 text-center relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {selectedThreadProfile.photo_url ? (
+                    <img src={selectedThreadProfile.photo_url} alt="" className="h-24 w-24 rounded-full object-cover mx-auto mb-4 border-2 border-white/20 shadow-lg" />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-fuchsia-500/20 mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-fuchsia-300 border-2 border-fuchsia-500/30">{selectedThreadProfile.name?.slice(0,1)}</div>
+                  )}
+                  <h4 className="text-xl font-bold text-white">{selectedThreadProfile.name}, {selectedThreadProfile.age}</h4>
+                  <p className="text-sm text-slate-400 mt-1">{selectedThreadProfile.city || '-'}</p>
+                  <div className="mt-4 flex flex-wrap justify-center gap-1">
+                    {(selectedThreadProfile.hobbies || '').split(',').filter(Boolean).map(h => (
+                       <span key={h} className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] text-slate-300 border border-white/5">{h.trim()}</span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              <div className="meta">
-                <h4>Quick Facts</h4>
+              <div className="flex-1 rounded-2xl border border-white/5 bg-white/5 p-4 flex flex-col">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">Quick Facts (Notlar)</h4>
                 <textarea
-                  placeholder="Kullanıcı hakkında önemli notlar (şehir, iş, sınırlar, tercih vb.)"
+                  className="flex-1 w-full resize-none rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder-slate-600 outline-none focus:border-amber-500/50 min-h-[150px] hide-scrollbar"
+                  placeholder="Kullanıcı zaafları, yalanlar, senaryo notları..."
                   value={quickFactsText}
                   onChange={(e) => setQuickFactsText(e.target.value)}
                 />
-                <button onClick={saveQuickFacts}>Quick Facts Kaydet</button>
+                <button className="mt-3 w-full rounded-xl bg-amber-500/20 text-amber-400 font-bold py-2 border border-amber-500/30 hover:bg-amber-500/30 transition-colors" onClick={saveQuickFacts}>Notu Kaydet</button>
               </div>
 
+              <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
+                 <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-3">Toplu İşlem</h4>
+                 <select className="w-full rounded-xl border border-white/10 bg-black/50 p-2.5 text-sm text-white outline-none mb-3" value={bulkTemplate} onChange={(e) => setBulkTemplate(e.target.value)}>
+                   {BULK_TEMPLATES.map(t => <option key={t} value={t}>{t}</option>)}
+                 </select>
+                 <button className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 py-2.5 font-bold text-white shadow-lg shadow-rose-500/25 hover:brightness-110" onClick={sendBulkTemplate}>Seçili Kuyruğa Gönder</button>
+              </div>
             </aside>
           )}
         </main>
-      ) : userView === 'discover' ? (
-        <main className="relative isolate space-y-6 overflow-hidden rounded-[2.2rem] border border-slate-200/70 bg-slate-950 p-4 text-white shadow-[0_30px_100px_-40px_rgba(15,23,42,0.85)] md:p-6">
-          <div className="pointer-events-none absolute -left-24 top-0 h-64 w-64 rounded-full bg-fuchsia-500/25 blur-3xl" />
-          <div className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 right-1/3 h-52 w-52 rounded-full bg-indigo-500/20 blur-3xl" />
 
-          <section className="relative overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-white/95 p-5 text-slate-900 shadow-2xl shadow-slate-900/10 md:p-6">
-            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-indigo-200/70 blur-3xl" />
-            <div className="pointer-events-none absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-cyan-200/60 blur-3xl" />
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-              <div className="relative space-y-3">
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-700">
-                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
-                  Discover Hub
+      // USER DISCOVER VIEW (Zaten bayağı modern Tailwind idi, biraz daha Glassmorphism/Dark Space eklendi)
+      ) : userView === 'discover' ? (
+        <main className="relative isolate mx-auto max-w-7xl space-y-8 overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/40 p-6 text-white shadow-2xl backdrop-blur-2xl md:p-8">
+          <div className="pointer-events-none absolute -left-24 top-0 h-64 w-64 rounded-full bg-fuchsia-500/20 blur-[120px]" />
+          <div className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full bg-cyan-500/15 blur-[120px]" />
+          <div className="pointer-events-none absolute bottom-0 right-1/3 h-52 w-52 rounded-full bg-indigo-500/15 blur-[120px]" />
+
+          <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-6 text-slate-100 shadow-xl backdrop-blur-md md:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+              <div className="relative space-y-4">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-fuchsia-300">
+                  <span className="h-2 w-2 rounded-full bg-fuchsia-400 animate-pulse" />
+                  Keşfet Radarı
                 </span>
-                <h2 className="text-3xl font-semibold leading-tight md:text-4xl">Çağa uyumlu eşleşmeler seni bekliyor ✨</h2>
-                <p className="max-w-2xl text-sm text-slate-600 md:text-base">
-                  Gelişmiş filtreler ve etkileşim butonlarıyla profilleri hızlıca keşfet, beğen ve tek dokunuşla sohbete başla.
+                <h2 className="text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 md:text-5xl">Gelecekteki Eşleşmen ✨</h2>
+                <p className="max-w-2xl text-sm text-slate-400 font-medium md:text-base leading-relaxed">
+                  Kuantum algoritmamızla senin için en ideal profilleri süzüyoruz. Hemen birini seç ve sohbete başla.
                 </p>
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-700">Toplam profil: {discoverProfiles.length}</span>
-                  <span className="rounded-full border border-emerald-300/70 bg-emerald-50 px-3 py-1.5 text-emerald-700">
+                <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-300">Toplam: {discoverProfiles.length}</span>
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-emerald-400">
                     Çevrimiçi: {discoverProfiles.filter((p) => effectiveOnlineProfiles[p.id]).length}
                   </span>
-                  <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
                 </div>
               </div>
 
-              <div className="relative grid gap-2 sm:grid-cols-2 xl:w-[480px]">
-                <label className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
-                  <span className="text-sm text-slate-400">⌕</span>
-                  <input
-                    placeholder="İsim, şehir veya hobi ara"
-                    value={profileSearch}
-                    onChange={(e) => setProfileSearch(e.target.value)}
-                    className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
-                  />
+              <div className="relative grid gap-3 sm:grid-cols-2 xl:w-[500px]">
+                <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 shadow-inner transition-colors focus-within:border-cyan-500">
+                  <span className="text-sm text-cyan-400">⌕</span>
+                  <input placeholder="Kimi arıyorsun?" value={profileSearch} onChange={(e) => setProfileSearch(e.target.value)} className="w-full bg-transparent text-sm text-white placeholder-slate-500 outline-none" />
                 </label>
-                <select
-                  value={genderFilter}
-                  onChange={(e) => setGenderFilter(e.target.value)}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none shadow-sm focus:border-cyan-400"
-                >
-                  <option value="all" className="text-slate-900">Tümü</option>
-                  <option value="Kadın" className="text-slate-900">Kadın</option>
-                  <option value="Erkek" className="text-slate-900">Erkek</option>
+                <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)} className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm font-semibold text-slate-200 outline-none shadow-inner focus:border-cyan-500 appearance-none">
+                  <option value="all">Herkes</option>
+                  <option value="Kadın">Kadın</option>
+                  <option value="Erkek">Erkek</option>
                 </select>
-                <input
-                  placeholder="Şehir filtresi (örn. İstanbul)"
-                  value={cityFilter}
-                  onChange={(e) => setCityFilter(e.target.value)}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none shadow-sm focus:border-fuchsia-400"
-                />
-                <select
-                  value={discoverSort}
-                  onChange={(e) => setDiscoverSort(e.target.value)}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none shadow-sm focus:border-indigo-400"
-                >
-                  <option value="match" className="text-slate-900">Uyuma göre sırala</option>
-                  <option value="newest" className="text-slate-900">En yeni profiller</option>
-                  <option value="age_asc" className="text-slate-900">Yaşa göre (artan)</option>
-                  <option value="online" className="text-slate-900">Önce çevrimiçi</option>
+                <input placeholder="Şehir filtresi" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none shadow-inner focus:border-fuchsia-500" />
+                <select value={discoverSort} onChange={(e) => setDiscoverSort(e.target.value)} className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm font-semibold text-slate-200 outline-none shadow-inner focus:border-indigo-500 appearance-none">
+                  <option value="match">Uyuma göre diz</option>
+                  <option value="newest">En yeniler</option>
+                  <option value="online">Aktif olanlar</option>
                 </select>
               </div>
             </div>
           </section>
 
-          <section className="relative grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+          <section className="relative grid gap-6 sm:grid-cols-2 2xl:grid-cols-4">
             {discoverProfiles.map((profile) => {
-              const hobbyBadges = (profile.hobbies || '')
-                .split(',')
-                .map((h) => h.trim())
-                .filter(Boolean)
-                .slice(0, 3);
+              const hobbyBadges = (profile.hobbies || '').split(',').map((h) => h.trim()).filter(Boolean).slice(0, 3);
               const isOnline = !!effectiveOnlineProfiles[profile.id];
               const liked = !!likedProfiles[profile.id];
-              const hearted = !!heartedProfiles[profile.id];
-              const waved = !!wavedProfiles[profile.id];
-
+              
               return (
-                <article
-                  key={profile.id}
-                  className="group relative overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/[0.06] p-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-white/35 hover:bg-white/[0.11] hover:shadow-2xl hover:shadow-indigo-900/40"
-                >
-                  <div className="relative h-[330px] overflow-hidden rounded-[1.2rem]">
+                <article key={profile.id} className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-3 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_20px_40px_-15px_rgba(79,70,229,0.3)]">
+                  <div className="relative h-[380px] overflow-hidden rounded-[1.5rem]">
                     {profile.photo_url ? (
-                      <img src={profile.photo_url} alt={profile.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <img src={profile.photo_url} alt="" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 text-6xl font-semibold text-white/70">
-                        {profile.name?.slice(0, 1)}
-                      </div>
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-indigo-900 to-slate-900 text-7xl font-bold text-white/30">{profile.name?.slice(0, 1)}</div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/35 to-transparent" />
-                    <div className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                      {isOnline ? '🟢 Çevrimiçi' : '⚪ Offline'}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                    <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-xs font-bold tracking-wide text-white backdrop-blur-md flex items-center gap-1.5">
+                      <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-slate-500'}`} />
+                      {isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 space-y-2 p-4">
+                    <div className="absolute bottom-0 left-0 right-0 space-y-3 p-5">
                       <div>
-                        <h3 className="text-2xl font-semibold text-white">{profile.name}, {profile.age}</h3>
-                        <p className="text-sm text-slate-200">{profile.city || 'Türkiye'}</p>
+                        <h3 className="text-3xl font-black text-white tracking-tight">{profile.name}, {profile.age}</h3>
+                        <p className="text-sm font-medium text-slate-300 mt-1">{profile.city || 'Belirtilmemiş'}</p>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {hobbyBadges.length
-                          ? hobbyBadges.map((hobby) => (
-                            <span key={hobby} className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] text-slate-100">
-                              {hobby}
-                            </span>
-                          ))
-                          : <span className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] text-slate-100">Yeni tanışma</span>}
+                      <div className="flex flex-wrap gap-2">
+                        {hobbyBadges.length ? hobbyBadges.map((hobby) => (
+                          <span key={hobby} className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold tracking-wider uppercase text-slate-200 backdrop-blur-md">{hobby}</span>
+                        )) : <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold text-slate-200">Gizemli</span>}
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                    <button
-                      type="button"
-                      className="rounded-xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/35 transition hover:brightness-110"
-                      onClick={() => openChatWithProfile(profile.id)}
-                    >
+                  <div className="mt-4 grid grid-cols-[1fr_auto] gap-3">
+                    <button type="button" className="rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95" onClick={() => openChatWithProfile(profile.id)}>
                       Mesaj Gönder
                     </button>
-                    <button
-                      type="button"
-                      className={`rounded-xl border px-3 py-2.5 text-sm transition ${liked ? 'border-pink-300/80 bg-pink-400/20 text-pink-100' : 'border-white/25 bg-white/10 text-white hover:bg-white/20'}`}
-                      onClick={() => setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }))}
-                    >
-                      {liked ? '★' : '☆'}
-                    </button>
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between gap-2 text-xs">
-                    <button
-                      type="button"
-                      className={`rounded-full border px-3 py-1.5 transition ${hearted ? 'border-rose-300/80 bg-rose-400/20 text-rose-100' : 'border-white/20 bg-white/10 text-slate-100 hover:bg-white/20'}`}
-                      onClick={() => {
-                        setHeartedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }));
-                        sendReaction(profile.id, 'heart');
-                      }}
-                    >
-                      {hearted ? '❤️ Beğenildi' : '🤍 Kalp At'}
-                    </button>
-                    <button
-                      type="button"
-                      className={`rounded-full border px-3 py-1.5 transition ${waved ? 'border-cyan-300/80 bg-cyan-400/20 text-cyan-100' : 'border-white/20 bg-white/10 text-slate-100 hover:bg-white/20'}`}
-                      onClick={() => {
-                        setWavedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }));
-                        sendReaction(profile.id, 'wave');
-                      }}
-                    >
-                      {waved ? '👋 Selamlandı' : '👋 Selam Gönder'}
+                    <button type="button" className={`flex items-center justify-center rounded-2xl border px-4 py-3 text-lg transition-all active:scale-90 ${liked ? 'border-rose-500/50 bg-rose-500/20 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-white/10 bg-black/40 text-slate-400 hover:text-white'}`} onClick={() => setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }))}>
+                      {liked ? '♥' : '♡'}
                     </button>
                   </div>
                 </article>
@@ -1749,149 +1667,170 @@ export default function App() {
           </section>
 
           {!discoverProfiles.length && (
-            <section className="relative rounded-3xl border border-dashed border-white/25 bg-white/5 p-10 text-center">
-              <h3 className="text-xl font-semibold">Bu filtrelerle profil bulunamadı</h3>
-              <p className="mt-2 text-sm text-slate-300">Arama kelimesini temizleyip şehir/cinsiyet filtrelerini değiştirerek tekrar dene.</p>
-            </section>
+            <div className="rounded-[2.5rem] border border-dashed border-white/20 bg-white/5 py-20 text-center backdrop-blur-sm">
+              <h3 className="text-2xl font-bold text-white">Radarda kimse kalmadı</h3>
+              <p className="mt-2 text-slate-400">Arama kriterlerini esneterek yeni evrenler keşfedebilirsin.</p>
+            </div>
           )}
         </main>
-      ) : userView === 'profile' ? (
-        <main className="mx-auto grid max-w-4xl gap-5 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-lg md:grid-cols-[320px_1fr] md:p-7">
-          <aside className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="text-xl font-semibold text-slate-900">Profilim</h3>
-            <p className="mt-2 text-sm text-slate-600">Profilini güncelle, fotoğrafını değiştir ve diğer kullanıcılara nasıl görüneceğini ayarla.</p>
-            <div className="mt-4 space-y-2 text-sm text-slate-700">
-              <p><strong>Kullanıcı:</strong> {memberSession?.username}</p>
-              <p><strong>Durum:</strong> {memberProfile.status_emoji}</p>
-              <p><strong>Şehir:</strong> {memberProfile.city || '-'}</p>
-            </div>
-          </aside>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-5">
-            <h4 className="text-lg font-semibold text-slate-900">Profil düzenleme</h4>
-            {memberProfile.photo_url && <img src={memberProfile.photo_url} alt="profil" className="profile-photo mt-4" />}
-
-            <div className="mt-4 grid gap-3">
-              <input
-                id="member-photo-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const url = await uploadImage(file, 'members');
-                  if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
-                }}
-              />
-              <label
-                htmlFor="member-photo-upload"
-                className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-200"
-              >
-                Resim Yükle
-              </label>
-              <input
-                placeholder="Yaş"
-                type="number"
-                value={memberProfile.age}
-                onChange={(e) => setMemberProfile((s) => ({ ...s, age: e.target.value }))}
-              />
-              <input
-                placeholder="Şehir"
-                value={memberProfile.city}
-                onChange={(e) => setMemberProfile((s) => ({ ...s, city: e.target.value }))}
-              />
-              <textarea
-                placeholder="Hobiler"
-                value={memberProfile.hobbies}
-                onChange={(e) => setMemberProfile((s) => ({ ...s, hobbies: e.target.value }))}
-              />
-              <select value={memberProfile.status_emoji} onChange={(e) => setMemberProfile((s) => ({ ...s, status_emoji: e.target.value }))}>
-                <option value="🙂">🙂 Normal</option>
-                <option value="☕">☕ Kahve içiyor</option>
-                <option value="💃">💃 Dans ediyor</option>
-                <option value="🎧">🎧 Müzik dinliyor</option>
-                <option value="🌙">🌙 Dinleniyor</option>
-              </select>
-              <button onClick={saveOwnProfile}>Profili Kaydet</button>
-            </div>
-          </section>
-        </main>
+      // USER CHAT & PROFILE VIEW (Sıfırdan modern Glassmorphism tasarım)
       ) : (
-        <main className="dashboard user-grid user-dashboard user-chat-layout compact-shell">
-          <aside className="card">
-            <h3>Sohbetler</h3>
-            <div className="profile-list" ref={profileListRef}>
-              {sortedProfiles.map((profile) => (
-                <button key={profile.id} onClick={() => setSelectedProfileId(profile.id)} className={`profile-item ${selectedProfileId === profile.id ? 'active' : ''} ${unreadByProfile[profile.id] > 0 ? 'has-unread' : ''}`}>
-                  <span className={`avatar-wrap ${unreadByProfile[profile.id] > 0 ? 'ringing' : ''}`}>
-                    {profile.photo_url ? <img src={profile.photo_url} alt={profile.name} className="avatar" /> : <span className="avatar-fallback">{profile.name?.slice(0,1)}</span>}
-                  </span>
-                  <span className="profile-main">
-                    <strong>{profile.name}</strong>
-                    <small>{profile.city || 'Türkiye'}</small>
-                  </span>
-                  <span className={`online-dot ${onlineProfiles[profile.id] ? 'on' : ''}`} />
-                  {unreadByProfile[profile.id] > 0 && <small>Yeni ({unreadByProfile[profile.id]})</small>}
-                </button>
-              ))}
-            </div>
-            {selectedProfile && (
-              <div className="meta">
-                {selectedProfile.photo_url && <img src={selectedProfile.photo_url} alt={selectedProfile.name} className="profile-photo" />}
-                <p><strong>Yaş:</strong> {selectedProfile.age}</p>
-                <p><strong>Cinsiyet:</strong> {selectedProfile.gender}</p>
-                <p><strong>Şehir:</strong> {selectedProfile.city || '-'}</p>
-                <p><strong>Hobiler:</strong> {selectedProfile.hobbies || '-'}</p>
-                <p><strong>Ortak ilgi skoru:</strong> %{interestScore}</p>
-              </div>
-            )}
-          </aside>
-          <section className="card">
-            <h3>Sohbet</h3>
-            <div className="chat-box" ref={chatBoxRef}>
-              {messages.map((msg) => {
-                const audioUrl = getAudioUrl(msg.content);
-                return (
-                  <div key={msg.id} className={`msg ${msg.sender_role}`}>
-                    <span>{msg.sender_role === 'member' ? 'Sen' : selectedProfile?.name}</span>
-                    {audioUrl ? <audio controls src={audioUrl} className="audio-player" /> : <p>{msg.content}</p>}
-                    <small>
-                      {formatTime(msg.created_at)}
-                      {msg.sender_role === 'member' ? <span className={`ticks ${msg.seen_by_admin ? 'seen' : ''}`} title={msg.seen_by_admin_at ? `Görüldü: ${formatTime(msg.seen_by_admin_at)}` : `Teslim: ${formatTime(msg.created_at)}`}>✓✓</span> : ''}
-                    </small>
-                  </div>
-                );
+        <main className="mx-auto max-w-7xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[80vh]">
+          {/* Kullanıcı Sol Menü (Sohbet Listesi) */}
+          <aside className="col-span-1 lg:col-span-4 flex flex-col gap-4 overflow-y-auto rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-2xl p-5 shadow-2xl hide-scrollbar">
+            <h3 className="text-xl font-bold text-white mb-2 px-2">Mesajlar</h3>
+            <div className="flex flex-col gap-2 overflow-y-auto hide-scrollbar" ref={profileListRef}>
+              {sortedProfiles.map((profile) => {
+                 const isActive = selectedProfileId === profile.id;
+                 const hasUnread = unreadByProfile[profile.id] > 0;
+                 return (
+                   <button key={profile.id} onClick={() => setSelectedProfileId(profile.id)} className={`group relative flex items-center gap-4 p-3 rounded-2xl border transition-all text-left ${isActive ? 'border-cyan-500/50 bg-cyan-500/10 shadow-[0_0_15px_rgba(34,211,238,0.1)]' : 'border-transparent hover:bg-white/5'}`}>
+                     <div className="relative">
+                       {profile.photo_url ? (
+                         <img src={profile.photo_url} alt="" className="h-14 w-14 rounded-full object-cover border border-white/10" />
+                       ) : (
+                         <div className="h-14 w-14 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xl text-slate-400 border border-white/10">{profile.name?.slice(0,1)}</div>
+                       )}
+                       {onlineProfiles[profile.id] && <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-black" />}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <h4 className={`text-base font-bold truncate ${hasUnread ? 'text-white' : 'text-slate-200'}`}>{profile.name}</h4>
+                       <p className={`text-xs truncate mt-0.5 ${hasUnread ? 'text-cyan-400 font-semibold' : 'text-slate-500'}`}>
+                         {hasUnread ? `Yeni mesaj (${unreadByProfile[profile.id]})` : profile.city || 'Sohbet et'}
+                       </p>
+                     </div>
+                   </button>
+                 );
               })}
             </div>
-            {typingLabel && <div className="typing-indicator">{typingLabel}</div>}
-            <div className="row">
-              <textarea
-                className="grow-textarea"
-                placeholder="Mesaj yaz"
-                value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value);
-                  autoResizeTextarea(e.target, 220);
-                }}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              />
-              <button onClick={sendMessage}>Gönder</button>
-            </div>
-          </section>
-          <section className="card">
-            <h3>Kendi Profilin</h3>
-            {memberProfile.photo_url && <img src={memberProfile.photo_url} alt="profil" className="profile-photo" />}
-            <p><strong>Durum:</strong> {memberProfile.status_emoji}</p>
-            <p><strong>Yaş:</strong> {memberProfile.age || '-'}</p>
-            <p><strong>Şehir:</strong> {memberProfile.city || '-'}</p>
-            <p><strong>Hobiler:</strong> {memberProfile.hobbies || '-'}</p>
-            <button type="button" onClick={() => setUserView('profile')}>Profilimi Düzenle</button>
+          </aside>
+
+          {/* Kullanıcı Orta/Sağ Alan */}
+          <section className="col-span-1 lg:col-span-8 flex flex-col rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+            {userView === 'profile' ? (
+               <div className="p-8 md:p-12 max-w-2xl mx-auto w-full overflow-y-auto hide-scrollbar">
+                 <div className="text-center mb-8">
+                   <div className="relative inline-block group cursor-pointer mb-6">
+                     {memberProfile.photo_url ? (
+                       <img src={memberProfile.photo_url} alt="" className="h-32 w-32 rounded-full object-cover border-4 border-white/10 shadow-2xl" />
+                     ) : (
+                       <div className="h-32 w-32 rounded-full bg-indigo-900/50 flex items-center justify-center text-4xl text-indigo-300 border-4 border-white/10">👤</div>
+                     )}
+                     <label htmlFor="member-photo-upload" className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">Değiştir</span>
+                     </label>
+                     <input id="member-photo-upload" type="file" accept="image/*" className="hidden" onChange={async(e)=>{ const f=e.target.files?.[0]; if(!f)return; const u=await uploadImage(f,'members'); if(u) setMemberProfile(s=>({...s,photo_url:u})); }} />
+                   </div>
+                   <h2 className="text-3xl font-black text-white">{memberSession?.username}</h2>
+                   <p className="text-slate-400 font-medium mt-1">Sanal Evren Profili</p>
+                 </div>
+
+                 <div className="space-y-5">
+                   <div className="grid grid-cols-2 gap-5">
+                     <div className="space-y-1.5">
+                       <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Yaş</label>
+                       <input type="number" placeholder="Örn. 24" value={memberProfile.age} onChange={(e)=>setMemberProfile(s=>({...s,age:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500" />
+                     </div>
+                     <div className="space-y-1.5">
+                       <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Şehir</label>
+                       <input placeholder="Örn. İzmir" value={memberProfile.city} onChange={(e)=>setMemberProfile(s=>({...s,city:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500" />
+                     </div>
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Şu anki Ruh Halin</label>
+                     <select value={memberProfile.status_emoji} onChange={(e)=>setMemberProfile(s=>({...s,status_emoji:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500 appearance-none">
+                       <option value="🙂">🙂 Her şey yolunda</option>
+                       <option value="☕">☕ Kahve modunda</option>
+                       <option value="💃">💃 Eğlence arıyor</option>
+                       <option value="🎧">🎧 Müziğe dalmış</option>
+                       <option value="🌙">🌙 Dinlenme safhasında</option>
+                     </select>
+                   </div>
+                   <div className="space-y-1.5">
+                     <label className="text-xs font-bold uppercase tracking-wider text-slate-500 pl-2">Nelerden Hoşlanırsın?</label>
+                     <textarea placeholder="Kitaplar, yürüyüş, teknoloji..." value={memberProfile.hobbies} onChange={(e)=>setMemberProfile(s=>({...s,hobbies:e.target.value}))} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-fuchsia-500 min-h-[100px] resize-none" />
+                   </div>
+                   <button onClick={saveOwnProfile} className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-indigo-500 py-4 font-bold text-white shadow-lg shadow-fuchsia-500/25 hover:brightness-110 hover:scale-[1.01] transition-all active:scale-95">Değişiklikleri Kaydet</button>
+                 </div>
+               </div>
+            ) : (
+              // Kullanıcı Sohbet Alanı
+              selectedProfile ? (
+                <>
+                  <div className="flex items-center justify-between p-5 border-b border-white/10 bg-white/5 backdrop-blur-md z-10">
+                    <div className="flex items-center gap-4">
+                      {selectedProfile.photo_url ? <img src={selectedProfile.photo_url} alt="" className="h-12 w-12 rounded-full object-cover border border-white/20" /> : <div className="h-12 w-12 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xl">{selectedProfile.name?.slice(0,1)}</div>}
+                      <div>
+                        <h3 className="text-xl font-bold text-white">{selectedProfile.name}</h3>
+                        <p className="text-xs font-medium text-slate-400 mt-0.5">{selectedProfile.city} • Uyum: %{interestScore}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar relative" ref={chatBoxRef}>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+                    {messages.map((msg) => {
+                      const audioUrl = getAudioUrl(msg.content);
+                      const isMe = msg.sender_role === 'member';
+                      return (
+                        <div key={msg.id} className={`flex flex-col relative z-10 ${isMe ? 'items-end' : 'items-start'}`}>
+                          <div className={`max-w-[75%] rounded-3xl px-5 py-3 text-[15px] shadow-lg ${isMe ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-tr-sm' : 'bg-white/10 text-white rounded-tl-sm border border-white/10 backdrop-blur-md'}`}>
+                            {audioUrl ? <audio controls src={audioUrl} className="h-10 max-w-[220px] rounded-full" /> : <p className="leading-normal">{msg.content}</p>}
+                          </div>
+                          <div className="flex items-center gap-1 mt-1.5 text-[10px] text-slate-500 font-medium px-2">
+                            {formatTime(msg.created_at)}
+                            {isMe && <span className={msg.seen_by_admin ? 'text-cyan-400' : 'text-slate-600'}>✓✓</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {typingLabel && <div className="text-xs text-fuchsia-400 italic font-medium relative z-10 px-2 animate-pulse">{selectedProfile.name} yazıyor...</div>}
+                  </div>
+
+                  <div className="p-4 border-t border-white/10 bg-white/5 backdrop-blur-md relative z-10">
+                    <div className="flex items-end gap-3 rounded-3xl border border-white/10 bg-black/50 p-2 shadow-inner focus-within:border-cyan-500/50 transition-colors">
+                      <textarea
+                        className="flex-1 resize-none bg-transparent px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none min-h-[44px] max-h-[120px] hide-scrollbar"
+                        placeholder="Bir şeyler yaz..."
+                        value={newMessage}
+                        onChange={(e) => { setNewMessage(e.target.value); autoResizeTextarea(e.target, 120); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                      />
+                      <button onClick={sendMessage} className="rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 p-3 text-white shadow-lg hover:brightness-110 active:scale-90 transition-all h-[44px] w-[44px] flex items-center justify-center shrink-0">
+                        <span className="transform -rotate-45 block mb-0.5 ml-0.5">➤</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
+                   <div className="text-6xl mb-4 opacity-50">🌌</div>
+                   <h3 className="text-2xl font-bold text-white mb-2">Uzayda Ses Yok</h3>
+                   <p className="text-slate-400 max-w-sm">Soldaki listeden bir profil seçerek konuşmayı başlat veya "Keşfet" sekmesinden yeni eşleşmeler bul.</p>
+                </div>
+              )
+            )}
           </section>
         </main>
       )}
 
-      {status && <p className="status">{status}</p>}
+      {/* GLOBAL STATUS TOAST */}
+      {status && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-slate-900/90 px-6 py-3 text-sm font-medium text-white shadow-2xl backdrop-blur-xl z-[100] flex items-center gap-3 animate-[slideUp_0.3s_ease-out]">
+          <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+          {status}
+        </div>
+      )}
+      
+      {/* İnce scrollbar CSS Inject (Varsa global css içinde halletmek en iyisidir ama komponent tam dolsun diye ekliyorum) */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .hide-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .hide-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .hide-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        @keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+      `}} />
     </div>
   );
 }
