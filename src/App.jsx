@@ -1129,7 +1129,7 @@ export default function App() {
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-fuchsia-300/40 bg-gradient-to-r from-[#160b2e] via-[#1f1648] to-[#10233f] p-2 shadow-2xl shadow-indigo-900/45 backdrop-blur-xl">
+            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-blue-300/40 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 p-2 shadow-2xl shadow-blue-500/40 backdrop-blur-xl">
               <button
                 type="button"
                 className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
