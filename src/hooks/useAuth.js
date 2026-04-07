@@ -30,14 +30,44 @@ export function useAuth({ adminPasswords = [], setStatus }) {
     setLoading(true);
     setStatus('');
 
-    const { error } = await supabase.from('members').insert({
-      username: authForm.username.trim(),
-      password: authForm.password,
-    });
+    const username = authForm.username.trim();
+    const password = authForm.password;
+
+    const { data: existingMember, error: existingError } = await supabase
+      .from('members')
+      .select('id, username')
+      .eq('username', username)
+      .eq('password', password)
+      .maybeSingle();
+
+    if (existingError) {
+      setLoading(false);
+      return setStatus(`Kayıt kontrolü başarısız: ${existingError.message}`);
+    }
+
+    if (existingMember) {
+      setMemberSession(existingMember);
+      setIsAdmin(false);
+      window.localStorage.setItem('is_admin_session', 'false');
+      window.localStorage.setItem('member_session', JSON.stringify(existingMember));
+      setLoading(false);
+      return setStatus('Bu hesap zaten kayıtlıydı, otomatik giriş yapıldı.');
+    }
+
+    const { data: createdMember, error } = await supabase
+      .from('members')
+      .insert({ username, password })
+      .select('id, username')
+      .single();
 
     setLoading(false);
     if (error) return setStatus(`Kayıt başarısız: ${error.message}`);
-    setStatus('Kayıt başarılı. Giriş yapabilirsin.');
+
+    setMemberSession(createdMember);
+    setIsAdmin(false);
+    window.localStorage.setItem('is_admin_session', 'false');
+    window.localStorage.setItem('member_session', JSON.stringify(createdMember));
+    setStatus('Kayıt başarılı, otomatik giriş yapıldı.');
   }
 
   async function signIn() {
