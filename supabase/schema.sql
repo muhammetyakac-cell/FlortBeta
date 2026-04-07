@@ -526,6 +526,23 @@ create policy "thread_quick_facts_all_anon"
   using (true)
   with check (true);
 
+create table if not exists public.member_moderation (
+  member_id uuid primary key references public.members(id) on delete cascade,
+  notes text not null default '',
+  tags text[] not null default '{}',
+  muted_until timestamptz,
+  is_blacklisted boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.member_moderation enable row level security;
+drop policy if exists "member_moderation_all_anon" on public.member_moderation;
+create policy "member_moderation_all_anon"
+  on public.member_moderation for all
+  to anon, authenticated
+  using (true)
+  with check (true);
+
 -- typing_states timeout compatibility: auto-refresh updated_at and inactive fallback
 create or replace function public.trg_touch_typing_states_updated_at()
 returns trigger

@@ -74,6 +74,7 @@ export default function App() {
   const [adminReply, setAdminReply] = useState('');
   const [threadMessages, setThreadMessages] = useState([]);
   const [memberProfile, setMemberProfile] = useState(initialMemberProfile);
+  const [onboardingActionCount, setOnboardingActionCount] = useState(0);
   const [unreadByProfile, setUnreadByProfile] = useState({});
   const [adminUnreadByThread, setAdminUnreadByThread] = useState({});
   const [onlineProfiles, setOnlineProfiles] = useState({});
@@ -109,6 +110,7 @@ export default function App() {
   const [registeredMembers, setRegisteredMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
+  const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', mutedUntil: '', blacklisted: false });
   const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
   const chatBoxRef = useRef(null);
   const adminChatBoxRef = useRef(null);
@@ -224,6 +226,15 @@ export default function App() {
   );
 
   const spotlightProfiles = useMemo(() => discoverProfiles.slice(0, 5), [discoverProfiles]);
+
+  const onboardingState = useMemo(() => {
+    const hasPhoto = !!memberProfile.photo_url;
+    const hasHobbies = (memberProfile.hobbies || '').split(',').map((x) => x.trim()).filter(Boolean).length > 0;
+    const hasThreeActions = onboardingActionCount >= 3;
+    const completed = hasPhoto && hasHobbies && hasThreeActions;
+    const currentStep = !hasPhoto ? 1 : !hasHobbies ? 2 : !hasThreeActions ? 3 : 0;
+    return { hasPhoto, hasHobbies, hasThreeActions, completed, currentStep };
+  }, [memberProfile.photo_url, memberProfile.hobbies, onboardingActionCount]);
 
   function threadKey(memberId, profileId) {
     return `${memberId}::${profileId}`;
@@ -372,6 +383,7 @@ export default function App() {
     fetchThreadMessages(selectedThread.member_id, selectedThread.virtual_profile_id);
     fetchQuickFacts(selectedThread.member_id, selectedThread.virtual_profile_id);
     fetchMemberProfile(selectedThread.member_id);
+    fetchMemberModeration(selectedThread.member_id);
   }, [isAdmin, selectedThread]);
 
   useEffect(() => {
@@ -392,6 +404,11 @@ export default function App() {
   useEffect(() => {
     if (!memberSession || isAdmin) return;
     fetchOwnProfile();
+  }, [memberSession, isAdmin]);
+
+  useEffect(() => {
+    if (!memberSession || isAdmin) return;
+    fetchOnboardingActionCount();
   }, [memberSession, isAdmin]);
 
   useEffect(() => {
@@ -606,6 +623,19 @@ export default function App() {
     });
   }
 
+  async function fetchOnboardingActionCount() {
+    if (!memberSession) return;
+    const { data, error } = await supabase
+      .from('engagement_events')
+      .select('id')
+      .eq('member_id', memberSession.id)
+      .eq('event_type', 'member_message')
+      .limit(50);
+
+    if (error) return setStatus(error.message);
+    setOnboardingActionCount(Math.min((data || []).length, 50));
+  }
+
   async function saveOwnProfile() {
     if (!memberSession) return;
 
@@ -720,6 +750,7 @@ export default function App() {
     });
     if (error) return setStatus(error.message);
     recordEngagement('member_message', memberSession.id, selectedProfileId, { source: 'chat_input' });
+    setOnboardingActionCount((prev) => prev + 1);
     setNewMessage('');
     fetchMessages(selectedProfileId);
   }
@@ -744,6 +775,7 @@ export default function App() {
     });
     if (error) return setStatus(error.message);
     recordEngagement('member_message', memberSession.id, profileId, { source: `reaction_${reactionType}` });
+    setOnboardingActionCount((prev) => prev + 1);
     setStatus('Etkileşim mesajı gönderildi.');
   }
 
@@ -966,6 +998,43 @@ export default function App() {
     setSelectedMemberProfile(data || null);
   }
 
+  async function fetchMemberModeration(memberId) {
+    const { data, error } = await supabase
+      .from('member_moderation')
+      .select('notes, tags, muted_until, is_blacklisted')
+      .eq('member_id', memberId)
+      .maybeSingle();
+
+    if (error) return setMemberModeration({ note: '', tags: '', mutedUntil: '', blacklisted: false });
+    setMemberModeration({
+      note: data?.notes || '',
+      tags: (data?.tags || []).join(', '),
+      mutedUntil: data?.muted_until ? new Date(data.muted_until).toISOString().slice(0, 16) : '',
+      blacklisted: !!data?.is_blacklisted,
+    });
+  }
+
+  async function saveMemberModeration() {
+    if (!selectedThread) return;
+    const payload = {
+      member_id: selectedThread.member_id,
+      notes: memberModeration.note,
+      tags: memberModeration.tags
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean),
+      muted_until: memberModeration.mutedUntil ? new Date(memberModeration.mutedUntil).toISOString() : null,
+      is_blacklisted: !!memberModeration.blacklisted,
+    };
+
+    const { error } = await supabase
+      .from('member_moderation')
+      .upsert(payload, { onConflict: 'member_id' });
+
+    if (error) return setStatus(error.message);
+    setStatus('Moderasyon ayarları kaydedildi.');
+  }
+
   async function saveQuickFacts() {
     if (!selectedThread) return;
     const { error } = await supabase
@@ -1004,6 +1073,12 @@ export default function App() {
 
   async function sendAdminReply() {
     if (!selectedThread || !adminReply.trim()) return;
+    if (memberModeration.blacklisted) {
+      return setStatus('Bu kullanıcı kara listede. Yanıt göndermeden önce moderasyon ayarını güncelle.');
+    }
+    if (memberModeration.mutedUntil && new Date(memberModeration.mutedUntil).getTime() > Date.now()) {
+      return setStatus('Kullanıcı geçici susturulmuş. Yanıt göndermek için susturma süresini kaldır.');
+    }
     const { error } = await supabase.from('messages').insert({
       member_id: selectedThread.member_id,
       virtual_profile_id: selectedThread.virtual_profile_id,
@@ -1169,6 +1244,31 @@ export default function App() {
           {loggedIn && isAdmin && <button onClick={handleSignOut}>Çıkış</button>}
         </div>
       </header>
+      {loggedIn && !isAdmin && !onboardingState.completed && (
+        <section className="mb-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <strong className="text-amber-900">Hoş geldin! Mini onboarding ({onboardingState.currentStep}/3)</strong>
+              <p className="text-sm text-amber-800">
+                1) Fotoğraf ekle • 2) Hobi gir • 3) İlk 3 profile aksiyon yap ({Math.min(onboardingActionCount, 3)}/3)
+              </p>
+            </div>
+            <button
+              type="button"
+              className="w-auto rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+              onClick={() => {
+                if (!onboardingState.hasPhoto || !onboardingState.hasHobbies) {
+                  setUserView('profile');
+                } else {
+                  setUserView('discover');
+                }
+              }}
+            >
+              {(!onboardingState.hasPhoto || !onboardingState.hasHobbies) ? 'Profil adımına git' : 'Aksiyon adımına git'}
+            </button>
+          </div>
+        </section>
+      )}
 
       {!loggedIn ? (
         <section className="relative isolate min-h-[78vh] overflow-hidden rounded-[2rem] border border-slate-200/40 bg-slate-950 px-4 py-6 md:px-8 md:py-8">
@@ -1309,6 +1409,8 @@ export default function App() {
                 <p><strong>Şehir:</strong> {selectedMemberProfile?.city || '-'}</p>
                 <p><strong>Hobiler:</strong> {selectedMemberProfile?.hobbies || '-'}</p>
                 <p><strong>Durum:</strong> {selectedMemberProfile?.status_emoji || '🙂'}</p>
+                <p><strong>Kara Liste:</strong> {memberModeration.blacklisted ? 'Evet' : 'Hayır'}</p>
+                <p><strong>Susturma:</strong> {memberModeration.mutedUntil ? new Date(memberModeration.mutedUntil).toLocaleString('tr-TR') : 'Yok'}</p>
               </div>
             )}
 
@@ -1586,6 +1688,36 @@ export default function App() {
                   onChange={(e) => setQuickFactsText(e.target.value)}
                 />
                 <button onClick={saveQuickFacts}>Quick Facts Kaydet</button>
+              </div>
+              <div className="meta">
+                <h4>Moderasyon Araçları</h4>
+                <textarea
+                  placeholder="Kullanıcı notu"
+                  value={memberModeration.note}
+                  onChange={(e) => setMemberModeration((prev) => ({ ...prev, note: e.target.value }))}
+                />
+                <input
+                  placeholder="Etiketler (virgülle): riskli, VIP, takip"
+                  value={memberModeration.tags}
+                  onChange={(e) => setMemberModeration((prev) => ({ ...prev, tags: e.target.value }))}
+                />
+                <label className="toggle-row">
+                  <span>Geçici susturma bitişi</span>
+                  <input
+                    type="datetime-local"
+                    value={memberModeration.mutedUntil}
+                    onChange={(e) => setMemberModeration((prev) => ({ ...prev, mutedUntil: e.target.value }))}
+                  />
+                </label>
+                <label className="toggle-row">
+                  <span>Kara listeye al</span>
+                  <input
+                    type="checkbox"
+                    checked={memberModeration.blacklisted}
+                    onChange={(e) => setMemberModeration((prev) => ({ ...prev, blacklisted: e.target.checked }))}
+                  />
+                </label>
+                <button onClick={saveMemberModeration}>Moderasyon Kaydet</button>
               </div>
 
             </aside>
