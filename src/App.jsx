@@ -1157,9 +1157,21 @@ export default function App() {
       .from('members')
       .select('id, username, created_at')
       .order('created_at', { ascending: false });
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('member_profiles')
+      .select('member_id, coin_balance, contact_phone');
+
     setLoadingMembers(false);
-    if (error) return setStatus(error.message);
-    setRegisteredMembers(data || []);
+    if (error || profileError) return setStatus(error?.message || profileError?.message || 'Üye listesi alınamadı.');
+
+    const profileMap = Object.fromEntries((profileData || []).map((p) => [p.member_id, p]));
+    const rows = (data || []).map((member) => ({
+      ...member,
+      coin_balance: Number(profileMap[member.id]?.coin_balance ?? 100),
+      contact_phone: profileMap[member.id]?.contact_phone || '',
+    }));
+    setRegisteredMembers(rows);
   }
 
   async function deleteMember(memberId) {
@@ -1762,6 +1774,8 @@ export default function App() {
                           <div>
                             <strong>{member.username}</strong>
                             <small>{new Date(member.created_at).toLocaleString('tr-TR')}</small>
+                            <small>Jeton: {member.coin_balance ?? 100}</small>
+                            <small>İletişim: {member.contact_phone || '-'}</small>
                           </div>
                           <button type="button" className="danger-btn" onClick={() => deleteMember(member.id)}>Sil</button>
                         </div>
