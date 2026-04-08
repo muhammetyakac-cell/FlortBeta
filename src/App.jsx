@@ -7,7 +7,9 @@ const ADMIN_PASSWORD2 = import.meta.env.VITE_ADMIN_PASSWORD2;
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 const initialProfile = { name: '', age: '', city: '', gender: '', hobbies: '', photo_url: '' };
-const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂' };
+const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂', coin_balance: 100, contact_phone: '' };
+const COIN_COST_PER_MESSAGE = 20;
+const TEST_CONTACT_NUMBER = '5552083092';
 
 const NAME_SEEDS = [
   'Alara','Asya','Defne','Nehir','Derin','Lina','Mira','Arya','Ela','Ada','Duru','Elif','Zeynep','Eylül','İdil','İpek','Mina','Nisa','Sude','Su','Beren','Naz','Aylin','Yaren','Lara','Selin','Melis','Ayşe','Buse','Ceren','Yasemin','Sena','Gizem','Selen','Nehir','Yelda','Esila','İrem','Tuana','Merve','Hilal','Nisanur','Ece','Nazlı','Güneş','Ecrin','Hazal','Helin','Sıla','Berfin','Damla','Sinem','Yağmur','Derya','Pelin','Cansu','Gökçe','Deniz','Meryem','Beste','Aden','Alina','Maya','Sahara','Lavin','Lavinya','Rüya','Nehirsu','Miray','Sahra','Mina','Nehirnaz','Aysu','Melisa','Zümra','Ecrinsu','Asel','Rabia','Nursena','Pınar','Leman','Öykü','Çağla','Açelya','Irmak','Ahu','Nehircan','Beliz','Elvan','Ayça','Mislina','Mislinay','Aren','Arven','Helia','Hira','Yüsra','Elisa','Liya','Mona','Noa','Talia'
@@ -111,6 +113,13 @@ export default function App() {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
   const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', blacklisted: false });
+  const [paymentSettings, setPaymentSettings] = useState({
+    provider: '',
+    api_key: '',
+    api_secret: '',
+    webhook_url: '',
+    is_active: false,
+  });
   const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
   const chatBoxRef = useRef(null);
   const adminChatBoxRef = useRef(null);
@@ -402,6 +411,11 @@ export default function App() {
   }, [isAdmin, adminTab]);
 
   useEffect(() => {
+    if (!isAdmin || adminTab !== 'payments') return;
+    fetchPaymentSettings();
+  }, [isAdmin, adminTab]);
+
+  useEffect(() => {
     if (!memberSession || isAdmin) return;
     fetchOwnProfile();
   }, [memberSession, isAdmin]);
@@ -612,7 +626,12 @@ export default function App() {
       .maybeSingle();
 
     if (error) return setStatus(error.message);
-    if (!data) return setMemberProfile(initialMemberProfile);
+    if (!data) {
+      await supabase
+        .from('member_profiles')
+        .upsert({ member_id: memberSession.id, coin_balance: 100, status_emoji: '🙂' }, { onConflict: 'member_id' });
+      return setMemberProfile(initialMemberProfile);
+    }
 
     setMemberProfile({
       age: data.age || '',
@@ -620,6 +639,8 @@ export default function App() {
       city: data.city || '',
       photo_url: data.photo_url || '',
       status_emoji: data.status_emoji || '🙂',
+      coin_balance: Number(data.coin_balance ?? 100),
+      contact_phone: data.contact_phone || '',
     });
   }
 
@@ -646,6 +667,8 @@ export default function App() {
       city: memberProfile.city,
       photo_url: memberProfile.photo_url,
       status_emoji: memberProfile.status_emoji,
+      coin_balance: Number(memberProfile.coin_balance ?? 100),
+      contact_phone: memberProfile.contact_phone || null,
     };
 
     const { error } = await supabase
@@ -654,6 +677,46 @@ export default function App() {
 
     if (error) return setStatus(error.message);
     setStatus('Profil bilgilerin kaydedildi.');
+  }
+
+  async function consumeCoins(amount) {
+    if (!memberSession || isAdmin) return true;
+    const current = Number(memberProfile.coin_balance || 0);
+    if (current < amount) return false;
+
+    const nextBalance = current - amount;
+    const { error } = await supabase
+      .from('member_profiles')
+      .update({ coin_balance: nextBalance })
+      .eq('member_id', memberSession.id);
+
+    if (error) {
+      setStatus(error.message);
+      return false;
+    }
+
+    setMemberProfile((prev) => ({ ...prev, coin_balance: nextBalance }));
+    return true;
+  }
+
+  async function handleCoinPurchaseTest() {
+    if (!memberSession) return;
+    if ((memberProfile.contact_phone || '').trim() !== TEST_CONTACT_NUMBER) {
+      return setStatus(`Test için iletişim numarasını ${TEST_CONTACT_NUMBER} girmen gerekiyor.`);
+    }
+
+    const nextBalance = Number(memberProfile.coin_balance || 0) + 5000;
+    const { error } = await supabase
+      .from('member_profiles')
+      .upsert({
+        member_id: memberSession.id,
+        coin_balance: nextBalance,
+        contact_phone: memberProfile.contact_phone,
+      }, { onConflict: 'member_id' });
+
+    if (error) return setStatus(error.message);
+    setMemberProfile((prev) => ({ ...prev, coin_balance: nextBalance }));
+    setStatus('Test satın alma başarılı: 5000 jeton yüklendi.');
   }
 
   function handleSignOut() {
@@ -723,6 +786,10 @@ export default function App() {
 
   async function sendMessage() {
     if (!memberSession || !selectedProfileId || !newMessage.trim()) return;
+    const hasCoin = await consumeCoins(COIN_COST_PER_MESSAGE);
+    if (!hasCoin) {
+      return setStatus(`Yetersiz jeton. Bir mesaj için ${COIN_COST_PER_MESSAGE} jeton gerekir.`);
+    }
 
     const { data: memberExists } = await supabase
       .from('members')
@@ -757,6 +824,10 @@ export default function App() {
 
   async function sendReaction(profileId, reactionType) {
     if (!memberSession || !profileId) return;
+    const hasCoin = await consumeCoins(COIN_COST_PER_MESSAGE);
+    if (!hasCoin) {
+      return setStatus(`Yetersiz jeton. Etkileşim için ${COIN_COST_PER_MESSAGE} jeton gerekir.`);
+    }
     const templates = {
       heart: '💘 Kalp gönderdim.',
       wave: '👋 Selam, sana el salladım.',
@@ -1033,6 +1104,40 @@ export default function App() {
     setStatus('Moderasyon ayarları kaydedildi.');
   }
 
+  async function fetchPaymentSettings() {
+    const { data, error } = await supabase
+      .from('payment_gateway_settings')
+      .select('provider, api_key, api_secret, webhook_url, is_active')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error) return setStatus(error.message);
+    if (!data) return;
+    setPaymentSettings({
+      provider: data.provider || '',
+      api_key: data.api_key || '',
+      api_secret: data.api_secret || '',
+      webhook_url: data.webhook_url || '',
+      is_active: !!data.is_active,
+    });
+  }
+
+  async function savePaymentSettings() {
+    const { error } = await supabase
+      .from('payment_gateway_settings')
+      .upsert({
+        id: 1,
+        provider: paymentSettings.provider,
+        api_key: paymentSettings.api_key,
+        api_secret: paymentSettings.api_secret,
+        webhook_url: paymentSettings.webhook_url,
+        is_active: paymentSettings.is_active,
+      }, { onConflict: 'id' });
+
+    if (error) return setStatus(error.message);
+    setStatus('Ödeme API ayarları kaydedildi.');
+  }
+
   async function saveQuickFacts() {
     if (!selectedThread) return;
     const { error } = await supabase
@@ -1196,6 +1301,7 @@ export default function App() {
               <button type="button" className={`nav-pill ${adminTab === 'chat' ? 'active' : ''}`} onClick={() => setAdminTab('chat')}>Chat</button>
               <button type="button" className={`nav-pill ${adminTab === 'stats' ? 'active' : ''}`} onClick={() => setAdminTab('stats')}>Stats</button>
               <button type="button" className={`nav-pill ${adminTab === 'settings' ? 'active' : ''}`} onClick={() => setAdminTab('settings')}>Settings</button>
+              <button type="button" className={`nav-pill ${adminTab === 'payments' ? 'active' : ''}`} onClick={() => setAdminTab('payments')}>Payments</button>
             </div>
           )}
           {loggedIn && !isAdmin && (
@@ -1221,6 +1327,13 @@ export default function App() {
                 onClick={() => setUserView('profile')}
               >
                 Profilim
+              </button>
+              <button
+                type="button"
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'coins' ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white shadow-lg shadow-orange-400/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                onClick={() => setUserView('coins')}
+              >
+                Coin Satın Al
               </button>
               <button
                 type="button"
@@ -1659,6 +1772,44 @@ export default function App() {
                 </div>
               </div>
             )}
+
+            {adminTab === 'payments' && (
+              <div className="settings-page">
+                <div className="meta">
+                  <h3>Ödeme API Entegrasyonu</h3>
+                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin.</p>
+                  <input
+                    placeholder="Provider (örn: iyzico, stripe, paytr)"
+                    value={paymentSettings.provider}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, provider: e.target.value }))}
+                  />
+                  <input
+                    placeholder="API Key"
+                    value={paymentSettings.api_key}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_key: e.target.value }))}
+                  />
+                  <input
+                    placeholder="API Secret"
+                    value={paymentSettings.api_secret}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_secret: e.target.value }))}
+                  />
+                  <input
+                    placeholder="Webhook URL"
+                    value={paymentSettings.webhook_url}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, webhook_url: e.target.value }))}
+                  />
+                  <label className="toggle-row">
+                    <span>Entegrasyon aktif</span>
+                    <input
+                      type="checkbox"
+                      checked={paymentSettings.is_active}
+                      onChange={(e) => setPaymentSettings((prev) => ({ ...prev, is_active: e.target.checked }))}
+                    />
+                  </label>
+                  <button type="button" onClick={savePaymentSettings}>Ödeme API Ayarlarını Kaydet</button>
+                </div>
+              </div>
+            )}
           </section>
 
           {adminDrawerOpen && adminTab === 'chat' && (
@@ -1734,6 +1885,10 @@ export default function App() {
                     Çevrimiçi: {discoverProfiles.filter((p) => effectiveOnlineProfiles[p.id]).length}
                   </span>
                   <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
+                  <span className="rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1.5 text-amber-700">Jeton: {memberProfile.coin_balance ?? 0}</span>
+                  <button type="button" className="w-auto rounded-full bg-amber-500 px-3 py-1.5 font-semibold text-white hover:bg-amber-600" onClick={() => setUserView('coins')}>
+                    Coin Satın Al
+                  </button>
                 </div>
               </div>
 
@@ -1932,6 +2087,29 @@ export default function App() {
                 <option value="🌙">🌙 Dinleniyor</option>
               </select>
               <button onClick={saveOwnProfile}>Profili Kaydet</button>
+            </div>
+          </section>
+        </main>
+      ) : userView === 'coins' ? (
+        <main className="mx-auto grid max-w-3xl gap-4 rounded-[2rem] border border-amber-200 bg-white p-5 shadow-lg md:p-7">
+          <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
+            <h3 className="text-2xl font-bold text-amber-900">Jeton Satın Al</h3>
+            <p className="mt-2 text-sm text-amber-800">Mesaj göndermek için jeton gerekir. Her mesaj/etkileşim {COIN_COST_PER_MESSAGE} jeton harcar.</p>
+            <p className="mt-2 text-sm text-amber-900"><strong>Mevcut jeton:</strong> {memberProfile.coin_balance ?? 0}</p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+            <h4 className="text-lg font-semibold text-slate-900">Test Satın Alma</h4>
+            <p className="mt-1 text-sm text-slate-600">
+              Test için iletişim numarasını <strong>{TEST_CONTACT_NUMBER}</strong> girip gönder. Sistem otomatik <strong>5000</strong> jeton yükler.
+            </p>
+            <div className="mt-3 grid gap-3">
+              <input
+                placeholder="İletişim numarası"
+                value={memberProfile.contact_phone || ''}
+                onChange={(e) => setMemberProfile((prev) => ({ ...prev, contact_phone: e.target.value }))}
+              />
+              <button type="button" onClick={handleCoinPurchaseTest}>Numarayı Gönder ve 5000 Jeton Yükle</button>
             </div>
           </section>
         </main>
