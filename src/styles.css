@@ -2043,9 +2043,14 @@ textarea {
 
 .thread-item.modern {
   border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(129, 140, 248, 0.28);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(238, 242, 255, 0.85));
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
 }
 
 .thread-item.modern:hover {
@@ -2056,7 +2061,49 @@ textarea {
 
 .thread-item.modern.active {
   border-color: rgba(147, 51, 234, 0.45);
-  background: linear-gradient(120deg, rgba(99, 102, 241, 0.12), rgba(236, 72, 153, 0.12));
+  background: linear-gradient(120deg, rgba(99, 102, 241, 0.18), rgba(236, 72, 153, 0.16));
+}
+
+.thread-item.modern .thread-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.thread-item.modern input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin: 0;
+  border-radius: 6px;
+}
+
+.thread-item.modern .thread-copy strong,
+.thread-item.modern .thread-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thread-item.modern .thread-copy strong {
+  color: #1e1b4b;
+  font-weight: 700;
+}
+
+.thread-item.modern .thread-copy small {
+  color: #475569;
+  font-size: 12px;
+}
+
+.thread-item.modern .pending-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  max-width: 100%;
+  border-radius: 999px;
+  background: rgba(244, 114, 182, 0.14);
+  color: #9d174d;
+  padding: 2px 8px;
 }
 
 .profile-item {

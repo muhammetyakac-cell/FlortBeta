@@ -110,7 +110,7 @@ export default function App() {
   const [registeredMembers, setRegisteredMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
-  const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', mutedUntil: '', blacklisted: false });
+  const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', blacklisted: false });
   const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
   const chatBoxRef = useRef(null);
   const adminChatBoxRef = useRef(null);
@@ -1001,15 +1001,14 @@ export default function App() {
   async function fetchMemberModeration(memberId) {
     const { data, error } = await supabase
       .from('member_moderation')
-      .select('notes, tags, muted_until, is_blacklisted')
+      .select('notes, tags, is_blacklisted')
       .eq('member_id', memberId)
       .maybeSingle();
 
-    if (error) return setMemberModeration({ note: '', tags: '', mutedUntil: '', blacklisted: false });
+    if (error) return setMemberModeration({ note: '', tags: '', blacklisted: false });
     setMemberModeration({
       note: data?.notes || '',
       tags: (data?.tags || []).join(', '),
-      mutedUntil: data?.muted_until ? new Date(data.muted_until).toISOString().slice(0, 16) : '',
       blacklisted: !!data?.is_blacklisted,
     });
   }
@@ -1023,7 +1022,6 @@ export default function App() {
         .split(',')
         .map((x) => x.trim())
         .filter(Boolean),
-      muted_until: memberModeration.mutedUntil ? new Date(memberModeration.mutedUntil).toISOString() : null,
       is_blacklisted: !!memberModeration.blacklisted,
     };
 
@@ -1075,9 +1073,6 @@ export default function App() {
     if (!selectedThread || !adminReply.trim()) return;
     if (memberModeration.blacklisted) {
       return setStatus('Bu kullanıcı kara listede. Yanıt göndermeden önce moderasyon ayarını güncelle.');
-    }
-    if (memberModeration.mutedUntil && new Date(memberModeration.mutedUntil).getTime() > Date.now()) {
-      return setStatus('Kullanıcı geçici susturulmuş. Yanıt göndermek için susturma süresini kaldır.');
     }
     const { error } = await supabase.from('messages').insert({
       member_id: selectedThread.member_id,
@@ -1410,7 +1405,6 @@ export default function App() {
                 <p><strong>Hobiler:</strong> {selectedMemberProfile?.hobbies || '-'}</p>
                 <p><strong>Durum:</strong> {selectedMemberProfile?.status_emoji || '🙂'}</p>
                 <p><strong>Kara Liste:</strong> {memberModeration.blacklisted ? 'Evet' : 'Hayır'}</p>
-                <p><strong>Susturma:</strong> {memberModeration.mutedUntil ? new Date(memberModeration.mutedUntil).toLocaleString('tr-TR') : 'Yok'}</p>
               </div>
             )}
 
@@ -1701,14 +1695,6 @@ export default function App() {
                   value={memberModeration.tags}
                   onChange={(e) => setMemberModeration((prev) => ({ ...prev, tags: e.target.value }))}
                 />
-                <label className="toggle-row">
-                  <span>Geçici susturma bitişi</span>
-                  <input
-                    type="datetime-local"
-                    value={memberModeration.mutedUntil}
-                    onChange={(e) => setMemberModeration((prev) => ({ ...prev, mutedUntil: e.target.value }))}
-                  />
-                </label>
                 <label className="toggle-row">
                   <span>Kara listeye al</span>
                   <input
