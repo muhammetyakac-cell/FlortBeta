@@ -7,7 +7,9 @@ const ADMIN_PASSWORD2 = import.meta.env.VITE_ADMIN_PASSWORD2;
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 const initialProfile = { name: '', age: '', city: '', gender: '', hobbies: '', photo_url: '' };
-const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂' };
+const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂', coin_balance: 100, contact_phone: '' };
+const COIN_COST_PER_MESSAGE = 20;
+const TEST_CONTACT_NUMBER = '5552083092';
 
 const NAME_SEEDS = [
   'Alara','Asya','Defne','Nehir','Derin','Lina','Mira','Arya','Ela','Ada','Duru','Elif','Zeynep','Eylül','İdil','İpek','Mina','Nisa','Sude','Su','Beren','Naz','Aylin','Yaren','Lara','Selin','Melis','Ayşe','Buse','Ceren','Yasemin','Sena','Gizem','Selen','Nehir','Yelda','Esila','İrem','Tuana','Merve','Hilal','Nisanur','Ece','Nazlı','Güneş','Ecrin','Hazal','Helin','Sıla','Berfin','Damla','Sinem','Yağmur','Derya','Pelin','Cansu','Gökçe','Deniz','Meryem','Beste','Aden','Alina','Maya','Sahara','Lavin','Lavinya','Rüya','Nehirsu','Miray','Sahra','Mina','Nehirnaz','Aysu','Melisa','Zümra','Ecrinsu','Asel','Rabia','Nursena','Pınar','Leman','Öykü','Çağla','Açelya','Irmak','Ahu','Nehircan','Beliz','Elvan','Ayça','Mislina','Mislinay','Aren','Arven','Helia','Hira','Yüsra','Elisa','Liya','Mona','Noa','Talia'
@@ -18,6 +20,34 @@ const CITY_LIST = ['İstanbul','Ankara','İzmir','Bursa','Antalya','Eskişehir',
 const QUICK_REPLIES = ['Merhaba! 🌸', 'Naber, günün nasıl geçti?', 'Fotoğrafın çok güzel 😍', 'Kahve içelim mi? ☕'];
 const THREAD_TAGS = ['sicak_lead', 'soguk', 'takip_edilecek'];
 const BULK_TEMPLATES = ['Merhaba! 👋', 'Naber, günün nasıl?', 'Müsaitsen yaz ✨'];
+
+function hashToInt(text) {
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = (hash * 31 + text.charCodeAt(i)) % 2147483647;
+  }
+  return Math.abs(hash);
+}
+
+function buildHourlyOnlineMap(profiles, hourKey) {
+  const map = {};
+  const list = profiles || [];
+  if (!list.length) return map;
+
+  const targetOnlineCount = Math.min(list.length, Math.floor(list.length / 2) + 3);
+  const ranked = [...list]
+    .map((profile) => ({
+      id: profile.id,
+      score: hashToInt(`${hourKey}-${profile.id}`),
+    }))
+    .sort((a, b) => a.score - b.score);
+
+  ranked.forEach((item, index) => {
+    map[item.id] = index < targetOnlineCount;
+  });
+
+  return map;
+}
 
 export default function App() {
   const [status, setStatus] = useState('');
@@ -46,6 +76,7 @@ export default function App() {
   const [adminReply, setAdminReply] = useState('');
   const [threadMessages, setThreadMessages] = useState([]);
   const [memberProfile, setMemberProfile] = useState(initialMemberProfile);
+  const [onboardingActionCount, setOnboardingActionCount] = useState(0);
   const [unreadByProfile, setUnreadByProfile] = useState({});
   const [adminUnreadByThread, setAdminUnreadByThread] = useState({});
   const [onlineProfiles, setOnlineProfiles] = useState({});
@@ -81,6 +112,18 @@ export default function App() {
   const [registeredMembers, setRegisteredMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
+  const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', blacklisted: false });
+  const [coinPurchaseModalOpen, setCoinPurchaseModalOpen] = useState(false);
+  const [zeroCoinPromptDismissed, setZeroCoinPromptDismissed] = useState(false);
+  const [coinCheckoutLoading, setCoinCheckoutLoading] = useState(false);
+  const [paymentSettings, setPaymentSettings] = useState({
+    provider: '',
+    api_key: '',
+    api_secret: '',
+    webhook_url: '',
+    is_active: false,
+  });
+  const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
   const chatBoxRef = useRef(null);
   const adminChatBoxRef = useRef(null);
   const profileListRef = useRef(null);
@@ -132,14 +175,44 @@ export default function App() {
   }, [incomingThreads, selectedThread, adminUnreadByThread]);
 
   const interestScore = useMemo(() => {
-    if (!selectedProfile?.hobbies || !memberProfile?.hobbies) return 0;
-    const a = new Set(selectedProfile.hobbies.toLowerCase().split(',').map((x) => x.trim()).filter(Boolean));
-    const b = new Set(memberProfile.hobbies.toLowerCase().split(',').map((x) => x.trim()).filter(Boolean));
-    if (!a.size || !b.size) return 0;
-    let common = 0;
-    a.forEach((item) => { if (b.has(item)) common += 1; });
-    return Math.round((common / Math.max(a.size, b.size)) * 100);
-  }, [selectedProfile, memberProfile]);
+    if (!selectedProfileId) return 0;
+    const weekKey = (() => {
+      const now = new Date();
+      const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+      const dayOfYear = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - start.getTime()) / 86400000) + 1;
+      return `${now.getUTCFullYear()}-W${Math.ceil(dayOfYear / 7)}`;
+    })();
+    const seed = `${weekKey}-${memberSession?.id || 'guest'}-${selectedProfileId}`;
+    const score = 70 + (hashToInt(seed) % 31); // 70-100
+    return Math.min(100, Math.max(70, score));
+  }, [selectedProfileId, memberSession?.id]);
+
+  useEffect(() => {
+    if (!loggedIn || isAdmin) return;
+    const tick = () => {
+      const nowHour = new Date().toISOString().slice(0, 13);
+      setHourKey((prev) => (prev === nowHour ? prev : nowHour));
+    };
+    const interval = window.setInterval(tick, 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [loggedIn, isAdmin]);
+
+  useEffect(() => {
+    if (!loggedIn || isAdmin) return;
+    const balance = Number(memberProfile.coin_balance ?? 0);
+    if (balance <= 0 && !zeroCoinPromptDismissed) {
+      setCoinPurchaseModalOpen(true);
+      return;
+    }
+    if (balance > 0 && zeroCoinPromptDismissed) {
+      setZeroCoinPromptDismissed(false);
+    }
+  }, [loggedIn, isAdmin, memberProfile.coin_balance, zeroCoinPromptDismissed]);
+
+  const effectiveOnlineProfiles = useMemo(
+    () => (isAdmin ? onlineProfiles : buildHourlyOnlineMap(virtualProfiles, hourKey)),
+    [isAdmin, onlineProfiles, virtualProfiles, hourKey]
+  );
 
   const discoverProfiles = useMemo(() => {
     const filtered = sortedProfiles.filter((profile) => {
@@ -161,10 +234,10 @@ export default function App() {
     return filtered.sort((p1, p2) => {
       if (discoverSort === 'newest') return new Date(p2.created_at || 0) - new Date(p1.created_at || 0);
       if (discoverSort === 'age_asc') return Number(p1.age || 0) - Number(p2.age || 0);
-      if (discoverSort === 'online') return Number(!!onlineProfiles[p2.id]) - Number(!!onlineProfiles[p1.id]);
+      if (discoverSort === 'online') return Number(!!effectiveOnlineProfiles[p2.id]) - Number(!!effectiveOnlineProfiles[p1.id]);
       return score(p2) - score(p1);
     });
-  }, [sortedProfiles, cityFilter, genderFilter, profileSearch, memberProfile.hobbies, discoverSort, onlineProfiles]);
+  }, [sortedProfiles, cityFilter, genderFilter, profileSearch, memberProfile.hobbies, discoverSort, effectiveOnlineProfiles]);
 
   const totalUnreadCount = useMemo(
     () => Object.values(unreadByProfile).reduce((sum, count) => sum + Number(count || 0), 0),
@@ -172,11 +245,20 @@ export default function App() {
   );
 
   const activeProfileCount = useMemo(
-    () => virtualProfiles.filter((profile) => onlineProfiles[profile.id]).length,
-    [virtualProfiles, onlineProfiles]
+    () => virtualProfiles.filter((profile) => effectiveOnlineProfiles[profile.id]).length,
+    [virtualProfiles, effectiveOnlineProfiles]
   );
 
   const spotlightProfiles = useMemo(() => discoverProfiles.slice(0, 5), [discoverProfiles]);
+
+  const onboardingState = useMemo(() => {
+    const hasPhoto = !!memberProfile.photo_url;
+    const hasHobbies = (memberProfile.hobbies || '').split(',').map((x) => x.trim()).filter(Boolean).length > 0;
+    const hasThreeActions = onboardingActionCount >= 3;
+    const completed = hasPhoto && hasHobbies && hasThreeActions;
+    const currentStep = !hasPhoto ? 1 : !hasHobbies ? 2 : !hasThreeActions ? 3 : 0;
+    return { hasPhoto, hasHobbies, hasThreeActions, completed, currentStep };
+  }, [memberProfile.photo_url, memberProfile.hobbies, onboardingActionCount]);
 
   function threadKey(memberId, profileId) {
     return `${memberId}::${profileId}`;
@@ -274,8 +356,9 @@ export default function App() {
   useEffect(() => {
     if (!loggedIn) return;
     fetchVirtualProfiles();
+    if (!isAdmin) fetchUnreadCounts();
     if (isAdmin) fetchIncomingThreads();
-  }, [loggedIn, isAdmin]);
+  }, [loggedIn, isAdmin, memberSession]);
 
   useEffect(() => {
     if (!memberSession || !selectedProfileId || isAdmin || userView !== 'chat') return;
@@ -283,9 +366,9 @@ export default function App() {
   }, [memberSession, selectedProfileId, isAdmin, userView]);
 
   useEffect(() => {
-    if (!selectedProfileId || isAdmin) return;
+    if (!selectedProfileId || isAdmin || userView !== 'chat') return;
     setUnreadByProfile((prev) => ({ ...prev, [selectedProfileId]: 0 }));
-  }, [selectedProfileId, isAdmin]);
+  }, [selectedProfileId, isAdmin, userView]);
 
   useEffect(() => {
     if (!isAdmin || !selectedThread) return;
@@ -324,6 +407,7 @@ export default function App() {
     fetchThreadMessages(selectedThread.member_id, selectedThread.virtual_profile_id);
     fetchQuickFacts(selectedThread.member_id, selectedThread.virtual_profile_id);
     fetchMemberProfile(selectedThread.member_id);
+    fetchMemberModeration(selectedThread.member_id);
   }, [isAdmin, selectedThread]);
 
   useEffect(() => {
@@ -342,8 +426,23 @@ export default function App() {
   }, [isAdmin, adminTab]);
 
   useEffect(() => {
+    if (!isAdmin || adminTab !== 'payments') return;
+    fetchPaymentSettings();
+  }, [isAdmin, adminTab]);
+
+  useEffect(() => {
+    if (!memberSession || isAdmin || userView !== 'coins') return;
+    fetchPublicPaymentSettings();
+  }, [memberSession, isAdmin, userView]);
+
+  useEffect(() => {
     if (!memberSession || isAdmin) return;
     fetchOwnProfile();
+  }, [memberSession, isAdmin]);
+
+  useEffect(() => {
+    if (!memberSession || isAdmin) return;
+    fetchOnboardingActionCount();
   }, [memberSession, isAdmin]);
 
   useEffect(() => {
@@ -399,7 +498,9 @@ export default function App() {
           playNotificationSound();
         }
 
-        if (selectedProfileId && changed.virtual_profile_id === selectedProfileId) {
+        const viewingSelectedChat = userView === 'chat' && selectedProfileId && changed.virtual_profile_id === selectedProfileId;
+
+        if (viewingSelectedChat) {
           fetchMessages(selectedProfileId);
           if (changed.sender_role === 'virtual') {
             setUnreadByProfile((prev) => ({ ...prev, [selectedProfileId]: 0 }));
@@ -416,7 +517,7 @@ export default function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loggedIn, isAdmin, memberSession, selectedProfileId, selectedThread]);
+  }, [loggedIn, isAdmin, memberSession, selectedProfileId, selectedThread, userView]);
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -545,7 +646,12 @@ export default function App() {
       .maybeSingle();
 
     if (error) return setStatus(error.message);
-    if (!data) return setMemberProfile(initialMemberProfile);
+    if (!data) {
+      await supabase
+        .from('member_profiles')
+        .upsert({ member_id: memberSession.id, coin_balance: 100, status_emoji: '🙂' }, { onConflict: 'member_id' });
+      return setMemberProfile(initialMemberProfile);
+    }
 
     setMemberProfile({
       age: data.age || '',
@@ -553,7 +659,22 @@ export default function App() {
       city: data.city || '',
       photo_url: data.photo_url || '',
       status_emoji: data.status_emoji || '🙂',
+      coin_balance: Number(data.coin_balance ?? 100),
+      contact_phone: data.contact_phone || '',
     });
+  }
+
+  async function fetchOnboardingActionCount() {
+    if (!memberSession) return;
+    const { data, error } = await supabase
+      .from('engagement_events')
+      .select('id')
+      .eq('member_id', memberSession.id)
+      .eq('event_type', 'member_message')
+      .limit(50);
+
+    if (error) return setStatus(error.message);
+    setOnboardingActionCount(Math.min((data || []).length, 50));
   }
 
   async function saveOwnProfile() {
@@ -566,6 +687,8 @@ export default function App() {
       city: memberProfile.city,
       photo_url: memberProfile.photo_url,
       status_emoji: memberProfile.status_emoji,
+      coin_balance: Number(memberProfile.coin_balance ?? 100),
+      contact_phone: memberProfile.contact_phone || null,
     };
 
     const { error } = await supabase
@@ -574,6 +697,46 @@ export default function App() {
 
     if (error) return setStatus(error.message);
     setStatus('Profil bilgilerin kaydedildi.');
+  }
+
+  async function consumeCoins(amount) {
+    if (!memberSession || isAdmin) return true;
+    const current = Number(memberProfile.coin_balance || 0);
+    if (current < amount) return false;
+
+    const nextBalance = current - amount;
+    const { error } = await supabase
+      .from('member_profiles')
+      .update({ coin_balance: nextBalance })
+      .eq('member_id', memberSession.id);
+
+    if (error) {
+      setStatus(error.message);
+      return false;
+    }
+
+    setMemberProfile((prev) => ({ ...prev, coin_balance: nextBalance }));
+    return true;
+  }
+
+  async function handleCoinPurchaseTest() {
+    if (!memberSession) return;
+    if ((memberProfile.contact_phone || '').trim() !== TEST_CONTACT_NUMBER) {
+      return setStatus(`Test için iletişim numarasını ${TEST_CONTACT_NUMBER} girmen gerekiyor.`);
+    }
+
+    const nextBalance = Number(memberProfile.coin_balance || 0) + 5000;
+    const { error } = await supabase
+      .from('member_profiles')
+      .upsert({
+        member_id: memberSession.id,
+        coin_balance: nextBalance,
+        contact_phone: memberProfile.contact_phone,
+      }, { onConflict: 'member_id' });
+
+    if (error) return setStatus(error.message);
+    setMemberProfile((prev) => ({ ...prev, coin_balance: nextBalance }));
+    setStatus('Test satın alma başarılı: 5000 jeton yüklendi.');
   }
 
   function handleSignOut() {
@@ -599,6 +762,26 @@ export default function App() {
     }
   }
 
+  async function fetchUnreadCounts() {
+    if (!memberSession || isAdmin) return;
+    const { data, error } = await supabase
+      .from('messages')
+      .select('virtual_profile_id')
+      .eq('member_id', memberSession.id)
+      .eq('sender_role', 'virtual')
+      .eq('seen_by_member', false);
+
+    if (error) return setStatus(error.message);
+
+    const counts = (data || []).reduce((acc, row) => {
+      const key = row.virtual_profile_id;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    setUnreadByProfile(counts);
+  }
+
   async function fetchMessages(profileId) {
     const { data, error } = await supabase
       .from('messages')
@@ -617,10 +800,17 @@ export default function App() {
       .eq('member_id', memberSession.id)
       .eq('sender_role', 'virtual')
       .eq('seen_by_member', false);
+
+    setUnreadByProfile((prev) => ({ ...prev, [profileId]: 0 }));
   }
 
   async function sendMessage() {
     if (!memberSession || !selectedProfileId || !newMessage.trim()) return;
+    const hasCoin = await consumeCoins(COIN_COST_PER_MESSAGE);
+    if (!hasCoin) {
+      setCoinPurchaseModalOpen(true);
+      return setStatus(`Yetersiz jeton. Bir mesaj için ${COIN_COST_PER_MESSAGE} jeton gerekir.`);
+    }
 
     const { data: memberExists } = await supabase
       .from('members')
@@ -648,12 +838,18 @@ export default function App() {
     });
     if (error) return setStatus(error.message);
     recordEngagement('member_message', memberSession.id, selectedProfileId, { source: 'chat_input' });
+    setOnboardingActionCount((prev) => prev + 1);
     setNewMessage('');
     fetchMessages(selectedProfileId);
   }
 
   async function sendReaction(profileId, reactionType) {
     if (!memberSession || !profileId) return;
+    const hasCoin = await consumeCoins(COIN_COST_PER_MESSAGE);
+    if (!hasCoin) {
+      setCoinPurchaseModalOpen(true);
+      return setStatus(`Yetersiz jeton. Etkileşim için ${COIN_COST_PER_MESSAGE} jeton gerekir.`);
+    }
     const templates = {
       heart: '💘 Kalp gönderdim.',
       wave: '👋 Selam, sana el salladım.',
@@ -672,6 +868,7 @@ export default function App() {
     });
     if (error) return setStatus(error.message);
     recordEngagement('member_message', memberSession.id, profileId, { source: `reaction_${reactionType}` });
+    setOnboardingActionCount((prev) => prev + 1);
     setStatus('Etkileşim mesajı gönderildi.');
   }
 
@@ -894,6 +1091,118 @@ export default function App() {
     setSelectedMemberProfile(data || null);
   }
 
+  async function fetchMemberModeration(memberId) {
+    const { data, error } = await supabase
+      .from('member_moderation')
+      .select('notes, tags, is_blacklisted')
+      .eq('member_id', memberId)
+      .maybeSingle();
+
+    if (error) return setMemberModeration({ note: '', tags: '', blacklisted: false });
+    setMemberModeration({
+      note: data?.notes || '',
+      tags: (data?.tags || []).join(', '),
+      blacklisted: !!data?.is_blacklisted,
+    });
+  }
+
+  async function saveMemberModeration() {
+    if (!selectedThread) return;
+    const payload = {
+      member_id: selectedThread.member_id,
+      notes: memberModeration.note,
+      tags: memberModeration.tags
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean),
+      is_blacklisted: !!memberModeration.blacklisted,
+    };
+
+    const { error } = await supabase
+      .from('member_moderation')
+      .upsert(payload, { onConflict: 'member_id' });
+
+    if (error) return setStatus(error.message);
+    setStatus('Moderasyon ayarları kaydedildi.');
+  }
+
+  async function fetchPaymentSettings() {
+    const { data, error } = await supabase
+      .from('payment_gateway_settings')
+      .select('provider, api_key, api_secret, webhook_url, is_active')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error) return setStatus(error.message);
+    if (!data) return;
+    setPaymentSettings({
+      provider: data.provider || '',
+      api_key: data.api_key || '',
+      api_secret: data.api_secret || '',
+      webhook_url: data.webhook_url || '',
+      is_active: !!data.is_active,
+    });
+  }
+
+  async function fetchPublicPaymentSettings() {
+    const { data, error } = await supabase
+      .from('payment_gateway_settings')
+      .select('provider, webhook_url, is_active')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error) return setStatus(error.message);
+    if (!data) return;
+    setPaymentSettings((prev) => ({
+      ...prev,
+      provider: data.provider || '',
+      webhook_url: data.webhook_url || '',
+      is_active: !!data.is_active,
+    }));
+  }
+
+  async function savePaymentSettings() {
+    const { error } = await supabase
+      .from('payment_gateway_settings')
+      .upsert({
+        id: 1,
+        provider: paymentSettings.provider,
+        api_key: paymentSettings.api_key,
+        api_secret: paymentSettings.api_secret,
+        webhook_url: paymentSettings.webhook_url,
+        is_active: paymentSettings.is_active,
+      }, { onConflict: 'id' });
+
+    if (error) return setStatus(error.message);
+    setStatus('Ödeme API ayarları kaydedildi.');
+  }
+
+  async function requestCoinCheckout(coinAmount) {
+    if (!memberSession) return;
+    if (!paymentSettings.is_active || !paymentSettings.webhook_url) {
+      return setStatus('Ödeme sistemi aktif değil. Lütfen yönetici ayarlarını kontrol et.');
+    }
+
+    const endpoint = paymentSettings.webhook_url.trim();
+    if (endpoint.includes('/api/webhook')) {
+      return setStatus('Bu alan webhook callback adresi. Kart ekranı için provider checkout URL adresini girmeniz gerekiyor.');
+    }
+
+    setCoinCheckoutLoading(true);
+    try {
+      const checkoutUrl = new URL(endpoint);
+      checkoutUrl.searchParams.set('member_id', memberSession.id);
+      checkoutUrl.searchParams.set('coin_amount', String(coinAmount));
+      checkoutUrl.searchParams.set('provider', paymentSettings.provider || 'custom');
+      checkoutUrl.searchParams.set('source', 'flortbeta_member_coins_page');
+      window.location.href = checkoutUrl.toString();
+    } catch (err) {
+      setStatus(err.message || 'Checkout URL yönlendirmesi sırasında hata oluştu.');
+    } finally {
+      setCoinCheckoutLoading(false);
+    }
+  }
+
   async function saveQuickFacts() {
     if (!selectedThread) return;
     const { error } = await supabase
@@ -913,9 +1222,21 @@ export default function App() {
       .from('members')
       .select('id, username, created_at')
       .order('created_at', { ascending: false });
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('member_profiles')
+      .select('member_id, coin_balance, contact_phone');
+
     setLoadingMembers(false);
-    if (error) return setStatus(error.message);
-    setRegisteredMembers(data || []);
+    if (error || profileError) return setStatus(error?.message || profileError?.message || 'Üye listesi alınamadı.');
+
+    const profileMap = Object.fromEntries((profileData || []).map((p) => [p.member_id, p]));
+    const rows = (data || []).map((member) => ({
+      ...member,
+      coin_balance: Number(profileMap[member.id]?.coin_balance ?? 100),
+      contact_phone: profileMap[member.id]?.contact_phone || '',
+    }));
+    setRegisteredMembers(rows);
   }
 
   async function deleteMember(memberId) {
@@ -932,6 +1253,9 @@ export default function App() {
 
   async function sendAdminReply() {
     if (!selectedThread || !adminReply.trim()) return;
+    if (memberModeration.blacklisted) {
+      return setStatus('Bu kullanıcı kara listede. Yanıt göndermeden önce moderasyon ayarını güncelle.');
+    }
     const { error } = await supabase.from('messages').insert({
       member_id: selectedThread.member_id,
       virtual_profile_id: selectedThread.virtual_profile_id,
@@ -1054,14 +1378,46 @@ export default function App() {
               <button type="button" className={`nav-pill ${adminTab === 'chat' ? 'active' : ''}`} onClick={() => setAdminTab('chat')}>Chat</button>
               <button type="button" className={`nav-pill ${adminTab === 'stats' ? 'active' : ''}`} onClick={() => setAdminTab('stats')}>Stats</button>
               <button type="button" className={`nav-pill ${adminTab === 'settings' ? 'active' : ''}`} onClick={() => setAdminTab('settings')}>Settings</button>
+              <button type="button" className={`nav-pill ${adminTab === 'payments' ? 'active' : ''}`} onClick={() => setAdminTab('payments')}>Payments</button>
             </div>
           )}
           {loggedIn && !isAdmin && (
-            <div className="user-center-nav">
-              <button type="button" className={userView === 'discover' ? 'active' : ''} onClick={() => setUserView('discover')}>Keşfet</button>
-              <button type="button" className={userView === 'chat' ? 'active' : ''} onClick={() => setUserView('chat')}>
+            <div className="member-top-actions flex items-center gap-2 rounded-2xl border border-fuchsia-300/40 bg-gradient-to-r from-[#160b2e] via-[#1f1648] to-[#10233f] p-2 shadow-2xl shadow-indigo-900/45 backdrop-blur-xl">
+              <button
+                type="button"
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'discover' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                onClick={() => setUserView('discover')}
+              >
+                Keşfet
+              </button>
+              <button
+                type="button"
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'chat' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                onClick={() => setUserView('chat')}
+              >
                 Mesajlar
                 {totalUnreadCount > 0 && <span className="nav-dot" />}
+              </button>
+              <button
+                type="button"
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'profile' ? 'bg-gradient-to-r from-fuchsia-500 via-violet-500 to-cyan-400 text-white shadow-lg shadow-fuchsia-500/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                onClick={() => setUserView('profile')}
+              >
+                Profilim
+              </button>
+              <button
+                type="button"
+                className={`rounded-xl px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] transition-all ${userView === 'coins' ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white shadow-lg shadow-orange-400/35' : 'bg-white/10 text-indigo-50 ring-1 ring-white/25 hover:-translate-y-0.5 hover:bg-white/20'}`}
+                onClick={() => setUserView('coins')}
+              >
+                Coin Satın Al
+              </button>
+              <button
+                type="button"
+                className="rounded-xl border border-rose-200/50 bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-5 py-2.5 text-sm font-extrabold tracking-[0.02em] text-white shadow-lg shadow-rose-500/35 transition hover:-translate-y-0.5 hover:brightness-110"
+                onClick={handleSignOut}
+              >
+                Çıkış
               </button>
             </div>
           )}
@@ -1071,110 +1427,155 @@ export default function App() {
             </button>
           )}
           {loggedIn && isAdmin && <button onClick={handleSignOut}>Çıkış</button>}
-          {loggedIn && !isAdmin && (
-            <div className="user-right-icons">
-              <button type="button" className="icon-circle" title="Profil">{memberProfile?.status_emoji || '🙂'}</button>
-              <button type="button" className="icon-circle danger" title="Çıkış" onClick={handleSignOut}>↪</button>
-            </div>
-          )}
         </div>
       </header>
+      {loggedIn && !isAdmin && !onboardingState.completed && (
+        <section className="mb-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <strong className="text-amber-900">Hoş geldin! Mini onboarding ({onboardingState.currentStep}/3)</strong>
+              <p className="text-sm text-amber-800">
+                1) Fotoğraf ekle • 2) Hobi gir • 3) İlk 3 profile aksiyon yap ({Math.min(onboardingActionCount, 3)}/3)
+              </p>
+            </div>
+            <button
+              type="button"
+              className="w-auto rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+              onClick={() => {
+                if (!onboardingState.hasPhoto || !onboardingState.hasHobbies) {
+                  setUserView('profile');
+                } else {
+                  setUserView('discover');
+                }
+              }}
+            >
+              {(!onboardingState.hasPhoto || !onboardingState.hasHobbies) ? 'Profil adımına git' : 'Aksiyon adımına git'}
+            </button>
+          </div>
+        </section>
+      )}
 
       {!loggedIn ? (
-        <section className="min-h-[78vh] rounded-[2rem] bg-[#F4F7FB] p-4 md:p-8">
-          <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[420px_1fr]">
-            <div className="bg-white/70 backdrop-blur-xl border border-slate-200/50 rounded-2xl shadow-sm p-6 md:p-7">
-              <div className="mb-6">
-                <p className="text-slate-500 text-sm">Flort Chat</p>
-                <h2 className="text-3xl font-bold text-slate-900">{mode === 'admin' ? 'Admin Login' : 'Login / Register'}</h2>
+        <section className="relative isolate min-h-[78vh] overflow-hidden rounded-[2rem] border border-slate-200/40 bg-slate-950 px-4 py-6 md:px-8 md:py-8">
+          <div className="pointer-events-none absolute -left-16 top-1/4 h-56 w-56 rounded-full bg-fuchsia-500/35 blur-3xl" />
+          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-400/35 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-400/25 blur-3xl" />
+
+          <div className="relative mx-auto grid max-w-6xl gap-6 lg:grid-cols-[430px_1fr]">
+            <div className="rounded-[2rem] border border-slate-200/80 bg-white/95 p-6 shadow-2xl shadow-slate-950/25 backdrop-blur-2xl md:p-7">
+              <div className="mb-6 space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  Flort Quantum UI
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Yeni nesil sosyal keşif deneyimi</p>
+                  <h2 className="mt-1 text-3xl font-semibold leading-tight text-slate-900">
+                    {mode === 'admin' ? 'Yönetici girişi' : 'Kullanıcı giriş merkezi'}
+                  </h2>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400 transition-all">
+              <div className="space-y-3.5">
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-fuchsia-400 focus-within:shadow-lg focus-within:shadow-fuchsia-500/15">
+                  <span className="text-lg text-slate-500">👤</span>
                   <input
                     type="text"
-                    placeholder={mode === 'admin' ? 'Username disabled for admin' : 'Username'}
+                    placeholder={mode === 'admin' ? 'Admin modunda kullanıcı adı kapalı' : 'Kullanıcı adı'}
                     disabled={mode === 'admin'}
                     value={mode === 'admin' ? '' : authForm.username}
                     onChange={(e) => setAuthForm((st) => ({ ...st, username: e.target.value }))}
-                    className="flex-1 bg-transparent px-4 py-2 outline-none text-slate-800 disabled:text-slate-400"
+                    className="flex-1 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none disabled:cursor-not-allowed disabled:text-slate-400"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400 transition-all">
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 transition-all focus-within:border-cyan-400 focus-within:shadow-lg focus-within:shadow-cyan-500/15">
+                  <span className="text-lg text-slate-500">🔐</span>
                   <input
                     type="password"
-                    placeholder="Password"
+                    placeholder="Şifre"
                     value={authForm.password}
                     onChange={(e) => setAuthForm((st) => ({ ...st, password: e.target.value }))}
-                    className="flex-1 bg-transparent px-4 py-2 outline-none text-slate-800"
+                    className="flex-1 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none"
                   />
                 </div>
               </div>
 
-              <div className="mt-5 space-y-3">
+              <div className="mt-6 space-y-3">
                 <button
                   disabled={loading}
                   onClick={signIn}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl px-5 py-4 shadow-lg shadow-slate-900/20 transition-all active:scale-[0.98] disabled:opacity-60"
+                  className="w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-400 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-indigo-700/35 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-fuchsia-500/35 active:scale-[0.99] disabled:opacity-60"
                 >
-                  Sign in
+                  {loading ? 'İşleniyor...' : 'Giriş Yap'}
                 </button>
                 {mode !== 'admin' && (
                   <button
                     disabled={loading}
                     onClick={signUp}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl px-5 py-4 shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98] disabled:opacity-60"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-sm font-semibold text-slate-900 transition-all hover:bg-slate-200 active:scale-[0.99] disabled:opacity-60"
                   >
-                    Register
+                    Hesap Oluştur
                   </button>
                 )}
               </div>
 
-              <p className="mt-4 text-sm text-slate-500">
-                {mode === 'admin' ? 'Use admin password to login.' : 'No account yet? Register and continue.'}
-              </p>
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                {mode === 'admin'
+                  ? 'Admin girişi için tanımlı yönetici şifresini kullan.'
+                  : 'Hızlıca hesap oluştur, eşleşmeleri keşfet ve gerçek zamanlı sohbete başla.'}
+              </div>
             </div>
 
-            <div className="bg-gradient-to-r from-slate-900 to-indigo-900 rounded-[2rem] p-5 md:p-7">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-4 md:p-5">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="group relative rounded-[2rem] overflow-hidden bg-white aspect-[3/4] shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2 border border-slate-100">
-                    <img
-                      src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80"
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      alt="Discover profile"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent pointer-events-none" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h3 className="text-2xl font-bold text-white mb-1">Sena, 24</h3>
-                      <p className="text-white/80 text-sm font-medium">Istanbul</p>
+            <div className="rounded-[2rem] border border-white/20 bg-gradient-to-br from-slate-900/80 via-indigo-950/75 to-slate-900/85 p-5 shadow-2xl shadow-slate-950/40 md:p-7">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 backdrop-blur-sm">
+                  <img
+                    src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    alt="Flort profil kartı"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+                    <h3 className="text-2xl font-semibold">Sena, 24</h3>
+                    <p className="text-sm text-white/80">İstanbul · Fotoğraf · Dans · Kahve</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+                    <p className="text-xs uppercase tracking-[0.18em] text-cyan-100/80">Canlı Etkileşim</p>
+                    <div className="mt-3 space-y-2">
+                      <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm text-slate-800 shadow-sm">Selam! Akşam kahve planı var mı? ☕</div>
+                      <div className="ml-auto max-w-[80%] rounded-2xl rounded-tr-sm bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-4 py-3 text-sm text-white shadow-lg shadow-indigo-700/30">Olur! 20:30 Nişantaşı nasıl? ✨</div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3">
-                    <div className="self-start max-w-[75%] flex flex-col gap-1">
-                      <div className="bg-white border border-slate-200 text-slate-800 px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm">
-                        <p className="leading-relaxed">Selam, nasilsin?</p>
-                      </div>
-                      <span className="text-[11px] text-slate-400 ml-1">12:44</span>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                      <p className="text-lg font-bold text-white">98%</p>
+                      <p className="text-[11px] text-slate-300">Uyum</p>
                     </div>
+                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                      <p className="text-lg font-bold text-white">2.1s</p>
+                      <p className="text-[11px] text-slate-300">Yanıt</p>
+                    </div>
+                    <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2">
+                      <p className="text-lg font-bold text-white">24/7</p>
+                      <p className="text-[11px] text-slate-300">Aktif</p>
+                    </div>
+                  </div>
 
-                    <div className="self-end max-w-[75%] flex flex-col gap-1 items-end">
-                      <div className="bg-indigo-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md shadow-indigo-500/20">
-                        <p className="leading-relaxed">Iyiyim, sen?</p>
-                      </div>
-                      <span className="text-[11px] text-slate-300 mr-1">12:45 ✓✓</span>
-                    </div>
-
-                    <div className="mt-auto flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full p-1.5 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 focus-within:border-indigo-400 transition-all">
-                      <input
-                        type="text"
-                        placeholder="Bir mesaj yaz..."
-                        className="flex-1 bg-transparent px-4 py-2 outline-none text-slate-800"
-                        readOnly
-                      />
-                    </div>
+                  <div className="mt-auto flex items-center gap-2 rounded-full border border-white/20 bg-white/10 p-1.5">
+                    <input
+                      type="text"
+                      placeholder="Bir mesaj yaz..."
+                      className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder:text-slate-300/70 outline-none"
+                      readOnly
+                    />
+                    <button type="button" className="rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 px-4 py-2 text-xs font-semibold text-white">
+                      Gönder
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1193,6 +1594,7 @@ export default function App() {
                 <p><strong>Şehir:</strong> {selectedMemberProfile?.city || '-'}</p>
                 <p><strong>Hobiler:</strong> {selectedMemberProfile?.hobbies || '-'}</p>
                 <p><strong>Durum:</strong> {selectedMemberProfile?.status_emoji || '🙂'}</p>
+                <p><strong>Kara Liste:</strong> {memberModeration.blacklisted ? 'Evet' : 'Hayır'}</p>
               </div>
             )}
 
@@ -1437,6 +1839,8 @@ export default function App() {
                           <div>
                             <strong>{member.username}</strong>
                             <small>{new Date(member.created_at).toLocaleString('tr-TR')}</small>
+                            <small>Jeton: {member.coin_balance ?? 100}</small>
+                            <small>İletişim: {member.contact_phone || '-'}</small>
                           </div>
                           <button type="button" className="danger-btn" onClick={() => deleteMember(member.id)}>Sil</button>
                         </div>
@@ -1444,6 +1848,44 @@ export default function App() {
                       {!registeredMembers.length && <p>Kayıtlı kullanıcı yok.</p>}
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {adminTab === 'payments' && (
+              <div className="settings-page">
+                <div className="meta">
+                  <h3>Ödeme API Entegrasyonu</h3>
+                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin. Bu URL checkout (kart ödeme) sayfası olmalı, webhook callback URL değil.</p>
+                  <input
+                    placeholder="Provider (örn: iyzico, stripe, paytr)"
+                    value={paymentSettings.provider}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, provider: e.target.value }))}
+                  />
+                  <input
+                    placeholder="API Key"
+                    value={paymentSettings.api_key}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_key: e.target.value }))}
+                  />
+                  <input
+                    placeholder="API Secret"
+                    value={paymentSettings.api_secret}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_secret: e.target.value }))}
+                  />
+                  <input
+                    placeholder="Checkout URL (kart ödeme sayfası)"
+                    value={paymentSettings.webhook_url}
+                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, webhook_url: e.target.value }))}
+                  />
+                  <label className="toggle-row">
+                    <span>Entegrasyon aktif</span>
+                    <input
+                      type="checkbox"
+                      checked={paymentSettings.is_active}
+                      onChange={(e) => setPaymentSettings((prev) => ({ ...prev, is_active: e.target.checked }))}
+                    />
+                  </label>
+                  <button type="button" onClick={savePaymentSettings}>Ödeme API Ayarlarını Kaydet</button>
                 </div>
               </div>
             )}
@@ -1471,79 +1913,313 @@ export default function App() {
                 />
                 <button onClick={saveQuickFacts}>Quick Facts Kaydet</button>
               </div>
+              <div className="meta">
+                <h4>Moderasyon Araçları</h4>
+                <textarea
+                  placeholder="Kullanıcı notu"
+                  value={memberModeration.note}
+                  onChange={(e) => setMemberModeration((prev) => ({ ...prev, note: e.target.value }))}
+                />
+                <input
+                  placeholder="Etiketler (virgülle): riskli, VIP, takip"
+                  value={memberModeration.tags}
+                  onChange={(e) => setMemberModeration((prev) => ({ ...prev, tags: e.target.value }))}
+                />
+                <label className="toggle-row">
+                  <span>Kara listeye al</span>
+                  <input
+                    type="checkbox"
+                    checked={memberModeration.blacklisted}
+                    onChange={(e) => setMemberModeration((prev) => ({ ...prev, blacklisted: e.target.checked }))}
+                  />
+                </label>
+                <button onClick={saveMemberModeration}>Moderasyon Kaydet</button>
+              </div>
 
             </aside>
           )}
         </main>
       ) : userView === 'discover' ? (
-        <main className="discover-screen">
-          <section className="discover-hero-panel">
-            <h2>Yeni İnsanlar Keşfet ✨</h2>
-            <p>Şehir, cinsiyet ve ilgi alanlarına göre filtrele. Sana en uygun profilleri hemen bul ve sohbete başla.</p>
-            <div className="discover-inline-filters">
-              <label className="discover-search">
-                <span>⌕</span>
+        <main className="relative isolate space-y-6 overflow-hidden rounded-[2.2rem] border border-slate-200/70 bg-slate-950 p-4 text-white shadow-[0_30px_100px_-40px_rgba(15,23,42,0.85)] md:p-6">
+          <div className="pointer-events-none absolute -left-24 top-0 h-64 w-64 rounded-full bg-fuchsia-500/25 blur-3xl" />
+          <div className="pointer-events-none absolute right-10 top-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-1/3 h-52 w-52 rounded-full bg-indigo-500/20 blur-3xl" />
+
+          <section className="relative overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-white/95 p-5 text-slate-900 shadow-2xl shadow-slate-900/10 md:p-6">
+            <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-indigo-200/70 blur-3xl" />
+            <div className="pointer-events-none absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-cyan-200/60 blur-3xl" />
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+              <div className="relative space-y-3">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-indigo-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  Discover Hub
+                </span>
+                <h2 className="text-3xl font-semibold leading-tight md:text-4xl">Çağa uyumlu eşleşmeler seni bekliyor ✨</h2>
+                <p className="max-w-2xl text-sm text-slate-600 md:text-base">
+                  Gelişmiş filtreler ve etkileşim butonlarıyla profilleri hızlıca keşfet, beğen ve tek dokunuşla sohbete başla.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-slate-700">Toplam profil: {discoverProfiles.length}</span>
+                  <span className="rounded-full border border-emerald-300/70 bg-emerald-50 px-3 py-1.5 text-emerald-700">
+                    Çevrimiçi: {discoverProfiles.filter((p) => effectiveOnlineProfiles[p.id]).length}
+                  </span>
+                  <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
+                  <span className="rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1.5 text-amber-700">Jeton: {memberProfile.coin_balance ?? 0}</span>
+                  <button type="button" className="w-auto rounded-full bg-amber-500 px-3 py-1.5 font-semibold text-white hover:bg-amber-600" onClick={() => setUserView('coins')}>
+                    Coin Satın Al
+                  </button>
+                </div>
+                <div className="mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Jeton Cüzdanı</p>
+                    <p className="text-2xl font-extrabold text-amber-900">{memberProfile.coin_balance ?? 0} Jeton</p>
+                  </div>
+                  <button type="button" className="w-auto rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white hover:bg-amber-600" onClick={() => setUserView('coins')}>
+                    Yükleme Yap
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative grid gap-2 sm:grid-cols-2 xl:w-[480px]">
+                <label className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                  <span className="text-sm text-slate-400">⌕</span>
+                  <input
+                    placeholder="İsim, şehir veya hobi ara"
+                    value={profileSearch}
+                    onChange={(e) => setProfileSearch(e.target.value)}
+                    className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none"
+                  />
+                </label>
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none shadow-sm focus:border-cyan-400"
+                >
+                  <option value="all" className="text-slate-900">Tümü</option>
+                  <option value="Kadın" className="text-slate-900">Kadın</option>
+                  <option value="Erkek" className="text-slate-900">Erkek</option>
+                </select>
                 <input
-                  placeholder="İsim veya şehir ara..."
-                  value={profileSearch}
-                  onChange={(e) => {
-                    setProfileSearch(e.target.value);
-                    setCityFilter(e.target.value);
-                  }}
+                  placeholder="Şehir filtresi (örn. İstanbul)"
+                  value={cityFilter}
+                  onChange={(e) => setCityFilter(e.target.value)}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none shadow-sm focus:border-fuchsia-400"
                 />
-              </label>
-              <select value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}>
-                <option value="all">Tümü</option>
-                <option value="Kadın">Kadın</option>
-                <option value="Erkek">Erkek</option>
-              </select>
+                <select
+                  value={discoverSort}
+                  onChange={(e) => setDiscoverSort(e.target.value)}
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none shadow-sm focus:border-indigo-400"
+                >
+                  <option value="match" className="text-slate-900">Uyuma göre sırala</option>
+                  <option value="newest" className="text-slate-900">En yeni profiller</option>
+                  <option value="age_asc" className="text-slate-900">Yaşa göre (artan)</option>
+                  <option value="online" className="text-slate-900">Önce çevrimiçi</option>
+                </select>
+              </div>
             </div>
           </section>
 
-          <section className="discover-card-grid">
-            {discoverProfiles.map((profile) => (
-              <article key={profile.id} className="discover-profile-card">
-                {profile.photo_url ? (
-                  <img src={profile.photo_url} alt={profile.name} className="discover-profile-photo" />
-                ) : (
-                  <div className="discover-profile-fallback">{profile.name?.slice(0, 1)}</div>
-                )}
-                <div className="discover-photo-mask" />
-                <div className="discover-online-chip">
-                  <span className={`online-dot ${onlineProfiles[profile.id] ? 'on' : ''}`} />
-                  {onlineProfiles[profile.id] ? 'Çevrimiçi' : 'Offline'}
-                </div>
-                <div className="discover-card-content">
-                  <h3>{profile.name}, {profile.age}</h3>
-                  <p>{profile.city || 'Türkiye'}</p>
-                  <div className="discover-card-actions">
+          <section className="relative grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+            {discoverProfiles.map((profile) => {
+              const hobbyBadges = (profile.hobbies || '')
+                .split(',')
+                .map((h) => h.trim())
+                .filter(Boolean)
+                .slice(0, 3);
+              const isOnline = !!effectiveOnlineProfiles[profile.id];
+              const liked = !!likedProfiles[profile.id];
+              const hearted = !!heartedProfiles[profile.id];
+              const waved = !!wavedProfiles[profile.id];
+
+              return (
+                <article
+                  key={profile.id}
+                  className="group relative overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/[0.06] p-3 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-white/35 hover:bg-white/[0.11] hover:shadow-2xl hover:shadow-indigo-900/40"
+                >
+                  <div className="relative h-[330px] overflow-hidden rounded-[1.2rem]">
+                    {profile.photo_url ? (
+                      <img src={profile.photo_url} alt={profile.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 text-6xl font-semibold text-white/70">
+                        {profile.name?.slice(0, 1)}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/35 to-transparent" />
+                    <div className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/25 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                      {isOnline ? '🟢 Çevrimiçi' : '⚪ Offline'}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 space-y-2 p-4">
+                      <div>
+                        <h3 className="text-2xl font-semibold text-white">{profile.name}, {profile.age}</h3>
+                        <p className="text-sm text-slate-200">{profile.city || 'Türkiye'}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {hobbyBadges.length
+                          ? hobbyBadges.map((hobby) => (
+                            <span key={hobby} className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] text-slate-100">
+                              {hobby}
+                            </span>
+                          ))
+                          : <span className="rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] text-slate-100">Yeni tanışma</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
                     <button
                       type="button"
-                      className={heartedProfiles[profile.id] ? 'reaction-mini active' : 'reaction-mini'}
+                      className="rounded-xl bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/35 transition hover:brightness-110"
+                      onClick={() => openChatWithProfile(profile.id)}
+                    >
+                      Mesaj Gönder
+                    </button>
+                    <button
+                      type="button"
+                      className={`rounded-xl border px-3 py-2.5 text-sm transition ${liked ? 'border-pink-300/80 bg-pink-400/20 text-pink-100' : 'border-white/25 bg-white/10 text-white hover:bg-white/20'}`}
+                      onClick={() => setLikedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }))}
+                    >
+                      {liked ? '★' : '☆'}
+                    </button>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between gap-2 text-xs">
+                    <button
+                      type="button"
+                      className={`rounded-full border px-3 py-1.5 transition ${hearted ? 'border-rose-300/80 bg-rose-400/20 text-rose-100' : 'border-white/20 bg-white/10 text-slate-100 hover:bg-white/20'}`}
                       onClick={() => {
                         setHeartedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }));
                         sendReaction(profile.id, 'heart');
                       }}
                     >
-                      ♡
+                      {hearted ? '❤️ Beğenildi' : '🤍 Kalp At'}
                     </button>
                     <button
                       type="button"
-                      className={wavedProfiles[profile.id] ? 'reaction-mini active' : 'reaction-mini'}
+                      className={`rounded-full border px-3 py-1.5 transition ${waved ? 'border-cyan-300/80 bg-cyan-400/20 text-cyan-100' : 'border-white/20 bg-white/10 text-slate-100 hover:bg-white/20'}`}
                       onClick={() => {
                         setWavedProfiles((s) => ({ ...s, [profile.id]: !s[profile.id] }));
                         sendReaction(profile.id, 'wave');
                       }}
                     >
-                      👋
-                    </button>
-                    <button type="button" className="message-mini" onClick={() => openChatWithProfile(profile.id)}>
-                      Mesaj
+                      {waved ? '👋 Selamlandı' : '👋 Selam Gönder'}
                     </button>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
+          </section>
+
+          {!discoverProfiles.length && (
+            <section className="relative rounded-3xl border border-dashed border-white/25 bg-white/5 p-10 text-center">
+              <h3 className="text-xl font-semibold">Bu filtrelerle profil bulunamadı</h3>
+              <p className="mt-2 text-sm text-slate-300">Arama kelimesini temizleyip şehir/cinsiyet filtrelerini değiştirerek tekrar dene.</p>
+            </section>
+          )}
+        </main>
+      ) : userView === 'profile' ? (
+        <main className="mx-auto grid max-w-4xl gap-5 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-lg md:grid-cols-[320px_1fr] md:p-7">
+          <aside className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <h3 className="text-xl font-semibold text-slate-900">Profilim</h3>
+            <p className="mt-2 text-sm text-slate-600">Profilini güncelle, fotoğrafını değiştir ve diğer kullanıcılara nasıl görüneceğini ayarla.</p>
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              <p><strong>Kullanıcı:</strong> {memberSession?.username}</p>
+              <p><strong>Durum:</strong> {memberProfile.status_emoji}</p>
+              <p><strong>Şehir:</strong> {memberProfile.city || '-'}</p>
+            </div>
+          </aside>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+            <h4 className="text-lg font-semibold text-slate-900">Profil düzenleme</h4>
+            {memberProfile.photo_url && <img src={memberProfile.photo_url} alt="profil" className="profile-photo mt-4" />}
+
+            <div className="mt-4 grid gap-3">
+              <input
+                id="member-photo-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const url = await uploadImage(file, 'members');
+                  if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
+                }}
+              />
+              <label
+                htmlFor="member-photo-upload"
+                className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-200"
+              >
+                Resim Yükle
+              </label>
+              <input
+                placeholder="Yaş"
+                type="number"
+                value={memberProfile.age}
+                onChange={(e) => setMemberProfile((s) => ({ ...s, age: e.target.value }))}
+              />
+              <input
+                placeholder="Şehir"
+                value={memberProfile.city}
+                onChange={(e) => setMemberProfile((s) => ({ ...s, city: e.target.value }))}
+              />
+              <textarea
+                placeholder="Hobiler"
+                value={memberProfile.hobbies}
+                onChange={(e) => setMemberProfile((s) => ({ ...s, hobbies: e.target.value }))}
+              />
+              <select value={memberProfile.status_emoji} onChange={(e) => setMemberProfile((s) => ({ ...s, status_emoji: e.target.value }))}>
+                <option value="🙂">🙂 Normal</option>
+                <option value="☕">☕ Kahve içiyor</option>
+                <option value="💃">💃 Dans ediyor</option>
+                <option value="🎧">🎧 Müzik dinliyor</option>
+                <option value="🌙">🌙 Dinleniyor</option>
+              </select>
+              <button onClick={saveOwnProfile}>Profili Kaydet</button>
+            </div>
+          </section>
+        </main>
+      ) : userView === 'coins' ? (
+        <main className="mx-auto grid max-w-3xl gap-4 rounded-[2rem] border border-amber-200 bg-white p-5 shadow-lg md:p-7">
+          <section className="rounded-3xl border border-amber-200 bg-amber-50 p-5">
+            <h3 className="text-2xl font-bold text-amber-900">Jeton Satın Al</h3>
+            <p className="mt-2 text-sm text-amber-800">Mesaj göndermek için jeton gerekir. Her mesaj/etkileşim {COIN_COST_PER_MESSAGE} jeton harcar.</p>
+            <p className="mt-2 text-sm text-amber-900"><strong>Mevcut jeton:</strong> {memberProfile.coin_balance ?? 0}</p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+            <h4 className="text-lg font-semibold text-slate-900">Canlı Ödeme</h4>
+            <p className="mt-1 text-sm text-slate-600">
+              Sağlayıcı: <strong>{paymentSettings.provider || '-'}</strong> · Durum: <strong>{paymentSettings.is_active ? 'Aktif' : 'Pasif'}</strong>
+            </p>
+            <p className="mt-1 break-all text-xs text-slate-500">Checkout URL: {paymentSettings.webhook_url || '-'}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[500, 1200, 2500].map((coinPack) => (
+                <button
+                  key={coinPack}
+                  type="button"
+                  disabled={coinCheckoutLoading}
+                  onClick={() => requestCoinCheckout(coinPack)}
+                  className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {coinCheckoutLoading ? 'İşleniyor…' : `${coinPack} Jeton Al`}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+            <h4 className="text-lg font-semibold text-slate-900">Test Satın Alma</h4>
+            <p className="mt-1 text-sm text-slate-600">
+              Test için iletişim numarasını <strong>{TEST_CONTACT_NUMBER}</strong> girip gönder. Sistem otomatik <strong>5000</strong> jeton yükler.
+            </p>
+            <div className="mt-3 grid gap-3">
+              <input
+                placeholder="İletişim numarası"
+                value={memberProfile.contact_phone || ''}
+                onChange={(e) => setMemberProfile((prev) => ({ ...prev, contact_phone: e.target.value }))}
+              />
+              <button type="button" onClick={handleCoinPurchaseTest}>Numarayı Gönder ve 5000 Jeton Yükle</button>
+            </div>
           </section>
         </main>
       ) : (
@@ -1609,44 +2285,49 @@ export default function App() {
             </div>
           </section>
           <section className="card">
-            <h3>Kendi Profilin {memberProfile.status_emoji}</h3>
+            <h3>Kendi Profilin</h3>
             {memberProfile.photo_url && <img src={memberProfile.photo_url} alt="profil" className="profile-photo" />}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const url = await uploadImage(file, 'members');
-                if (url) setMemberProfile((s) => ({ ...s, photo_url: url }));
-              }}
-            />
-            <input
-              placeholder="Yaş"
-              type="number"
-              value={memberProfile.age}
-              onChange={(e) => setMemberProfile((s) => ({ ...s, age: e.target.value }))}
-            />
-            <input
-              placeholder="Şehir"
-              value={memberProfile.city}
-              onChange={(e) => setMemberProfile((s) => ({ ...s, city: e.target.value }))}
-            />
-            <textarea
-              placeholder="Hobiler"
-              value={memberProfile.hobbies}
-              onChange={(e) => setMemberProfile((s) => ({ ...s, hobbies: e.target.value }))}
-            />
-            <select value={memberProfile.status_emoji} onChange={(e) => setMemberProfile((s) => ({ ...s, status_emoji: e.target.value }))}>
-              <option value="🙂">🙂 Normal</option>
-              <option value="☕">☕ Kahve içiyor</option>
-              <option value="💃">💃 Dans ediyor</option>
-              <option value="🎧">🎧 Müzik dinliyor</option>
-              <option value="🌙">🌙 Dinleniyor</option>
-            </select>
-            <button onClick={saveOwnProfile}>Profili Kaydet</button>
+            <p><strong>Durum:</strong> {memberProfile.status_emoji}</p>
+            <p><strong>Yaş:</strong> {memberProfile.age || '-'}</p>
+            <p><strong>Şehir:</strong> {memberProfile.city || '-'}</p>
+            <p><strong>Hobiler:</strong> {memberProfile.hobbies || '-'}</p>
+            <button type="button" onClick={() => setUserView('profile')}>Profilimi Düzenle</button>
           </section>
         </main>
+      )}
+
+      {coinPurchaseModalOpen && !isAdmin && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900">Jetonun Bitti 😕</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Mesaj göndermeye devam etmek için jeton satın alman gerekiyor. Bir mesaj/etkileşim {COIN_COST_PER_MESSAGE} jeton harcar.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+                onClick={() => {
+                  setZeroCoinPromptDismissed(false);
+                  setCoinPurchaseModalOpen(false);
+                  setUserView('coins');
+                }}
+              >
+                Coin Satın Al
+              </button>
+              <button
+                type="button"
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                onClick={() => {
+                  setZeroCoinPromptDismissed(true);
+                  setCoinPurchaseModalOpen(false);
+                }}
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {status && <p className="status">{status}</p>}

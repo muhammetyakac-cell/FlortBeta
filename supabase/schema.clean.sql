@@ -16,6 +16,8 @@ create table if not exists public.member_profiles (
   city text,
   photo_url text,
   status_emoji text not null default '🙂',
+  coin_balance int not null default 100 check (coin_balance >= 0),
+  contact_phone text,
   updated_at timestamptz not null default now()
 );
 
@@ -42,7 +44,36 @@ alter table if exists public.member_profiles
   add column if not exists city text,
   add column if not exists hobbies text,
   add column if not exists age int,
-  add column if not exists status_emoji text not null default '🙂';
+  add column if not exists status_emoji text not null default '🙂',
+  add column if not exists coin_balance int not null default 100,
+  add column if not exists contact_phone text;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'member_profiles_coin_balance_non_negative'
+  ) then
+    alter table public.member_profiles
+      add constraint member_profiles_coin_balance_non_negative check (coin_balance >= 0);
+  end if;
+end $$;
+
+create or replace function public.ensure_member_profile_defaults()
+returns trigger
+language plpgsql
+as $$
+begin
+  insert into public.member_profiles (member_id, coin_balance, status_emoji)
+  values (new.id, 100, '🙂')
+  on conflict (member_id) do nothing;
+  return new;
+end $$;
+
+drop trigger if exists trg_members_create_profile_defaults on public.members;
+create trigger trg_members_create_profile_defaults
+after insert on public.members
+for each row execute function public.ensure_member_profile_defaults();
 
 -- Eski şemadan gelen created_by uuid kolonunu text'e çevir (çakışmasız migration)
 do $$
@@ -476,6 +507,16 @@ create table if not exists public.engagement_events (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.payment_gateway_settings (
+  id int primary key,
+  provider text not null default '',
+  api_key text not null default '',
+  api_secret text not null default '',
+  webhook_url text not null default '',
+  is_active boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.thread_quick_facts (
   member_id uuid not null references public.members(id) on delete cascade,
   virtual_profile_id uuid not null references public.virtual_profiles(id) on delete cascade,
@@ -488,12 +529,14 @@ alter table public.thread_events enable row level security;
 alter table public.presence_snapshots enable row level security;
 alter table public.kpi_snapshots_daily enable row level security;
 alter table public.engagement_events enable row level security;
+alter table public.payment_gateway_settings enable row level security;
 alter table public.thread_quick_facts enable row level security;
 
 drop policy if exists "thread_events_all_anon" on public.thread_events;
 drop policy if exists "presence_snapshots_all_anon" on public.presence_snapshots;
 drop policy if exists "kpi_snapshots_daily_all_anon" on public.kpi_snapshots_daily;
 drop policy if exists "engagement_events_all_anon" on public.engagement_events;
+drop policy if exists "payment_gateway_settings_all_anon" on public.payment_gateway_settings;
 drop policy if exists "thread_quick_facts_all_anon" on public.thread_quick_facts;
 
 create policy "thread_events_all_anon"
@@ -520,8 +563,31 @@ create policy "engagement_events_all_anon"
   using (true)
   with check (true);
 
+create policy "payment_gateway_settings_all_anon"
+  on public.payment_gateway_settings for all
+  to anon, authenticated
+  using (true)
+  with check (true);
+
 create policy "thread_quick_facts_all_anon"
   on public.thread_quick_facts for all
+  to anon, authenticated
+  using (true)
+  with check (true);
+
+create table if not exists public.member_moderation (
+  member_id uuid primary key references public.members(id) on delete cascade,
+  notes text not null default '',
+  tags text[] not null default '{}',
+  muted_until timestamptz,
+  is_blacklisted boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.member_moderation enable row level security;
+drop policy if exists "member_moderation_all_anon" on public.member_moderation;
+create policy "member_moderation_all_anon"
+  on public.member_moderation for all
   to anon, authenticated
   using (true)
   with check (true);
