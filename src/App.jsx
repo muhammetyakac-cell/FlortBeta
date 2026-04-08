@@ -115,6 +115,7 @@ export default function App() {
   const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', blacklisted: false });
   const [coinPurchaseModalOpen, setCoinPurchaseModalOpen] = useState(false);
   const [zeroCoinPromptDismissed, setZeroCoinPromptDismissed] = useState(false);
+  const [coinCheckoutLoading, setCoinCheckoutLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState({
     provider: '',
     api_key: '',
@@ -428,6 +429,11 @@ export default function App() {
     if (!isAdmin || adminTab !== 'payments') return;
     fetchPaymentSettings();
   }, [isAdmin, adminTab]);
+
+  useEffect(() => {
+    if (!memberSession || isAdmin || userView !== 'coins') return;
+    fetchPublicPaymentSettings();
+  }, [memberSession, isAdmin, userView]);
 
   useEffect(() => {
     if (!memberSession || isAdmin) return;
@@ -1138,6 +1144,23 @@ export default function App() {
     });
   }
 
+  async function fetchPublicPaymentSettings() {
+    const { data, error } = await supabase
+      .from('payment_gateway_settings')
+      .select('provider, webhook_url, is_active')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error) return setStatus(error.message);
+    if (!data) return;
+    setPaymentSettings((prev) => ({
+      ...prev,
+      provider: data.provider || '',
+      webhook_url: data.webhook_url || '',
+      is_active: !!data.is_active,
+    }));
+  }
+
   async function savePaymentSettings() {
     const { error } = await supabase
       .from('payment_gateway_settings')
@@ -1152,6 +1175,58 @@ export default function App() {
 
     if (error) return setStatus(error.message);
     setStatus('Ödeme API ayarları kaydedildi.');
+  }
+
+  async function requestCoinCheckout(coinAmount) {
+    if (!memberSession) return;
+    if (!paymentSettings.is_active || !paymentSettings.webhook_url) {
+      return setStatus('Ödeme sistemi aktif değil. Lütfen yönetici ayarlarını kontrol et.');
+    }
+
+    setCoinCheckoutLoading(true);
+    try {
+      const res = await fetch(paymentSettings.webhook_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          member_id: memberSession.id,
+          coin_amount: coinAmount,
+          provider: paymentSettings.provider || 'custom',
+          source: 'flortbeta_member_coins_page',
+        }),
+      });
+
+      if (!res.ok) {
+        const failText = await res.text();
+        throw new Error(failText || `Webhook çağrısı başarısız (${res.status})`);
+      }
+
+      const payload = await res.json().catch(() => ({}));
+      if (payload?.redirect_url) {
+        window.location.href = payload.redirect_url;
+        return;
+      }
+
+      if (Number.isFinite(Number(payload?.coin_balance))) {
+        const nextBalance = Number(payload.coin_balance);
+        setMemberProfile((prev) => ({ ...prev, coin_balance: nextBalance }));
+        setStatus(`Ödeme işlendi. Yeni jeton bakiyesi: ${nextBalance}`);
+        return;
+      }
+
+      if (Number.isFinite(Number(payload?.coins_added))) {
+        const coinsAdded = Number(payload.coins_added);
+        setMemberProfile((prev) => ({ ...prev, coin_balance: Number(prev.coin_balance || 0) + coinsAdded }));
+        setStatus(`Ödeme talebi alındı. ${coinsAdded} jeton hesabına yansıtıldı.`);
+        return;
+      }
+
+      setStatus('Ödeme talebi webhooka gönderildi. Sağlayıcı sonucu bekleniyor.');
+    } catch (err) {
+      setStatus(err.message || 'Webhook çağrısı sırasında hata oluştu.');
+    } finally {
+      setCoinCheckoutLoading(false);
+    }
   }
 
   async function saveQuickFacts() {
@@ -2135,6 +2210,27 @@ export default function App() {
             <h3 className="text-2xl font-bold text-amber-900">Jeton Satın Al</h3>
             <p className="mt-2 text-sm text-amber-800">Mesaj göndermek için jeton gerekir. Her mesaj/etkileşim {COIN_COST_PER_MESSAGE} jeton harcar.</p>
             <p className="mt-2 text-sm text-amber-900"><strong>Mevcut jeton:</strong> {memberProfile.coin_balance ?? 0}</p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-5">
+            <h4 className="text-lg font-semibold text-slate-900">Canlı Ödeme</h4>
+            <p className="mt-1 text-sm text-slate-600">
+              Sağlayıcı: <strong>{paymentSettings.provider || '-'}</strong> · Durum: <strong>{paymentSettings.is_active ? 'Aktif' : 'Pasif'}</strong>
+            </p>
+            <p className="mt-1 break-all text-xs text-slate-500">Webhook: {paymentSettings.webhook_url || '-'}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[500, 1200, 2500].map((coinPack) => (
+                <button
+                  key={coinPack}
+                  type="button"
+                  disabled={coinCheckoutLoading}
+                  onClick={() => requestCoinCheckout(coinPack)}
+                  className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {coinCheckoutLoading ? 'İşleniyor…' : `${coinPack} Jeton Al`}
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-5">
