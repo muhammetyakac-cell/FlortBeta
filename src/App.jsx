@@ -114,6 +114,7 @@ export default function App() {
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
   const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', blacklisted: false });
   const [coinPurchaseModalOpen, setCoinPurchaseModalOpen] = useState(false);
+  const [zeroCoinPromptDismissed, setZeroCoinPromptDismissed] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState({
     provider: '',
     api_key: '',
@@ -194,6 +195,18 @@ export default function App() {
     const interval = window.setInterval(tick, 60 * 1000);
     return () => window.clearInterval(interval);
   }, [loggedIn, isAdmin]);
+
+  useEffect(() => {
+    if (!loggedIn || isAdmin) return;
+    const balance = Number(memberProfile.coin_balance ?? 0);
+    if (balance <= 0 && !zeroCoinPromptDismissed) {
+      setCoinPurchaseModalOpen(true);
+      return;
+    }
+    if (balance > 0 && zeroCoinPromptDismissed) {
+      setZeroCoinPromptDismissed(false);
+    }
+  }, [loggedIn, isAdmin, memberProfile.coin_balance, zeroCoinPromptDismissed]);
 
   const effectiveOnlineProfiles = useMemo(
     () => (isAdmin ? onlineProfiles : buildHourlyOnlineMap(virtualProfiles, hourKey)),
@@ -2225,6 +2238,7 @@ export default function App() {
                 type="button"
                 className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
                 onClick={() => {
+                  setZeroCoinPromptDismissed(false);
                   setCoinPurchaseModalOpen(false);
                   setUserView('coins');
                 }}
@@ -2234,7 +2248,10 @@ export default function App() {
               <button
                 type="button"
                 className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-                onClick={() => setCoinPurchaseModalOpen(false)}
+                onClick={() => {
+                  setZeroCoinPromptDismissed(true);
+                  setCoinPurchaseModalOpen(false);
+                }}
               >
                 Kapat
               </button>
