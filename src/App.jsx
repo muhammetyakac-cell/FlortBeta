@@ -113,6 +113,7 @@ export default function App() {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedMemberProfile, setSelectedMemberProfile] = useState(null);
   const [memberModeration, setMemberModeration] = useState({ note: '', tags: '', blacklisted: false });
+  const [coinPurchaseModalOpen, setCoinPurchaseModalOpen] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState({
     provider: '',
     api_key: '',
@@ -788,6 +789,7 @@ export default function App() {
     if (!memberSession || !selectedProfileId || !newMessage.trim()) return;
     const hasCoin = await consumeCoins(COIN_COST_PER_MESSAGE);
     if (!hasCoin) {
+      setCoinPurchaseModalOpen(true);
       return setStatus(`Yetersiz jeton. Bir mesaj için ${COIN_COST_PER_MESSAGE} jeton gerekir.`);
     }
 
@@ -826,6 +828,7 @@ export default function App() {
     if (!memberSession || !profileId) return;
     const hasCoin = await consumeCoins(COIN_COST_PER_MESSAGE);
     if (!hasCoin) {
+      setCoinPurchaseModalOpen(true);
       return setStatus(`Yetersiz jeton. Etkileşim için ${COIN_COST_PER_MESSAGE} jeton gerekir.`);
     }
     const templates = {
@@ -1904,6 +1907,15 @@ export default function App() {
                     Coin Satın Al
                   </button>
                 </div>
+                <div className="mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Jeton Cüzdanı</p>
+                    <p className="text-2xl font-extrabold text-amber-900">{memberProfile.coin_balance ?? 0} Jeton</p>
+                  </div>
+                  <button type="button" className="w-auto rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white hover:bg-amber-600" onClick={() => setUserView('coins')}>
+                    Yükleme Yap
+                  </button>
+                </div>
               </div>
 
               <div className="relative grid gap-2 sm:grid-cols-2 xl:w-[480px]">
@@ -2199,6 +2211,36 @@ export default function App() {
             <button type="button" onClick={() => setUserView('profile')}>Profilimi Düzenle</button>
           </section>
         </main>
+      )}
+
+      {coinPurchaseModalOpen && !isAdmin && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-amber-200 bg-white p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-900">Jetonun Bitti 😕</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Mesaj göndermeye devam etmek için jeton satın alman gerekiyor. Bir mesaj/etkileşim {COIN_COST_PER_MESSAGE} jeton harcar.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
+                onClick={() => {
+                  setCoinPurchaseModalOpen(false);
+                  setUserView('coins');
+                }}
+              >
+                Coin Satın Al
+              </button>
+              <button
+                type="button"
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                onClick={() => setCoinPurchaseModalOpen(false)}
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {status && <p className="status">{status}</p>}
