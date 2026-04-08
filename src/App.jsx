@@ -1183,47 +1183,21 @@ export default function App() {
       return setStatus('Ödeme sistemi aktif değil. Lütfen yönetici ayarlarını kontrol et.');
     }
 
+    const endpoint = paymentSettings.webhook_url.trim();
+    if (endpoint.includes('/api/webhook')) {
+      return setStatus('Bu alan webhook callback adresi. Kart ekranı için provider checkout URL adresini girmeniz gerekiyor.');
+    }
+
     setCoinCheckoutLoading(true);
     try {
-      const res = await fetch(paymentSettings.webhook_url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          member_id: memberSession.id,
-          coin_amount: coinAmount,
-          provider: paymentSettings.provider || 'custom',
-          source: 'flortbeta_member_coins_page',
-        }),
-      });
-
-      if (!res.ok) {
-        const failText = await res.text();
-        throw new Error(failText || `Webhook çağrısı başarısız (${res.status})`);
-      }
-
-      const payload = await res.json().catch(() => ({}));
-      if (payload?.redirect_url) {
-        window.location.href = payload.redirect_url;
-        return;
-      }
-
-      if (Number.isFinite(Number(payload?.coin_balance))) {
-        const nextBalance = Number(payload.coin_balance);
-        setMemberProfile((prev) => ({ ...prev, coin_balance: nextBalance }));
-        setStatus(`Ödeme işlendi. Yeni jeton bakiyesi: ${nextBalance}`);
-        return;
-      }
-
-      if (Number.isFinite(Number(payload?.coins_added))) {
-        const coinsAdded = Number(payload.coins_added);
-        setMemberProfile((prev) => ({ ...prev, coin_balance: Number(prev.coin_balance || 0) + coinsAdded }));
-        setStatus(`Ödeme talebi alındı. ${coinsAdded} jeton hesabına yansıtıldı.`);
-        return;
-      }
-
-      setStatus('Ödeme talebi webhooka gönderildi. Sağlayıcı sonucu bekleniyor.');
+      const checkoutUrl = new URL(endpoint);
+      checkoutUrl.searchParams.set('member_id', memberSession.id);
+      checkoutUrl.searchParams.set('coin_amount', String(coinAmount));
+      checkoutUrl.searchParams.set('provider', paymentSettings.provider || 'custom');
+      checkoutUrl.searchParams.set('source', 'flortbeta_member_coins_page');
+      window.location.href = checkoutUrl.toString();
     } catch (err) {
-      setStatus(err.message || 'Webhook çağrısı sırasında hata oluştu.');
+      setStatus(err.message || 'Checkout URL yönlendirmesi sırasında hata oluştu.');
     } finally {
       setCoinCheckoutLoading(false);
     }
@@ -1882,7 +1856,7 @@ export default function App() {
               <div className="settings-page">
                 <div className="meta">
                   <h3>Ödeme API Entegrasyonu</h3>
-                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin.</p>
+                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin. Bu URL checkout (kart ödeme) sayfası olmalı, webhook callback URL değil.</p>
                   <input
                     placeholder="Provider (örn: iyzico, stripe, paytr)"
                     value={paymentSettings.provider}
@@ -1899,7 +1873,7 @@ export default function App() {
                     onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_secret: e.target.value }))}
                   />
                   <input
-                    placeholder="Webhook URL"
+                    placeholder="Checkout URL (kart ödeme sayfası)"
                     value={paymentSettings.webhook_url}
                     onChange={(e) => setPaymentSettings((prev) => ({ ...prev, webhook_url: e.target.value }))}
                   />
@@ -2217,7 +2191,7 @@ export default function App() {
             <p className="mt-1 text-sm text-slate-600">
               Sağlayıcı: <strong>{paymentSettings.provider || '-'}</strong> · Durum: <strong>{paymentSettings.is_active ? 'Aktif' : 'Pasif'}</strong>
             </p>
-            <p className="mt-1 break-all text-xs text-slate-500">Webhook: {paymentSettings.webhook_url || '-'}</p>
+            <p className="mt-1 break-all text-xs text-slate-500">Checkout URL: {paymentSettings.webhook_url || '-'}</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {[500, 1200, 2500].map((coinPack) => (
                 <button
