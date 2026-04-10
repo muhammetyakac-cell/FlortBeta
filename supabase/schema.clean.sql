@@ -5,9 +5,25 @@ create extension if not exists pgcrypto;
 create table if not exists public.members (
   id uuid primary key default gen_random_uuid(),
   username text unique not null,
-  password text not null,
+  password_hash text not null,
   created_at timestamptz not null default now()
 );
+
+alter table if exists public.members
+  add column if not exists password_hash text;
+
+update public.members
+set password_hash = crypt(password, gen_salt('bf'))
+where password_hash is null
+  and coalesce(password, '') <> '';
+
+alter table public.members
+  alter column password_hash set not null;
+
+alter table public.members
+  drop column if exists password;
+
+revoke all (password_hash) on public.members from anon, authenticated;
 
 create table if not exists public.member_profiles (
   member_id uuid primary key references public.members(id) on delete cascade,
@@ -74,6 +90,47 @@ drop trigger if exists trg_members_create_profile_defaults on public.members;
 create trigger trg_members_create_profile_defaults
 after insert on public.members
 for each row execute function public.ensure_member_profile_defaults();
+
+create or replace function public.member_sign_up(p_username text, p_password text)
+returns table (id uuid, username text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_member public.members%rowtype;
+begin
+  if coalesce(trim(p_username), '') = '' then
+    raise exception 'username_required';
+  end if;
+  if coalesce(p_password, '') = '' then
+    raise exception 'password_required';
+  end if;
+
+  insert into public.members (username, password_hash)
+  values (trim(p_username), crypt(p_password, gen_salt('bf')))
+  returning * into new_member;
+
+  return query
+  select new_member.id, new_member.username;
+end;
+$$;
+
+create or replace function public.member_sign_in(p_username text, p_password text)
+returns table (id uuid, username text)
+language sql
+security definer
+set search_path = public
+as $$
+  select m.id, m.username
+  from public.members m
+  where m.username = trim(p_username)
+    and m.password_hash = crypt(p_password, m.password_hash)
+  limit 1
+$$;
+
+grant execute on function public.member_sign_up(text, text) to anon, authenticated;
+grant execute on function public.member_sign_in(text, text) to anon, authenticated;
 
 -- Eski şemadan gelen created_by uuid kolonunu text'e çevir (çakışmasız migration)
 do $$

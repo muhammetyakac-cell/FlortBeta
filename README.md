@@ -46,7 +46,7 @@ Bu sürümde admin ve üyeler profil fotoğrafı yükleyebilir.
 - `schema.clean.sql` dosyası engagement + quick facts dahil tüm güncel şemayı tek seferde kurar.
 
 ## Önemli Not (Güvenlik)
-Bu yapı demo/prototip içindir. `members.password` düz metin tutulur ve anon erişim açıktır.
+Bu yapı demo/prototip içindir. Son güncellemede `members.password` kaldırıldı; şifreler `pgcrypto` ile hashlenmiş şekilde (`password_hash`) saklanır.
 
 
 ## Stripe Checkout (Coin Satın Alma)
