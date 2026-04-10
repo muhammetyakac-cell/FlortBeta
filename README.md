@@ -49,6 +49,11 @@ Bu sürümde admin ve üyeler profil fotoğrafı yükleyebilir.
 Bu yapı demo/prototip içindir. Son güncellemede `members.password` kaldırıldı; şifreler `pgcrypto` ile hashlenmiş şekilde (`password_hash`) saklanır.
 
 
+
+## RLS Redesign (P0)
+- `*_all_anon` politikalarını kaldırıp owner/admin scoped policy'lere geçmek için Supabase SQL Editor'de `supabase/rls_redesign_p0.sql` dosyasını çalıştır.
+- Bu script `public.is_admin()` helper fonksiyonunu oluşturur ve tüm kritik tablolar için sadece `authenticated` + owner/admin erişimi bırakır.
+
 ## Stripe Checkout (Coin Satın Alma)
 - Coin satın al butonu checkout başlatırken otomatik olarak `/api/create-checkout-session` endpointini çağırır.
 - Admin panelinde checkout endpoint manuel girilmez.

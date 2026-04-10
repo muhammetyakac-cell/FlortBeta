@@ -1958,9 +1958,6 @@ export default function App() {
                   </span>
                   <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
                   <span className="rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1.5 text-amber-700">Jeton: {memberProfile.coin_balance ?? 0}</span>
-                  <button type="button" className="w-auto rounded-full bg-amber-500 px-3 py-1.5 font-semibold text-white hover:bg-amber-600" onClick={() => setUserView('coins')}>
-                    Coin Satın Al
-                  </button>
                 </div>
                 <div className="mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3">
                   <div>
