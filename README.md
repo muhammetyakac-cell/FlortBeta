@@ -46,7 +46,27 @@ Bu sürümde admin ve üyeler profil fotoğrafı yükleyebilir.
 - `schema.clean.sql` dosyası engagement + quick facts dahil tüm güncel şemayı tek seferde kurar.
 
 ## Önemli Not (Güvenlik)
-Bu yapı demo/prototip içindir. `members.password` düz metin tutulur ve anon erişim açıktır.
+Bu yapı demo/prototip içindir. Son güncellemede `members.password` kaldırıldı; şifreler `pgcrypto` ile hashlenmiş şekilde (`password_hash`) saklanır.
+
+
+
+## RLS Redesign (P0)
+- `*_all_anon` politikalarını kaldırıp owner/admin scoped policy'lere geçmek için Supabase SQL Editor'de `supabase/rls_redesign_p0.sql` dosyasını çalıştır.
+- Bu script `public.is_admin()` helper fonksiyonunu oluşturur ve tüm kritik tablolar için sadece `authenticated` + owner/admin erişimi bırakır.
+
+## Stripe Checkout (Coin Satın Alma)
+- Coin satın al butonu checkout başlatırken otomatik olarak `/api/create-checkout-session` endpointini çağırır.
+- Admin panelinde checkout endpoint manuel girilmez.
+- Güvenlik: Stripe secret key’leri veritabanında tutulmaz. `api_key` / `api_secret` kolonları kaldırılmıştır; sadece sunucu env değişkenleri kullanılır.
+- Vercel env değişkenleri:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `VITE_STRIPE_PUBLIC_KEY` (opsiyonel, frontend kullanımına göre)
+  - `STRIPE_CURRENCY` (opsiyonel, varsayılan: `try`)
+  - `STRIPE_UNIT_AMOUNT_PER_COIN` (opsiyonel, varsayılan: `10`)
+  - `APP_BASE_URL` (opsiyonel; success/cancel URL üretiminde kullanılır)
+- Ödeme sonrası coin yükleme için Stripe webhook’unuzu `https://flortbeta.vercel.app/api/webhook` endpoint’ine yönlendirin. Endpoint, `STRIPE_WEBHOOK_SECRET` ile Stripe imzasını doğrular ve `checkout.session.completed` event metadata’sındaki `member_id` + `coin_amount` ile bakiyeyi günceller.
+- Endpoint ayrıca imza doğrulaması başarısız olursa Stripe Event API (`STRIPE_SECRET_KEY`) üzerinden event doğrulaması yapar; bu sayede bazı hosting body parse farklarında webhook akışı daha dayanıklı çalışır.
 
 ## Vercel Deploy
 - Framework: **Vite**

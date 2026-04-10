@@ -10,6 +10,7 @@ const initialProfile = { name: '', age: '', city: '', gender: '', hobbies: '', p
 const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂', coin_balance: 100, contact_phone: '' };
 const COIN_COST_PER_MESSAGE = 20;
 const TEST_CONTACT_NUMBER = '5552083092';
+const DEFAULT_CHECKOUT_ENDPOINT = '/api/create-checkout-session';
 
 const NAME_SEEDS = [
   'Alara','Asya','Defne','Nehir','Derin','Lina','Mira','Arya','Ela','Ada','Duru','Elif','Zeynep','Eylül','İdil','İpek','Mina','Nisa','Sude','Su','Beren','Naz','Aylin','Yaren','Lara','Selin','Melis','Ayşe','Buse','Ceren','Yasemin','Sena','Gizem','Selen','Nehir','Yelda','Esila','İrem','Tuana','Merve','Hilal','Nisanur','Ece','Nazlı','Güneş','Ecrin','Hazal','Helin','Sıla','Berfin','Damla','Sinem','Yağmur','Derya','Pelin','Cansu','Gökçe','Deniz','Meryem','Beste','Aden','Alina','Maya','Sahara','Lavin','Lavinya','Rüya','Nehirsu','Miray','Sahra','Mina','Nehirnaz','Aysu','Melisa','Zümra','Ecrinsu','Asel','Rabia','Nursena','Pınar','Leman','Öykü','Çağla','Açelya','Irmak','Ahu','Nehircan','Beliz','Elvan','Ayça','Mislina','Mislinay','Aren','Arven','Helia','Hira','Yüsra','Elisa','Liya','Mona','Noa','Talia'
@@ -118,9 +119,7 @@ export default function App() {
   const [coinCheckoutLoading, setCoinCheckoutLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState({
     provider: '',
-    api_key: '',
-    api_secret: '',
-    webhook_url: '',
+    webhook_url: DEFAULT_CHECKOUT_ENDPOINT,
     is_active: false,
   });
   const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
@@ -1129,7 +1128,7 @@ export default function App() {
   async function fetchPaymentSettings() {
     const { data, error } = await supabase
       .from('payment_gateway_settings')
-      .select('provider, api_key, api_secret, webhook_url, is_active')
+      .select('provider, webhook_url, is_active')
       .eq('id', 1)
       .maybeSingle();
 
@@ -1137,9 +1136,7 @@ export default function App() {
     if (!data) return;
     setPaymentSettings({
       provider: data.provider || '',
-      api_key: data.api_key || '',
-      api_secret: data.api_secret || '',
-      webhook_url: data.webhook_url || '',
+      webhook_url: data.webhook_url || DEFAULT_CHECKOUT_ENDPOINT,
       is_active: !!data.is_active,
     });
   }
@@ -1156,7 +1153,7 @@ export default function App() {
     setPaymentSettings((prev) => ({
       ...prev,
       provider: data.provider || '',
-      webhook_url: data.webhook_url || '',
+      webhook_url: data.webhook_url || DEFAULT_CHECKOUT_ENDPOINT,
       is_active: !!data.is_active,
     }));
   }
@@ -1167,9 +1164,7 @@ export default function App() {
       .upsert({
         id: 1,
         provider: paymentSettings.provider,
-        api_key: paymentSettings.api_key,
-        api_secret: paymentSettings.api_secret,
-        webhook_url: paymentSettings.webhook_url,
+        webhook_url: DEFAULT_CHECKOUT_ENDPOINT,
         is_active: paymentSettings.is_active,
       }, { onConflict: 'id' });
 
@@ -1179,23 +1174,31 @@ export default function App() {
 
   async function requestCoinCheckout(coinAmount) {
     if (!memberSession) return;
-    if (!paymentSettings.is_active || !paymentSettings.webhook_url) {
+    if (!paymentSettings.is_active) {
       return setStatus('Ödeme sistemi aktif değil. Lütfen yönetici ayarlarını kontrol et.');
-    }
-
-    const endpoint = paymentSettings.webhook_url.trim();
-    if (endpoint.includes('/api/webhook')) {
-      return setStatus('Bu alan webhook callback adresi. Kart ekranı için provider checkout URL adresini girmeniz gerekiyor.');
     }
 
     setCoinCheckoutLoading(true);
     try {
-      const checkoutUrl = new URL(endpoint);
-      checkoutUrl.searchParams.set('member_id', memberSession.id);
-      checkoutUrl.searchParams.set('coin_amount', String(coinAmount));
-      checkoutUrl.searchParams.set('provider', paymentSettings.provider || 'custom');
-      checkoutUrl.searchParams.set('source', 'flortbeta_member_coins_page');
-      window.location.href = checkoutUrl.toString();
+      const response = await fetch(DEFAULT_CHECKOUT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          member_id: memberSession.id,
+          coin_amount: coinAmount,
+          provider: paymentSettings.provider || 'stripe',
+          source: 'flortbeta_member_coins_page',
+        }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || 'Checkout endpoint hata döndürdü.');
+      }
+      if (!result.url) {
+        throw new Error('Checkout endpoint geçerli bir url döndürmedi.');
+      }
+      window.location.href = result.url;
     } catch (err) {
       setStatus(err.message || 'Checkout URL yönlendirmesi sırasında hata oluştu.');
     } finally {
@@ -1856,27 +1859,17 @@ export default function App() {
               <div className="settings-page">
                 <div className="meta">
                   <h3>Ödeme API Entegrasyonu</h3>
-                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin. Bu URL checkout (kart ödeme) sayfası olmalı, webhook callback URL değil.</p>
+                  <p>Coin satın alma akışı Stripe Checkout Session endpointine otomatik gider. Adminin endpoint yazmasına gerek yok.</p>
                   <input
                     placeholder="Provider (örn: iyzico, stripe, paytr)"
                     value={paymentSettings.provider}
                     onChange={(e) => setPaymentSettings((prev) => ({ ...prev, provider: e.target.value }))}
                   />
                   <input
-                    placeholder="API Key"
-                    value={paymentSettings.api_key}
-                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_key: e.target.value }))}
+                    readOnly
+                    value={DEFAULT_CHECKOUT_ENDPOINT}
                   />
-                  <input
-                    placeholder="API Secret"
-                    value={paymentSettings.api_secret}
-                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_secret: e.target.value }))}
-                  />
-                  <input
-                    placeholder="Checkout URL (kart ödeme sayfası)"
-                    value={paymentSettings.webhook_url}
-                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, webhook_url: e.target.value }))}
-                  />
+                  <p className="text-xs text-slate-500">Webhook callback adresi: <code>/api/webhook</code> (Stripe Dashboard'dan tanımlanmalı)</p>
                   <label className="toggle-row">
                     <span>Entegrasyon aktif</span>
                     <input
@@ -1965,9 +1958,6 @@ export default function App() {
                   </span>
                   <span className="rounded-full border border-indigo-300/70 bg-indigo-50 px-3 py-1.5 text-indigo-700">Spotlight: {spotlightProfiles.length}</span>
                   <span className="rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1.5 text-amber-700">Jeton: {memberProfile.coin_balance ?? 0}</span>
-                  <button type="button" className="w-auto rounded-full bg-amber-500 px-3 py-1.5 font-semibold text-white hover:bg-amber-600" onClick={() => setUserView('coins')}>
-                    Coin Satın Al
-                  </button>
                 </div>
                 <div className="mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3">
                   <div>
@@ -2191,7 +2181,7 @@ export default function App() {
             <p className="mt-1 text-sm text-slate-600">
               Sağlayıcı: <strong>{paymentSettings.provider || '-'}</strong> · Durum: <strong>{paymentSettings.is_active ? 'Aktif' : 'Pasif'}</strong>
             </p>
-            <p className="mt-1 break-all text-xs text-slate-500">Checkout URL: {paymentSettings.webhook_url || '-'}</p>
+            <p className="mt-1 break-all text-xs text-slate-500">Checkout URL: {DEFAULT_CHECKOUT_ENDPOINT}</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {[500, 1200, 2500].map((coinPack) => (
                 <button

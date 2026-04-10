@@ -5,9 +5,25 @@ create extension if not exists pgcrypto;
 create table if not exists public.members (
   id uuid primary key default gen_random_uuid(),
   username text unique not null,
-  password text not null,
+  password_hash text not null,
   created_at timestamptz not null default now()
 );
+
+alter table if exists public.members
+  add column if not exists password_hash text;
+
+update public.members
+set password_hash = crypt(password, gen_salt('bf'))
+where password_hash is null
+  and coalesce(password, '') <> '';
+
+alter table public.members
+  alter column password_hash set not null;
+
+alter table public.members
+  drop column if exists password;
+
+revoke all (password_hash) on public.members from anon, authenticated;
 
 create table if not exists public.member_profiles (
   member_id uuid primary key references public.members(id) on delete cascade,
@@ -74,6 +90,47 @@ drop trigger if exists trg_members_create_profile_defaults on public.members;
 create trigger trg_members_create_profile_defaults
 after insert on public.members
 for each row execute function public.ensure_member_profile_defaults();
+
+create or replace function public.member_sign_up(p_username text, p_password text)
+returns table (id uuid, username text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_member public.members%rowtype;
+begin
+  if coalesce(trim(p_username), '') = '' then
+    raise exception 'username_required';
+  end if;
+  if coalesce(p_password, '') = '' then
+    raise exception 'password_required';
+  end if;
+
+  insert into public.members (username, password_hash)
+  values (trim(p_username), crypt(p_password, gen_salt('bf')))
+  returning * into new_member;
+
+  return query
+  select new_member.id, new_member.username;
+end;
+$$;
+
+create or replace function public.member_sign_in(p_username text, p_password text)
+returns table (id uuid, username text)
+language sql
+security definer
+set search_path = public
+as $$
+  select m.id, m.username
+  from public.members m
+  where m.username = trim(p_username)
+    and m.password_hash = crypt(p_password, m.password_hash)
+  limit 1
+$$;
+
+grant execute on function public.member_sign_up(text, text) to anon, authenticated;
+grant execute on function public.member_sign_in(text, text) to anon, authenticated;
 
 -- Eski şemadan gelen created_by uuid kolonunu text'e çevir (çakışmasız migration)
 do $$
@@ -510,12 +567,13 @@ create table if not exists public.engagement_events (
 create table if not exists public.payment_gateway_settings (
   id int primary key,
   provider text not null default '',
-  api_key text not null default '',
-  api_secret text not null default '',
   webhook_url text not null default '',
   is_active boolean not null default false,
   updated_at timestamptz not null default now()
 );
+
+alter table public.payment_gateway_settings drop column if exists api_key;
+alter table public.payment_gateway_settings drop column if exists api_secret;
 
 create table if not exists public.thread_quick_facts (
   member_id uuid not null references public.members(id) on delete cascade,
@@ -537,6 +595,8 @@ drop policy if exists "presence_snapshots_all_anon" on public.presence_snapshots
 drop policy if exists "kpi_snapshots_daily_all_anon" on public.kpi_snapshots_daily;
 drop policy if exists "engagement_events_all_anon" on public.engagement_events;
 drop policy if exists "payment_gateway_settings_all_anon" on public.payment_gateway_settings;
+drop policy if exists "payment_gateway_settings_read_all" on public.payment_gateway_settings;
+drop policy if exists "payment_gateway_settings_write_authenticated" on public.payment_gateway_settings;
 drop policy if exists "thread_quick_facts_all_anon" on public.thread_quick_facts;
 
 create policy "thread_events_all_anon"
@@ -563,9 +623,14 @@ create policy "engagement_events_all_anon"
   using (true)
   with check (true);
 
-create policy "payment_gateway_settings_all_anon"
-  on public.payment_gateway_settings for all
+create policy "payment_gateway_settings_read_all"
+  on public.payment_gateway_settings for select
   to anon, authenticated
+  using (true);
+
+create policy "payment_gateway_settings_write_authenticated"
+  on public.payment_gateway_settings for all
+  to authenticated
   using (true)
   with check (true);
 
@@ -623,3 +688,188 @@ begin
   get diagnostics affected_count = row_count;
   return affected_count;
 end $$;
+-- P0 RLS redesign: remove all-open policies and enforce owner/admin scope
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin'
+      or coalesce(auth.jwt() ->> 'role', '') = 'service_role'
+$$;
+
+-- cleanup old wide-open policies
+ drop policy if exists "members_all_anon" on public.members;
+ drop policy if exists "member_profiles_all_anon" on public.member_profiles;
+ drop policy if exists "virtual_profiles_all_anon" on public.virtual_profiles;
+ drop policy if exists "messages_all_anon" on public.messages;
+ drop policy if exists "admin_threads_all_anon" on public.admin_threads;
+ drop policy if exists "thread_metrics_all_anon" on public.thread_metrics_daily;
+ drop policy if exists "admin_actions_all_anon" on public.admin_actions_log;
+ drop policy if exists "typing_states_all_anon" on public.typing_states;
+ drop policy if exists "mood_history_all_anon" on public.member_mood_history;
+ drop policy if exists "thread_events_all_anon" on public.thread_events;
+ drop policy if exists "presence_snapshots_all_anon" on public.presence_snapshots;
+ drop policy if exists "kpi_snapshots_daily_all_anon" on public.kpi_snapshots_daily;
+ drop policy if exists "engagement_events_all_anon" on public.engagement_events;
+ drop policy if exists "payment_gateway_settings_all_anon" on public.payment_gateway_settings;
+ drop policy if exists "thread_quick_facts_all_anon" on public.thread_quick_facts;
+ drop policy if exists "member_moderation_all_anon" on public.member_moderation;
+ drop policy if exists "payment_gateway_settings_read_all" on public.payment_gateway_settings;
+ drop policy if exists "payment_gateway_settings_write_authenticated" on public.payment_gateway_settings;
+
+-- cleanup policy names from previous runs
+ drop policy if exists "members_owner_select" on public.members;
+ drop policy if exists "members_owner_insert" on public.members;
+ drop policy if exists "members_owner_update" on public.members;
+ drop policy if exists "members_admin_delete" on public.members;
+ drop policy if exists "member_profiles_owner_all" on public.member_profiles;
+ drop policy if exists "virtual_profiles_authenticated_read" on public.virtual_profiles;
+ drop policy if exists "virtual_profiles_admin_write" on public.virtual_profiles;
+ drop policy if exists "messages_owner_or_admin_all" on public.messages;
+ drop policy if exists "admin_threads_owner_or_admin_select" on public.admin_threads;
+ drop policy if exists "admin_threads_owner_or_admin_upsert" on public.admin_threads;
+ drop policy if exists "admin_threads_owner_or_admin_update" on public.admin_threads;
+ drop policy if exists "admin_threads_admin_delete" on public.admin_threads;
+ drop policy if exists "thread_metrics_admin_all" on public.thread_metrics_daily;
+ drop policy if exists "admin_actions_admin_all" on public.admin_actions_log;
+ drop policy if exists "typing_states_owner_or_admin_all" on public.typing_states;
+ drop policy if exists "mood_history_owner_or_admin_all" on public.member_mood_history;
+ drop policy if exists "thread_events_owner_or_admin_all" on public.thread_events;
+ drop policy if exists "presence_snapshots_owner_or_admin_all" on public.presence_snapshots;
+ drop policy if exists "kpi_snapshots_admin_all" on public.kpi_snapshots_daily;
+ drop policy if exists "engagement_owner_or_admin_all" on public.engagement_events;
+ drop policy if exists "payment_gateway_settings_admin_all" on public.payment_gateway_settings;
+ drop policy if exists "thread_quick_facts_owner_or_admin_all" on public.thread_quick_facts;
+ drop policy if exists "member_moderation_admin_all" on public.member_moderation;
+
+create policy "members_owner_select"
+  on public.members for select
+  to authenticated
+  using (id = auth.uid() or public.is_admin());
+
+create policy "members_owner_insert"
+  on public.members for insert
+  to authenticated
+  with check (id = auth.uid() or public.is_admin());
+
+create policy "members_owner_update"
+  on public.members for update
+  to authenticated
+  using (id = auth.uid() or public.is_admin())
+  with check (id = auth.uid() or public.is_admin());
+
+create policy "members_admin_delete"
+  on public.members for delete
+  to authenticated
+  using (public.is_admin());
+
+create policy "member_profiles_owner_all"
+  on public.member_profiles for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "virtual_profiles_authenticated_read"
+  on public.virtual_profiles for select
+  to authenticated
+  using (true);
+
+create policy "virtual_profiles_admin_write"
+  on public.virtual_profiles for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "messages_owner_or_admin_all"
+  on public.messages for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "admin_threads_owner_or_admin_select"
+  on public.admin_threads for select
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin());
+
+create policy "admin_threads_owner_or_admin_upsert"
+  on public.admin_threads for insert
+  to authenticated
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "admin_threads_owner_or_admin_update"
+  on public.admin_threads for update
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "admin_threads_admin_delete"
+  on public.admin_threads for delete
+  to authenticated
+  using (public.is_admin());
+
+create policy "thread_metrics_admin_all"
+  on public.thread_metrics_daily for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "admin_actions_admin_all"
+  on public.admin_actions_log for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "typing_states_owner_or_admin_all"
+  on public.typing_states for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "mood_history_owner_or_admin_all"
+  on public.member_mood_history for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "thread_events_owner_or_admin_all"
+  on public.thread_events for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "presence_snapshots_owner_or_admin_all"
+  on public.presence_snapshots for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "kpi_snapshots_admin_all"
+  on public.kpi_snapshots_daily for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "engagement_owner_or_admin_all"
+  on public.engagement_events for all
+  to authenticated
+  using (public.is_admin() or member_id = auth.uid())
+  with check (public.is_admin() or member_id = auth.uid());
+
+create policy "payment_gateway_settings_admin_all"
+  on public.payment_gateway_settings for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "thread_quick_facts_owner_or_admin_all"
+  on public.thread_quick_facts for all
+  to authenticated
+  using (member_id = auth.uid() or public.is_admin())
+  with check (member_id = auth.uid() or public.is_admin());
+
+create policy "member_moderation_admin_all"
+  on public.member_moderation for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
