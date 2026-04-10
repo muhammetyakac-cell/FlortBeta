@@ -52,6 +52,7 @@ export default async function handler(req, res) {
     form.set('line_items[0][price_data][product_data][name]', `${coinAmount} Flort Coin`);
     form.set('line_items[0][price_data][product_data][description]', 'Flortbeta uygulaması içi coin paketi');
     form.set('line_items[0][price_data][unit_amount]', String(lineItemAmount));
+    form.set('client_reference_id', memberId);
     form.set('metadata[member_id]', memberId);
     form.set('metadata[coin_amount]', String(coinAmount));
     form.set('metadata[source]', 'flortbeta_member_coins_page');

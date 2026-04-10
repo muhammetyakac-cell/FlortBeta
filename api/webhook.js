@@ -49,6 +49,29 @@ function verifyStripeSignature(rawBody, signatureHeader, webhookSecret) {
   });
 }
 
+function parseEventPayload(rawBody, req) {
+  const rawText = rawBody?.length ? rawBody.toString('utf8') : '';
+  if (rawText) return JSON.parse(rawText);
+  if (typeof req.body === 'string') return JSON.parse(req.body || '{}');
+  if (req.body && typeof req.body === 'object') return req.body;
+  return {};
+}
+
+async function fetchStripeEvent(eventId, stripeSecretKey) {
+  const response = await fetch(`https://api.stripe.com/v1/events/${encodeURIComponent(eventId)}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${stripeSecretKey}`,
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error?.message || 'stripe_event_fetch_failed');
+  }
+  return data;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -56,31 +79,45 @@ export default async function handler(req, res) {
   }
 
   try {
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
     if (!webhookSecret) {
       return json(res, 500, { ok: false, error: 'stripe_webhook_secret_missing' });
     }
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
 
     const rawBody = await getRawBody(req);
     const signatureHeader = req.headers['stripe-signature'];
 
     const isValidSignature = verifyStripeSignature(rawBody, signatureHeader, webhookSecret);
-    if (!isValidSignature) {
-      return json(res, 400, { ok: false, error: 'invalid_stripe_signature' });
+    let event = {};
+    try {
+      event = parseEventPayload(rawBody, req);
+    } catch {
+      return json(res, 400, { ok: false, error: 'invalid_json_payload' });
     }
 
-    const event = JSON.parse(rawBody.toString('utf8') || '{}');
+    if (!isValidSignature) {
+      if (!stripeSecretKey || !event?.id) {
+        return json(res, 400, { ok: false, error: 'invalid_stripe_signature' });
+      }
+      const canonicalEvent = await fetchStripeEvent(event.id, stripeSecretKey);
+      if (!canonicalEvent?.id || canonicalEvent.id !== event.id) {
+        return json(res, 400, { ok: false, error: 'stripe_event_validation_failed' });
+      }
+      event = canonicalEvent;
+    }
 
-    if (event.type !== 'checkout.session.completed') {
+    const supportedEventTypes = new Set(['checkout.session.completed', 'checkout.session.async_payment_succeeded']);
+    if (!supportedEventTypes.has(event.type)) {
       return json(res, 200, { ok: true, ignored: true, event_type: event.type || 'unknown' });
     }
 
     const session = event?.data?.object || {};
-    if (session.payment_status !== 'paid') {
+    if (session.payment_status && session.payment_status !== 'paid') {
       return json(res, 200, { ok: true, ignored: true, reason: 'session_not_paid' });
     }
 
-    const memberId = String(session?.metadata?.member_id || '').trim();
+    const memberId = String(session?.metadata?.member_id || session?.client_reference_id || '').trim();
     const coinAmount = Number(session?.metadata?.coin_amount || 0);
 
     if (!memberId) {
