@@ -10,6 +10,7 @@ const initialProfile = { name: '', age: '', city: '', gender: '', hobbies: '', p
 const initialMemberProfile = { age: '', hobbies: '', city: '', photo_url: '', status_emoji: '🙂', coin_balance: 100, contact_phone: '' };
 const COIN_COST_PER_MESSAGE = 20;
 const TEST_CONTACT_NUMBER = '5552083092';
+const DEFAULT_CHECKOUT_ENDPOINT = '/api/create-checkout-session';
 
 const NAME_SEEDS = [
   'Alara','Asya','Defne','Nehir','Derin','Lina','Mira','Arya','Ela','Ada','Duru','Elif','Zeynep','Eylül','İdil','İpek','Mina','Nisa','Sude','Su','Beren','Naz','Aylin','Yaren','Lara','Selin','Melis','Ayşe','Buse','Ceren','Yasemin','Sena','Gizem','Selen','Nehir','Yelda','Esila','İrem','Tuana','Merve','Hilal','Nisanur','Ece','Nazlı','Güneş','Ecrin','Hazal','Helin','Sıla','Berfin','Damla','Sinem','Yağmur','Derya','Pelin','Cansu','Gökçe','Deniz','Meryem','Beste','Aden','Alina','Maya','Sahara','Lavin','Lavinya','Rüya','Nehirsu','Miray','Sahra','Mina','Nehirnaz','Aysu','Melisa','Zümra','Ecrinsu','Asel','Rabia','Nursena','Pınar','Leman','Öykü','Çağla','Açelya','Irmak','Ahu','Nehircan','Beliz','Elvan','Ayça','Mislina','Mislinay','Aren','Arven','Helia','Hira','Yüsra','Elisa','Liya','Mona','Noa','Talia'
@@ -118,7 +119,7 @@ export default function App() {
   const [coinCheckoutLoading, setCoinCheckoutLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState({
     provider: '',
-    webhook_url: '',
+    webhook_url: DEFAULT_CHECKOUT_ENDPOINT,
     is_active: false,
   });
   const [hourKey, setHourKey] = useState(() => new Date().toISOString().slice(0, 13));
@@ -1135,7 +1136,7 @@ export default function App() {
     if (!data) return;
     setPaymentSettings({
       provider: data.provider || '',
-      webhook_url: data.webhook_url || '',
+      webhook_url: data.webhook_url || DEFAULT_CHECKOUT_ENDPOINT,
       is_active: !!data.is_active,
     });
   }
@@ -1152,7 +1153,7 @@ export default function App() {
     setPaymentSettings((prev) => ({
       ...prev,
       provider: data.provider || '',
-      webhook_url: data.webhook_url || '',
+      webhook_url: data.webhook_url || DEFAULT_CHECKOUT_ENDPOINT,
       is_active: !!data.is_active,
     }));
   }
@@ -1163,7 +1164,7 @@ export default function App() {
       .upsert({
         id: 1,
         provider: paymentSettings.provider,
-        webhook_url: paymentSettings.webhook_url,
+        webhook_url: DEFAULT_CHECKOUT_ENDPOINT,
         is_active: paymentSettings.is_active,
       }, { onConflict: 'id' });
 
@@ -1173,48 +1174,31 @@ export default function App() {
 
   async function requestCoinCheckout(coinAmount) {
     if (!memberSession) return;
-    if (!paymentSettings.is_active || !paymentSettings.webhook_url) {
+    if (!paymentSettings.is_active) {
       return setStatus('Ödeme sistemi aktif değil. Lütfen yönetici ayarlarını kontrol et.');
-    }
-
-    const endpoint = paymentSettings.webhook_url.trim();
-    if (endpoint.includes('/api/webhook')) {
-      return setStatus('Bu alan webhook callback adresi. Checkout session endpoint adresi girmeniz gerekiyor (örn: /api/create-checkout-session).');
     }
 
     setCoinCheckoutLoading(true);
     try {
-      const isApiEndpoint = endpoint.includes('/api/');
-      if (isApiEndpoint) {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            member_id: memberSession.id,
-            coin_amount: coinAmount,
-            provider: paymentSettings.provider || 'custom',
-            source: 'flortbeta_member_coins_page',
-          }),
-        });
+      const response = await fetch(DEFAULT_CHECKOUT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          member_id: memberSession.id,
+          coin_amount: coinAmount,
+          provider: paymentSettings.provider || 'stripe',
+          source: 'flortbeta_member_coins_page',
+        }),
+      });
 
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(result.error || 'Checkout endpoint hata döndürdü.');
-        }
-        if (!result.url) {
-          throw new Error('Checkout endpoint geçerli bir url döndürmedi.');
-        }
-
-        window.location.href = result.url;
-        return;
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || 'Checkout endpoint hata döndürdü.');
       }
-
-      const checkoutUrl = new URL(endpoint);
-      checkoutUrl.searchParams.set('member_id', memberSession.id);
-      checkoutUrl.searchParams.set('coin_amount', String(coinAmount));
-      checkoutUrl.searchParams.set('provider', paymentSettings.provider || 'custom');
-      checkoutUrl.searchParams.set('source', 'flortbeta_member_coins_page');
-      window.location.href = checkoutUrl.toString();
+      if (!result.url) {
+        throw new Error('Checkout endpoint geçerli bir url döndürmedi.');
+      }
+      window.location.href = result.url;
     } catch (err) {
       setStatus(err.message || 'Checkout URL yönlendirmesi sırasında hata oluştu.');
     } finally {
@@ -1875,17 +1859,17 @@ export default function App() {
               <div className="settings-page">
                 <div className="meta">
                   <h3>Ödeme API Entegrasyonu</h3>
-                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin. Stripe için checkout session endpoint (örn: /api/create-checkout-session) gir; webhook callback URL girme.</p>
+                  <p>Coin satın alma akışı Stripe Checkout Session endpointine otomatik gider. Adminin endpoint yazmasına gerek yok.</p>
                   <input
                     placeholder="Provider (örn: iyzico, stripe, paytr)"
                     value={paymentSettings.provider}
                     onChange={(e) => setPaymentSettings((prev) => ({ ...prev, provider: e.target.value }))}
                   />
                   <input
-                    placeholder="Checkout API Endpoint (örn: /api/create-checkout-session)"
-                    value={paymentSettings.webhook_url}
-                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, webhook_url: e.target.value }))}
+                    readOnly
+                    value={DEFAULT_CHECKOUT_ENDPOINT}
                   />
+                  <p className="text-xs text-slate-500">Webhook callback adresi: <code>/api/webhook</code> (Stripe Dashboard'dan tanımlanmalı)</p>
                   <label className="toggle-row">
                     <span>Entegrasyon aktif</span>
                     <input
@@ -2200,7 +2184,7 @@ export default function App() {
             <p className="mt-1 text-sm text-slate-600">
               Sağlayıcı: <strong>{paymentSettings.provider || '-'}</strong> · Durum: <strong>{paymentSettings.is_active ? 'Aktif' : 'Pasif'}</strong>
             </p>
-            <p className="mt-1 break-all text-xs text-slate-500">Checkout URL: {paymentSettings.webhook_url || '-'}</p>
+            <p className="mt-1 break-all text-xs text-slate-500">Checkout URL: {DEFAULT_CHECKOUT_ENDPOINT}</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               {[500, 1200, 2500].map((coinPack) => (
                 <button
