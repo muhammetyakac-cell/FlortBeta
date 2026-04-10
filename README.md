@@ -48,6 +48,17 @@ Bu sürümde admin ve üyeler profil fotoğrafı yükleyebilir.
 ## Önemli Not (Güvenlik)
 Bu yapı demo/prototip içindir. `members.password` düz metin tutulur ve anon erişim açıktır.
 
+
+## Stripe Checkout (Coin Satın Alma)
+- Admin panelindeki **Ödeme API Entegrasyonu** alanında `Checkout URL` olarak `/api/create-checkout-session` girin.
+- `webhook_url` alanına webhook callback (`/api/webhook`) yazmayın; coin alım butonu checkout session endpoint bekler.
+- Vercel env değişkenleri:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_CURRENCY` (opsiyonel, varsayılan: `try`)
+  - `STRIPE_UNIT_AMOUNT_PER_COIN` (opsiyonel, varsayılan: `10`)
+  - `APP_BASE_URL` (opsiyonel; success/cancel URL üretiminde kullanılır)
+- Ödeme sonrası coin yükleme için Stripe webhook’unuzu mevcut `/api/webhook` endpoint’ine yönlendirin ve payload içinde `member_id` + `coin_amount` gönderin.
+
 ## Vercel Deploy
 - Framework: **Vite**
 - Build Command: `npm run build`

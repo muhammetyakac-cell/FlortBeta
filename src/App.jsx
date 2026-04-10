@@ -1185,11 +1185,36 @@ export default function App() {
 
     const endpoint = paymentSettings.webhook_url.trim();
     if (endpoint.includes('/api/webhook')) {
-      return setStatus('Bu alan webhook callback adresi. Kart ekranı için provider checkout URL adresini girmeniz gerekiyor.');
+      return setStatus('Bu alan webhook callback adresi. Checkout session endpoint adresi girmeniz gerekiyor (örn: /api/create-checkout-session).');
     }
 
     setCoinCheckoutLoading(true);
     try {
+      const isApiEndpoint = endpoint.includes('/api/');
+      if (isApiEndpoint) {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            member_id: memberSession.id,
+            coin_amount: coinAmount,
+            provider: paymentSettings.provider || 'custom',
+            source: 'flortbeta_member_coins_page',
+          }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(result.error || 'Checkout endpoint hata döndürdü.');
+        }
+        if (!result.url) {
+          throw new Error('Checkout endpoint geçerli bir url döndürmedi.');
+        }
+
+        window.location.href = result.url;
+        return;
+      }
+
       const checkoutUrl = new URL(endpoint);
       checkoutUrl.searchParams.set('member_id', memberSession.id);
       checkoutUrl.searchParams.set('coin_amount', String(coinAmount));
@@ -1856,7 +1881,7 @@ export default function App() {
               <div className="settings-page">
                 <div className="meta">
                   <h3>Ödeme API Entegrasyonu</h3>
-                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin. Bu URL checkout (kart ödeme) sayfası olmalı, webhook callback URL değil.</p>
+                  <p>Coin satın alma sağlayıcısını buradan bağlayabilirsin. Stripe için checkout session endpoint (örn: /api/create-checkout-session) gir; webhook callback URL girme.</p>
                   <input
                     placeholder="Provider (örn: iyzico, stripe, paytr)"
                     value={paymentSettings.provider}
