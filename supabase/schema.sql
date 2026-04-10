@@ -510,12 +510,13 @@ create table if not exists public.engagement_events (
 create table if not exists public.payment_gateway_settings (
   id int primary key,
   provider text not null default '',
-  api_key text not null default '',
-  api_secret text not null default '',
   webhook_url text not null default '',
   is_active boolean not null default false,
   updated_at timestamptz not null default now()
 );
+
+alter table public.payment_gateway_settings drop column if exists api_key;
+alter table public.payment_gateway_settings drop column if exists api_secret;
 
 create table if not exists public.thread_quick_facts (
   member_id uuid not null references public.members(id) on delete cascade,
@@ -537,6 +538,8 @@ drop policy if exists "presence_snapshots_all_anon" on public.presence_snapshots
 drop policy if exists "kpi_snapshots_daily_all_anon" on public.kpi_snapshots_daily;
 drop policy if exists "engagement_events_all_anon" on public.engagement_events;
 drop policy if exists "payment_gateway_settings_all_anon" on public.payment_gateway_settings;
+drop policy if exists "payment_gateway_settings_read_all" on public.payment_gateway_settings;
+drop policy if exists "payment_gateway_settings_write_authenticated" on public.payment_gateway_settings;
 drop policy if exists "thread_quick_facts_all_anon" on public.thread_quick_facts;
 
 create policy "thread_events_all_anon"
@@ -563,9 +566,14 @@ create policy "engagement_events_all_anon"
   using (true)
   with check (true);
 
-create policy "payment_gateway_settings_all_anon"
-  on public.payment_gateway_settings for all
+create policy "payment_gateway_settings_read_all"
+  on public.payment_gateway_settings for select
   to anon, authenticated
+  using (true);
+
+create policy "payment_gateway_settings_write_authenticated"
+  on public.payment_gateway_settings for all
+  to authenticated
   using (true)
   with check (true);
 

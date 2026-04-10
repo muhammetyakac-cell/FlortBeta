@@ -52,12 +52,15 @@ Bu yapı demo/prototip içindir. `members.password` düz metin tutulur ve anon e
 ## Stripe Checkout (Coin Satın Alma)
 - Admin panelindeki **Ödeme API Entegrasyonu** alanında `Checkout URL` olarak `/api/create-checkout-session` girin.
 - `webhook_url` alanına webhook callback (`/api/webhook`) yazmayın; coin alım butonu checkout session endpoint bekler.
+- Güvenlik: Stripe secret key’leri veritabanında tutulmaz. `api_key` / `api_secret` kolonları kaldırılmıştır; sadece sunucu env değişkenleri kullanılır.
 - Vercel env değişkenleri:
   - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `VITE_STRIPE_PUBLIC_KEY` (opsiyonel, frontend kullanımına göre)
   - `STRIPE_CURRENCY` (opsiyonel, varsayılan: `try`)
   - `STRIPE_UNIT_AMOUNT_PER_COIN` (opsiyonel, varsayılan: `10`)
   - `APP_BASE_URL` (opsiyonel; success/cancel URL üretiminde kullanılır)
-- Ödeme sonrası coin yükleme için Stripe webhook’unuzu mevcut `/api/webhook` endpoint’ine yönlendirin ve payload içinde `member_id` + `coin_amount` gönderin.
+- Ödeme sonrası coin yükleme için Stripe webhook’unuzu `/api/webhook` endpoint’ine yönlendirin. Endpoint, `STRIPE_WEBHOOK_SECRET` ile Stripe imzasını doğrular ve `checkout.session.completed` event metadata’sındaki `member_id` + `coin_amount` ile bakiyeyi günceller.
 
 ## Vercel Deploy
 - Framework: **Vite**

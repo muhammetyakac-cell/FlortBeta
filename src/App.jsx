@@ -118,8 +118,6 @@ export default function App() {
   const [coinCheckoutLoading, setCoinCheckoutLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState({
     provider: '',
-    api_key: '',
-    api_secret: '',
     webhook_url: '',
     is_active: false,
   });
@@ -1129,7 +1127,7 @@ export default function App() {
   async function fetchPaymentSettings() {
     const { data, error } = await supabase
       .from('payment_gateway_settings')
-      .select('provider, api_key, api_secret, webhook_url, is_active')
+      .select('provider, webhook_url, is_active')
       .eq('id', 1)
       .maybeSingle();
 
@@ -1137,8 +1135,6 @@ export default function App() {
     if (!data) return;
     setPaymentSettings({
       provider: data.provider || '',
-      api_key: data.api_key || '',
-      api_secret: data.api_secret || '',
       webhook_url: data.webhook_url || '',
       is_active: !!data.is_active,
     });
@@ -1167,8 +1163,6 @@ export default function App() {
       .upsert({
         id: 1,
         provider: paymentSettings.provider,
-        api_key: paymentSettings.api_key,
-        api_secret: paymentSettings.api_secret,
         webhook_url: paymentSettings.webhook_url,
         is_active: paymentSettings.is_active,
       }, { onConflict: 'id' });
@@ -1888,17 +1882,7 @@ export default function App() {
                     onChange={(e) => setPaymentSettings((prev) => ({ ...prev, provider: e.target.value }))}
                   />
                   <input
-                    placeholder="API Key"
-                    value={paymentSettings.api_key}
-                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_key: e.target.value }))}
-                  />
-                  <input
-                    placeholder="API Secret"
-                    value={paymentSettings.api_secret}
-                    onChange={(e) => setPaymentSettings((prev) => ({ ...prev, api_secret: e.target.value }))}
-                  />
-                  <input
-                    placeholder="Checkout URL (kart ödeme sayfası)"
+                    placeholder="Checkout API Endpoint (örn: /api/create-checkout-session)"
                     value={paymentSettings.webhook_url}
                     onChange={(e) => setPaymentSettings((prev) => ({ ...prev, webhook_url: e.target.value }))}
                   />
